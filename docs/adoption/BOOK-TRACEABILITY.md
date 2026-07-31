@@ -1,0 +1,17 @@
+# Rastreabilidade da adoção do livro
+
+| Recomendação | Referência no livro | Aplicação no projeto | Decisão | Owner | Evidência | Estado |
+|---|---|---|---|---|---|---|
+| O problema vem antes da solução | [Princípios de controle](https://github.com/caleo-hub/engenharia-de-software-com-agentes-de-codigo/blob/main/capitulos/00-introducao/06-os-vinte-principios-de-controle.md) | problema proposto separadamente das funcionalidades em `INITIATIVE-BRIEF.md` | adotar | produto | brief da iniciativa | em validação |
+| Usar progressive disclosure | [Runbook a priori](https://github.com/caleo-hub/engenharia-de-software-com-agentes-de-codigo/blob/main/guias-de-adocao/RUNBOOK-A-PRIORI-PROJETO-NOVO.md) | lidos somente README, SUMMARY, runbook e fontes obrigatórias da Fase 0 | adotar | técnico | atualização de `STATUS.md` | em uso |
+| Dimensionar governança pelo risco | [Runbook a priori — perfil](https://github.com/caleo-hub/engenharia-de-software-com-agentes-de-codigo/blob/main/guias-de-adocao/RUNBOOK-A-PRIORI-PROJETO-NOVO.md#5-escolha-o-perfil-antes-de-criar-cerim%C3%B4nia) | perfil padrão proposto por segredo, dados, integração, binário e dependências nativas | adotar | produto + técnico | brief e registro de riscos | pendente de aceite |
+| Operar com menor permissão necessária | [Princípios de controle](https://github.com/caleo-hub/engenharia-de-software-com-agentes-de-codigo/blob/main/capitulos/00-introducao/06-os-vinte-principios-de-controle.md) | matriz por classe de ação; código e chamadas pagas bloqueados nesta fase | adotar | técnico | `AGENT-PERMISSIONS.md` | em uso |
+| Manter contexto e decisões versionados | [A pergunta central](https://github.com/caleo-hub/engenharia-de-software-com-agentes-de-codigo/blob/main/capitulos/00-introducao/03-a-pergunta-central.md) | artefatos canônicos em `docs/adoption/` | adotar | produto + técnico | commit da Fase 0 | em uso |
+| Avançar somente por gate observável | [Critérios de avanço](https://github.com/caleo-hub/engenharia-de-software-com-agentes-de-codigo/blob/main/capitulos/03-parte-iii-spec-driven-development-sem-teatro-documental/017-criterios-de-avanco-entre-fases.md) | status declara gate não atendido e lista decisões faltantes | adotar | produto | `STATUS.md` | em uso |
+| Evitar arquitetura por acidente | [Fluxo completo](https://github.com/caleo-hub/engenharia-de-software-com-agentes-de-codigo/blob/main/capitulos/03-parte-iii-spec-driven-development-sem-teatro-documental/012-o-fluxo-completo.md) | nenhuma linguagem, UI, empacotador, endpoint ou mecanismo de credenciais escolhido na Fase 0 | adotar | técnico | brief da iniciativa | em uso |
+| Preferir mudanças pequenas e reversíveis | [Princípios de controle](https://github.com/caleo-hub/engenharia-de-software-com-agentes-de-codigo/blob/main/capitulos/00-introducao/06-os-vinte-principios-de-controle.md) | primeiro incremento contém apenas artefatos de adoção | adotar | técnico | diff inicial | em uso |
+| Não usar o agente como único oráculo | [Princípios de controle](https://github.com/caleo-hub/engenharia-de-software-com-agentes-de-codigo/blob/main/capitulos/00-introducao/06-os-vinte-principios-de-controle.md) | decisões humanas e validação independente serão gates antes de implementação/entrega | adotar | produto + técnico | permissões e status | planejado |
+
+## Regra de manutenção
+
+Atualizar esta tabela quando uma recomendação for adotada, adaptada, adiada ou rejeitada. Toda adaptação, adiamento ou rejeição deve registrar justificativa proporcional ao risco e apontar para uma evidência versionada.
