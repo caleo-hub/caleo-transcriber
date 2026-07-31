@@ -6,9 +6,10 @@ import sys
 from collections.abc import Callable, Iterable
 from pathlib import Path
 
-from PySide6.QtCore import QObject, QThread, QUrl, Signal, Slot
-from PySide6.QtGui import QCloseEvent, QDesktopServices, QDragEnterEvent, QDropEvent, QIcon
+from PySide6.QtCore import QObject, Qt, QThread, QUrl, Signal, Slot
+from PySide6.QtGui import QAction, QCloseEvent, QDesktopServices, QDragEnterEvent, QDropEvent, QIcon
 from PySide6.QtWidgets import (
+    QAbstractItemView,
     QComboBox,
     QDialog,
     QFileDialog,
@@ -17,6 +18,7 @@ from PySide6.QtWidgets import (
     QHeaderView,
     QLabel,
     QMainWindow,
+    QMenu,
     QMessageBox,
     QProgressBar,
     QPushButton,
@@ -36,7 +38,7 @@ from caleo_transcriber.application import (
     OutputFormat,
     TranscribeSingleFileFailure,
 )
-from caleo_transcriber.domain import AttemptState, BatchItemState
+from caleo_transcriber.domain import ACTIVE_BATCH_STATES, AttemptState, BatchItemState
 from caleo_transcriber.presentation.notices import CloudNoticePolicy
 from caleo_transcriber.presentation.worker import BatchWorker
 
@@ -219,12 +221,57 @@ class MainWindow(QMainWindow):
         self.table.setAccessibleName("Fila de arquivos para transcrição")
         self.table.setAlternatingRowColors(True)
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.table.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         self.table.verticalHeader().setVisible(False)
         header_view = self.table.horizontalHeader()
         header_view.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         for column in range(1, 5):
             header_view.setSectionResizeMode(column, QHeaderView.ResizeMode.ResizeToContents)
+        queue_actions = QHBoxLayout()
+        self.remove_button = QPushButton("&Remover selecionados")
+        self.remove_button.setAccessibleName("Remover itens selecionados da fila")
+        self.remove_button.clicked.connect(self._remove_selected)
+        self.move_up_button = QPushButton("S&ubir")
+        self.move_up_button.setAccessibleName("Mover itens pendentes selecionados para cima")
+        self.move_up_button.clicked.connect(lambda: self._move_selected(-1))
+        self.move_down_button = QPushButton("&Descer")
+        self.move_down_button.setAccessibleName("Mover itens pendentes selecionados para baixo")
+        self.move_down_button.clicked.connect(lambda: self._move_selected(1))
+        self.retry_selected_button = QPushButton("Repetir &selecionados")
+        self.retry_selected_button.setAccessibleName("Repetir falhas selecionadas")
+        self.retry_selected_button.clicked.connect(self._retry_selected)
+        self.more_button = QPushButton("&Limpar…")
+        self.more_button.setAccessibleName("Mais ações para limpar ou cancelar a fila")
+        clear_menu = QMenu(self.more_button)
+        self.clear_completed_action = QAction("Limpar concluídos", self)
+        self.clear_completed_action.triggered.connect(self._clear_completed)
+        self.clear_failed_action = QAction("Limpar falhas e cancelados", self)
+        self.clear_failed_action.triggered.connect(self._clear_failed_cancelled)
+        self.clear_pending_action = QAction("Limpar pendentes", self)
+        self.clear_pending_action.triggered.connect(self._clear_pending)
+        self.clear_queue_action = QAction("Limpar fila", self)
+        self.clear_queue_action.triggered.connect(self._clear_queue)
+        self.cancel_all_action = QAction("Cancelar fila", self)
+        self.cancel_all_action.triggered.connect(self._cancel_all)
+        clear_menu.addAction(self.clear_completed_action)
+        clear_menu.addAction(self.clear_failed_action)
+        clear_menu.addAction(self.clear_pending_action)
+        clear_menu.addAction(self.clear_queue_action)
+        clear_menu.addSeparator()
+        clear_menu.addAction(self.cancel_all_action)
+        self.more_button.setMenu(clear_menu)
+        for button in (
+            self.remove_button,
+            self.move_up_button,
+            self.move_down_button,
+            self.retry_selected_button,
+            self.more_button,
+        ):
+            queue_actions.addWidget(button)
+        queue_actions.addStretch()
+        root.addLayout(queue_actions)
         root.addWidget(self.table, 1)
+        self.table.itemSelectionChanged.connect(self._refresh_queue_controls)
 
         status = QFrame()
         status.setObjectName("card")
@@ -249,11 +296,14 @@ class MainWindow(QMainWindow):
         self.start_button = QPushButton("&Iniciar fila")
         self.start_button.setObjectName("primaryButton")
         self.start_button.clicked.connect(self._start)
-        self.cancel_button = QPushButton("&Cancelar fila")
-        self.cancel_button.clicked.connect(self._cancel_all)
+        self.pause_button = QPushButton("&Pausar após o atual")
+        self.pause_button.clicked.connect(self._pause_after_current)
+        self.cancel_button = QPushButton("&Cancelar atual")
+        self.cancel_button.clicked.connect(self._cancel_active)
         self.retry_button = QPushButton("&Repetir falhas")
         self.retry_button.clicked.connect(self._retry_failed)
         actions.addWidget(self.start_button)
+        actions.addWidget(self.pause_button)
         actions.addWidget(self.cancel_button)
         actions.addWidget(self.retry_button)
         actions.addStretch()
@@ -388,10 +438,90 @@ class MainWindow(QMainWindow):
         self._refresh()
 
     @Slot()
+    def _cancel_active(self) -> None:
+        if self._processor.cancel_active():
+            self.detail_label.setText(
+                "Cancelamento do item atual solicitado; os demais continuam na fila."
+            )
+        self._refresh()
+
+    @Slot()
+    def _pause_after_current(self) -> None:
+        if self._processor.pause_after_current():
+            self.detail_label.setText(
+                "A fila será pausada quando o item atual terminar; nenhum item será cancelado."
+            )
+        self._refresh()
+
+    @Slot()
     def _retry_failed(self) -> None:
         if self._processor.retry_failed():
             self._rebuild_table()
             self._start()
+
+    @Slot()
+    def _remove_selected(self) -> None:
+        selected = self._selected_item_ids()
+        removed = self._processor.remove_items(selected)
+        ignored = len(selected) - len(removed)
+        self._rebuild_table()
+        message = f"{len(removed)} item(ns) removido(s) somente da fila."
+        if ignored:
+            message += " O item ativo foi preservado."
+        self.detail_label.setText(message)
+        self._refresh()
+
+    def _move_selected(self, direction: int) -> None:
+        selected = self._selected_item_ids()
+        preserved = self._processor.move_items(selected, direction)
+        self._rebuild_table(preserved)
+        if preserved:
+            self.detail_label.setText(
+                "Ordem dos itens pendentes atualizada; ativo e concluídos permanecem fixos."
+            )
+        self._refresh()
+
+    @Slot()
+    def _retry_selected(self) -> None:
+        retried = self._processor.retry_items(self._selected_item_ids())
+        self._rebuild_table(retried)
+        if retried:
+            self.detail_label.setText(f"{len(retried)} falha(s) selecionada(s) voltaram à fila.")
+            self._start()
+        self._refresh()
+
+    @Slot()
+    def _clear_completed(self) -> None:
+        self._finish_clear(self._processor.clear_completed(), "concluído(s)")
+
+    @Slot()
+    def _clear_failed_cancelled(self) -> None:
+        self._finish_clear(self._processor.clear_failed_cancelled(), "com falha/cancelado(s)")
+
+    @Slot()
+    def _clear_pending(self) -> None:
+        self._finish_clear(self._processor.clear_pending(), "pendente(s)")
+
+    @Slot()
+    def _clear_queue(self) -> None:
+        if self._thread is not None:
+            answer = QMessageBox.question(
+                self,
+                "Limpar fila",
+                "O item em processamento permanecerá visível. Limpar todos os outros itens?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No,
+            )
+            if answer != QMessageBox.StandardButton.Yes:
+                return
+        self._finish_clear(self._processor.clear_inactive(), "inativo(s)")
+
+    def _finish_clear(self, removed: tuple[str, ...], label: str) -> None:
+        self._rebuild_table()
+        self.detail_label.setText(
+            f"{len(removed)} item(ns) {label} removido(s) da fila; arquivos foram preservados."
+        )
+        self._refresh()
 
     @Slot(object)
     def _on_batch_event(self, value: object) -> None:
@@ -421,7 +551,7 @@ class MainWindow(QMainWindow):
                 result.category is AttemptFailure.AMBIGUOUS
             ):
                 self._show_ambiguous_banner(value.item_id)
-        self._refresh_summary()
+        self._refresh()
 
     @Slot(object)
     def _on_attempt_event(self, value: object) -> None:
@@ -469,7 +599,8 @@ class MainWindow(QMainWindow):
             self._rebuild_table()
             self._start()
 
-    def _rebuild_table(self) -> None:
+    def _rebuild_table(self, selected_item_ids: Iterable[str] = ()) -> None:
+        selected = set(selected_item_ids)
         items = self._processor.items
         for row in range(self.table.rowCount()):
             widget = self.table.cellWidget(row, 4)
@@ -485,6 +616,7 @@ class MainWindow(QMainWindow):
             source = Path(item.source_identity)
             file_item = QTableWidgetItem(source.name)
             file_item.setToolTip(item.source_identity)
+            file_item.setData(Qt.ItemDataRole.UserRole, item.item_id)
             self.table.setItem(row, 0, file_item)
             self.table.setItem(row, 1, QTableWidgetItem("—"))
             self.table.setItem(row, 2, QTableWidgetItem(self._format().value.upper()))
@@ -498,6 +630,45 @@ class MainWindow(QMainWindow):
                 status_item.setToolTip(_failure_guidance(result))
             self.table.setItem(row, 3, status_item)
             self._set_action(row, item.item_id, item.state)
+            if item.item_id in selected:
+                for column in range(4):
+                    cell = self.table.item(row, column)
+                    if cell is not None:
+                        cell.setSelected(True)
+
+    def _selected_item_ids(self) -> tuple[str, ...]:
+        selected: list[str] = []
+        for index in self.table.selectionModel().selectedRows(0):
+            item = self.table.item(index.row(), 0)
+            item_id = item.data(Qt.ItemDataRole.UserRole) if item is not None else None
+            if isinstance(item_id, str):
+                selected.append(item_id)
+        return tuple(selected)
+
+    @Slot()
+    def _refresh_queue_controls(self) -> None:
+        items = self._processor.items
+        selected_ids = set(self._selected_item_ids())
+        selected = [item for item in items if item.item_id in selected_ids]
+        active = self._thread is not None
+        removable = any(item.state not in ACTIVE_BATCH_STATES for item in selected)
+        failed = any(item.state is BatchItemState.FAILED for item in selected)
+        selected_queued = {item.item_id for item in selected if item.state is BatchItemState.QUEUED}
+        queued = [item.item_id for item in items if item.state is BatchItemState.QUEUED]
+        can_move_up = any(
+            item_id in selected_queued and index > 0 and queued[index - 1] not in selected_queued
+            for index, item_id in enumerate(queued)
+        )
+        can_move_down = any(
+            item_id in selected_queued
+            and index < len(queued) - 1
+            and queued[index + 1] not in selected_queued
+            for index, item_id in enumerate(queued)
+        )
+        self.remove_button.setEnabled(removable)
+        self.move_up_button.setEnabled(can_move_up)
+        self.move_down_button.setEnabled(can_move_down)
+        self.retry_selected_button.setEnabled(not active and failed)
 
     def _set_action(self, row: int, item_id: str, state: BatchItemState) -> None:
         existing = self.table.cellWidget(row, 4)
@@ -548,11 +719,24 @@ class MainWindow(QMainWindow):
 
     def _refresh(self) -> None:
         active = self._thread is not None
+        processing = self._processor.running
         summary = self._processor.summary()
         queued = any(item.state is BatchItemState.QUEUED for item in self._processor.items)
         self.start_button.setEnabled(not active and queued and self._output_directory is not None)
-        self.cancel_button.setEnabled(active)
+        self.pause_button.setEnabled(processing)
+        self.cancel_button.setEnabled(processing)
         self.retry_button.setEnabled(not active and summary.failed > 0)
+        states = [item.state for item in self._processor.items]
+        self.more_button.setEnabled(bool(states))
+        self.clear_completed_action.setEnabled(BatchItemState.COMPLETED in states)
+        self.clear_failed_action.setEnabled(
+            BatchItemState.FAILED in states or BatchItemState.CANCELLED in states
+        )
+        self.clear_pending_action.setEnabled(BatchItemState.QUEUED in states)
+        self.clear_queue_action.setEnabled(
+            any(state not in ACTIVE_BATCH_STATES for state in states)
+        )
+        self.cancel_all_action.setEnabled(processing or queued)
         for widget in (
             self.add_button,
             self.output_button,
@@ -560,6 +744,7 @@ class MainWindow(QMainWindow):
             self.settings_button,
         ):
             widget.setEnabled(not active)
+        self._refresh_queue_controls()
         self._refresh_summary()
 
     def _refresh_summary(self) -> None:

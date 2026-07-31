@@ -110,3 +110,13 @@ def test_batch_oracle_retries_only_failures_and_never_more_than_one_active() -> 
         sum(state in {"preparing", "transcribing", "saving"} for state in active["observed"]) == 1
     )
     assert active["expected_active_count"] == 1
+
+
+@pytest.mark.contract
+def test_queue_management_oracles_preserve_files_and_active_position() -> None:
+    cases = {case["id"]: case for case in _load(EXAMPLES / "batch-queue-cases.json")["cases"]}
+
+    assert cases["remove-selection-preserves-active"]["filesystem_deletes"] == 0
+    assert cases["clear-completed-only"]["filesystem_deletes"] == 0
+    assert cases["move-pending-up"]["expected_ids"][0] == "completed"
+    assert cases["pause-after-active"]["expected_after_active"] == ["completed", "queued"]

@@ -6,6 +6,10 @@ da margem de upload, com timestamps, recomposição e retomada segura.
 
 ## Novidades desta beta
 
+- seleção múltipla com remoção segura somente da fila;
+- botões para subir/descer itens pendentes e repetir apenas falhas selecionadas;
+- limpeza de concluídos, falhas/cancelados, pendentes ou toda a fila inativa;
+- pausa após o item atual e cancelamento separado do item atual ou da fila inteira;
 - contraste corrigido no diálogo, campos, tabela e cabeçalhos mesmo com tema escuro do Windows;
 - falhas mostram categoria, ação de recuperação e código seguro, inclusive chave OpenAI recusada;
 - o botão de chave agora informa corretamente que verifica apenas o formato local;
@@ -25,7 +29,6 @@ da margem de upload, com timestamps, recomposição e retomada segura.
 
 ## Estado da beta
 
-- instalador inicialmente sem assinatura Authenticode do projeto;
 - instalador sem assinatura Authenticode: o Windows pode mostrar aviso de editor desconhecido;
 - Whisper local e seleção de trecho ainda não fazem parte desta beta;
 - não há telemetria, histórico persistente ou atualização automática.
@@ -33,5 +36,5 @@ da margem de upload, com timestamps, recomposição e retomada segura.
 ## Integridade e rollback
 
 Confira `SHA256SUMS.txt` antes de instalar. O rollback recomendado é desinstalar esta versão e
-reinstalar `v0.2.0-beta.1`; a desinstalação não remove a chave do Credential Manager nem arquivos
+reinstalar `v0.2.1-beta.1`; a desinstalação não remove a chave do Credential Manager nem arquivos
 TXT/SRT criados pela pessoa usuária.

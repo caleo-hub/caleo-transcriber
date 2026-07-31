@@ -1,4 +1,4 @@
-# ADR-0007 — Fila FIFO sequencial e efêmera
+# ADR-0007 — Fila sequencial, efêmera e reordenável
 
 - **Status:** aceito
 - **Data:** 2026-07-31
@@ -20,12 +20,17 @@ aplicação que inicia no máximo um item. A fila e suas tentativas vivem soment
 - cancelamento pendente é síncrono e sem efeitos externos;
 - cancelamento ativo sinaliza o token existente;
 - `retry_failed()` cria novas tentativas apenas para falhas, preservando ordem e sucessos;
+- a pessoa pode mudar a ordem relativa dos itens `queued`; ativo e terminais ficam imóveis;
+- remoção e limpeza descartam somente entradas não ativas e seus metadados em memória;
+- pausa após o atual encerra o scheduler em uma fronteira terminal sem cancelar o trabalho;
 - progresso global é contagem de terminais e resumo por estado;
 - eventos carregam IDs efêmeros e estados, nunca caminhos ou conteúdo.
 
 ## Consequências
 
 - comportamento de fila é testável sem thread/UI;
+- a fila deixa de ser FIFO estrita antes do início de cada item, mas continua sequencial e
+  determinística segundo a ordem visível;
 - throughput pode ser menor, mas custo e recursos são previsíveis;
 - FEAT-002 pode paralelizar internamente no futuro sem alterar o contrato de um item ativo;
 - fechar o aplicativo descarta a fila, mantendo apenas checkpoints técnicos cifrados da FEAT-002.
@@ -36,6 +41,7 @@ aplicação que inicia no máximo um item. A fila e suas tentativas vivem soment
 - interromper lote na primeira falha: viola isolamento por item;
 - persistir a fila: criaria histórico não autorizado;
 - percentual global ponderado por duração: pareceria precisão temporal sem base real.
+- prioridade numérica ou automática: aumentaria configuração e esconderia a ordem efetiva.
 
 ## Rollback
 

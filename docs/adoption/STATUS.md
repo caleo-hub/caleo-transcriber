@@ -2,16 +2,16 @@
 
 ## Fase atual
 
-Patch beta — contraste e diagnóstico de falhas (TASK-021/TASK-022).
+Incremento de gerenciamento da fila (TASK-023).
 
 ## Resultado esperado desta fase
 
-Publicar `v0.2.1-beta.1` com contraste corrigido e falhas compreensíveis e acionáveis por item.
+Publicar `v0.3.0-beta.1` com seleção, remoção, limpeza, reordenação e pausa segura da fila.
 
 ## Estado do gate
 
-**CONCLUÍDO.** TASK-021/022 foram mescladas na PR #17. A prerelease `v0.2.1-beta.1` foi publicada
-com contraste corrigido, diagnóstico por item e pacote Windows x64 validado após download.
+**EM ANDAMENTO.** O owner aprovou a TASK-023 e a publicação de uma nova beta. Spec e ADR foram
+estendidos sem alterar privacidade, persistência, concorrência ou política de arquivos.
 
 ## Artefatos canônicos
 
@@ -238,5 +238,5 @@ autorizadas. A chave atual foi recusada e precisa ser substituída pela UI antes
 
 ## Próxima ação recomendada
 
-Substituir a chave recusada pela UI e testar a beta em uma máquina Windows x64, mantendo
-`v0.2.0-beta.1` disponível para rollback.
+Concluir TASK-023, validar a UX e publicar `v0.3.0-beta.1`, mantendo `v0.2.1-beta.1` disponível para
+rollback.

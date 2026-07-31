@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass, replace
 from enum import StrEnum
 
@@ -114,6 +115,23 @@ class BatchQueue:
                 retried.append(updated)
         return tuple(retried)
 
+    def retry_items(self, item_ids: Iterable[str]) -> tuple[BatchItem, ...]:
+        if any(item.state in ACTIVE_BATCH_STATES for item in self._items):
+            raise BatchQueueError("não é possível repetir durante processamento")
+        selected = set(item_ids)
+        retried: list[BatchItem] = []
+        for index, item in enumerate(self._items):
+            if item.item_id in selected and item.state is BatchItemState.FAILED:
+                updated = replace(
+                    item,
+                    state=BatchItemState.QUEUED,
+                    attempts=item.attempts + 1,
+                    failure=None,
+                )
+                self._items[index] = updated
+                retried.append(updated)
+        return tuple(retried)
+
     def retry_item(self, item_id: str) -> BatchItem:
         index, item = self._find(item_id)
         if item.state is not BatchItemState.FAILED:
@@ -141,6 +159,53 @@ class BatchQueue:
         if any(item.state in ACTIVE_BATCH_STATES for item in self._items):
             raise BatchQueueError("não é possível limpar item ativo")
         self._items.clear()
+
+    def remove(self, item_ids: Iterable[str]) -> tuple[BatchItem, ...]:
+        selected = set(item_ids)
+        return self._remove_where(
+            lambda item: item.item_id in selected and item.state not in ACTIVE_BATCH_STATES
+        )
+
+    def clear_states(self, states: Iterable[BatchItemState]) -> tuple[BatchItem, ...]:
+        removable = set(states) - ACTIVE_BATCH_STATES
+        return self._remove_where(lambda item: item.state in removable)
+
+    def clear_inactive(self) -> tuple[BatchItem, ...]:
+        return self._remove_where(lambda item: item.state not in ACTIVE_BATCH_STATES)
+
+    def move_queued(self, item_ids: Iterable[str], direction: int) -> tuple[BatchItem, ...]:
+        if direction not in {-1, 1}:
+            raise ValueError("direção deve ser -1 ou 1")
+        selected = set(item_ids)
+        queued_slots = [
+            index for index, item in enumerate(self._items) if item.state is BatchItemState.QUEUED
+        ]
+        queued = [self._items[index] for index in queued_slots]
+        indexes = range(1, len(queued)) if direction == -1 else range(len(queued) - 2, -1, -1)
+        for index in indexes:
+            neighbor = index + direction
+            if queued[index].item_id in selected and queued[neighbor].item_id not in selected:
+                queued[index], queued[neighbor] = queued[neighbor], queued[index]
+        for slot, item in zip(queued_slots, queued, strict=True):
+            self._items[slot] = item
+        self._reindex()
+        return tuple(
+            item
+            for item in self._items
+            if item.item_id in selected and item.state is BatchItemState.QUEUED
+        )
+
+    def _remove_where(self, predicate: Callable[[BatchItem], bool]) -> tuple[BatchItem, ...]:
+        removed = tuple(item for item in self._items if predicate(item))
+        if not removed:
+            return ()
+        removed_ids = {item.item_id for item in removed}
+        self._items = [item for item in self._items if item.item_id not in removed_ids]
+        self._reindex()
+        return removed
+
+    def _reindex(self) -> None:
+        self._items = [replace(item, position=index) for index, item in enumerate(self._items)]
 
     def _find(self, item_id: str) -> tuple[int, BatchItem]:
         for index, item in enumerate(self._items):
