@@ -114,6 +114,19 @@ class BatchQueue:
                 retried.append(updated)
         return tuple(retried)
 
+    def retry_item(self, item_id: str) -> BatchItem:
+        index, item = self._find(item_id)
+        if item.state is not BatchItemState.FAILED:
+            raise BatchQueueError("somente falha pode ser repetida")
+        updated = replace(
+            item,
+            state=BatchItemState.QUEUED,
+            attempts=item.attempts + 1,
+            failure=None,
+        )
+        self._items[index] = updated
+        return updated
+
     def summary(self) -> BatchSummary:
         states = [item.state for item in self._items]
         return BatchSummary(

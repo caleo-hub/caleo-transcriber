@@ -15,7 +15,7 @@ analysis = Analysis(
     [str(project_root / "src" / "caleo_transcriber" / "__main__.py")],
     pathex=[str(project_root / "src")],
     binaries=[],
-    datas=metadata,
+    datas=metadata + [(str(project_root / "assets" / "caleo-transcriber.png"), "assets")],
     hiddenimports=hidden_imports,
     hookspath=[],
     hooksconfig={},
@@ -37,6 +37,7 @@ executable = EXE(
     strip=False,
     upx=False,
     console=False,
+    icon=str(project_root / "assets" / "caleo-transcriber.ico"),
     version=str(project_root / "packaging" / "windows-version.txt"),
 )
 

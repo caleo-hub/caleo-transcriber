@@ -7,7 +7,7 @@ import uuid
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from threading import Event, Lock
+from threading import Event, RLock
 from typing import Protocol, runtime_checkable
 
 from caleo_transcriber.application.output import OutputFormat
@@ -75,10 +75,11 @@ class BatchProcessor:
         self._sources: dict[str, Path] = {}
         self._results: dict[str, TranscribeSingleFileResult] = {}
         self._retry_ids: set[str] = set()
+        self._confirm_ids: set[str] = set()
         self._active_cancel: Event | None = None
         self._active_id: str | None = None
         self._running = False
-        self._lock = Lock()
+        self._lock = RLock()
 
     @property
     def items(self) -> tuple[BatchItem, ...]:
@@ -107,6 +108,12 @@ class BatchProcessor:
                 self._publish(self._queue.items[-1])
         return BatchAddResult(tuple(added), duplicates)
 
+    def configure(self, settings: BatchSettings) -> None:
+        with self._lock:
+            if self._running:
+                raise RuntimeError("configuração do lote bloqueada durante execução")
+            self._settings = settings
+
     def run(self) -> BatchSummary:
         with self._lock:
             if self._running:
@@ -134,12 +141,14 @@ class BatchProcessor:
                         output_format=self._settings.output_format,
                         language=self._settings.language,
                         retry_failed=retry_failed,
+                        confirm_ambiguous=item.item_id in self._confirm_ids,
                     ),
                     cancel.is_set,
                 )
                 with self._lock:
                     self._results[item.item_id] = result
                     self._retry_ids.discard(item.item_id)
+                    self._confirm_ids.discard(item.item_id)
                     current = next(
                         candidate
                         for candidate in self._queue.items
@@ -215,6 +224,22 @@ class BatchProcessor:
                 self._publish(item)
             return ids
 
+    def retry_ambiguous(self, item_id: str) -> bool:
+        with self._lock:
+            result = self._results.get(item_id)
+            if not isinstance(result, TranscribeSingleFileFailure) or (
+                result.category is not AttemptFailure.AMBIGUOUS
+            ):
+                return False
+            item = self._queue.retry_item(item_id)
+            self._confirm_ids.add(item_id)
+            self._publish(item)
+            return True
+
+    def result_for(self, item_id: str) -> TranscribeSingleFileResult | None:
+        with self._lock:
+            return self._results.get(item_id)
+
     def summary(self) -> BatchSummary:
         with self._lock:
             return self._queue.summary()
@@ -225,6 +250,7 @@ class BatchProcessor:
             self._sources.clear()
             self._results.clear()
             self._retry_ids.clear()
+            self._confirm_ids.clear()
 
     def _publish(self, item: BatchItem) -> None:
         self._events.publish(

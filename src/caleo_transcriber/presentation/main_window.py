@@ -1,117 +1,109 @@
-"""Janela principal da primeira fatia de transcrição."""
+"""Janela desktop acessível para fila efêmera de transcrições."""
 
-import uuid
-from collections.abc import Callable
+from __future__ import annotations
+
+import sys
+from collections.abc import Callable, Iterable
 from pathlib import Path
 
 from PySide6.QtCore import QObject, QThread, QUrl, Signal, Slot
-from PySide6.QtGui import QCloseEvent, QDesktopServices
+from PySide6.QtGui import QCloseEvent, QDesktopServices, QDragEnterEvent, QDropEvent, QIcon
 from PySide6.QtWidgets import (
+    QComboBox,
     QDialog,
     QFileDialog,
     QFrame,
-    QGridLayout,
     QHBoxLayout,
+    QHeaderView,
     QLabel,
-    QLineEdit,
     QMainWindow,
     QMessageBox,
     QProgressBar,
     QPushButton,
+    QTableWidget,
+    QTableWidgetItem,
     QVBoxLayout,
     QWidget,
 )
 
 from caleo_transcriber import __version__
 from caleo_transcriber.application import (
-    AttemptEvent,
-    TranscribeSingleFileCommand,
+    AttemptFailure,
+    BatchProcessor,
+    BatchQueueEvent,
+    BatchSettings,
+    OutputFormat,
     TranscribeSingleFileFailure,
-    TranscribeSingleFileSuccess,
-    TranscribeSingleFileUseCase,
 )
-from caleo_transcriber.domain import AttemptState
+from caleo_transcriber.domain import BatchItemState
 from caleo_transcriber.presentation.notices import CloudNoticePolicy
-from caleo_transcriber.presentation.worker import CancellationToken, TranscriptionWorker
+from caleo_transcriber.presentation.worker import BatchWorker
 
-_ACTIVE_STATES = {
-    AttemptState.PREPARING,
-    AttemptState.TRANSCRIBING,
-    AttemptState.SAVING,
-    AttemptState.CANCELLING,
-}
+_SUPPORTED = {".mp4", ".mp3", ".wav"}
 _STATE_TEXT = {
-    AttemptState.READY: "Pronto para iniciar",
-    AttemptState.PREPARING: "Preparando somente o áudio...",
-    AttemptState.TRANSCRIBING: "Transcrevendo pela OpenAI...",
-    AttemptState.SAVING: "Salvando o arquivo TXT...",
-    AttemptState.COMPLETED: "Transcrição concluída",
-    AttemptState.FAILED: "Não foi possível concluir",
-    AttemptState.CANCELLING: "Cancelando com segurança...",
-    AttemptState.CANCELLED: "Transcrição cancelada",
-}
-_FAILURE_TEXT = {
-    "invalid_input": "O arquivo não é válido. Escolha MP4, MP3 ou WAV com até 30 minutos.",
-    "unsupported_media": "Formato não suportado. Escolha MP4, MP3 ou WAV.",
-    "credential": "Configure ou substitua sua chave da OpenAI e tente novamente.",
-    "network": "Falha de rede ou tempo esgotado. Verifique a conexão e tente novamente.",
-    "rate_limit": "A OpenAI limitou temporariamente as solicitações. Tente mais tarde.",
-    "provider": "A transcrição não foi concluída pela OpenAI. Tente novamente.",
-    "cancelled": "O trabalho foi cancelado e os temporários foram descartados.",
-    "output": "Não foi possível salvar o TXT. Escolha outro destino e tente novamente.",
+    BatchItemState.QUEUED: "Na fila",
+    BatchItemState.PREPARING: "Preparando áudio",
+    BatchItemState.TRANSCRIBING: "Transcrevendo",
+    BatchItemState.SAVING: "Salvando",
+    BatchItemState.COMPLETED: "Concluído",
+    BatchItemState.FAILED: "Falhou",
+    BatchItemState.CANCELLING: "Cancelando",
+    BatchItemState.CANCELLED: "Cancelado",
 }
 
 
-class QtAttemptEvents(QObject):
+class QtBatchEvents(QObject):
     event_published = Signal(object)
 
-    def publish(self, event: AttemptEvent) -> None:
+    def publish(self, event: BatchQueueEvent) -> None:
         self.event_published.emit(event)
 
 
 class MainWindow(QMainWindow):
     def __init__(
         self,
-        use_case: TranscribeSingleFileUseCase,
-        events: QtAttemptEvents,
+        processor: BatchProcessor,
+        events: QtBatchEvents,
         workspace: Path,
         settings_widget_factory: Callable[[], QWidget],
         notice_policy: CloudNoticePolicy,
     ) -> None:
         super().__init__()
-        self._use_case = use_case
+        self._processor = processor
         self._events = events
         self._workspace = workspace
         self._settings_widget_factory = settings_widget_factory
         self._notice_policy = notice_policy
-        self._source: Path | None = None
         self._output_directory: Path | None = None
-        self._last_output: Path | None = None
         self._thread: QThread | None = None
-        self._worker: TranscriptionWorker | None = None
-        self._cancellation: CancellationToken | None = None
+        self._worker: BatchWorker | None = None
+        self._rows: dict[str, int] = {}
         self._close_when_finished = False
 
         self.setWindowTitle(f"Caleo Transcriber {__version__}")
-        self.setMinimumSize(760, 560)
-        self.resize(860, 620)
+        icon_path = _application_icon_path()
+        if icon_path.is_file():
+            self.setWindowIcon(QIcon(str(icon_path)))
+        self.setMinimumSize(880, 620)
+        self.resize(980, 700)
+        self.setAcceptDrops(True)
         self._build_ui()
         self._apply_style()
-        self._events.event_published.connect(self._on_attempt_event)
-        self._refresh_actions()
+        self._events.event_published.connect(self._on_batch_event)
+        self._refresh()
 
     def _build_ui(self) -> None:
         central = QWidget()
         root = QVBoxLayout(central)
-        root.setContentsMargins(28, 24, 28, 24)
-        root.setSpacing(18)
+        root.setContentsMargins(24, 20, 24, 20)
+        root.setSpacing(14)
 
         header = QHBoxLayout()
         title_box = QVBoxLayout()
         title = QLabel(f"Caleo Transcriber  {__version__}")
         title.setObjectName("title")
-        subtitle = QLabel("Transforme áudio ou vídeo em texto, sem complicação.")
-        subtitle.setObjectName("subtitle")
+        subtitle = QLabel("Transcreva vários áudios e vídeos em uma fila simples.")
+        subtitle.setObjectName("muted")
         title_box.addWidget(title)
         title_box.addWidget(subtitle)
         header.addLayout(title_box)
@@ -122,96 +114,96 @@ class MainWindow(QMainWindow):
         header.addWidget(self.settings_button)
         root.addLayout(header)
 
-        cloud_card = QFrame()
-        cloud_card.setObjectName("cloudCard")
-        cloud_layout = QHBoxLayout(cloud_card)
+        cloud = QFrame()
+        cloud.setObjectName("cloudCard")
+        cloud_layout = QHBoxLayout(cloud)
         cloud_title = QLabel("OpenAI (cloud)")
         cloud_title.setObjectName("cloudTitle")
-        cloud_text = QLabel("Envia somente o áudio selecionado e pode gerar custo.")
-        cloud_text.setWordWrap(True)
+        cloud_text = QLabel("Envia somente o áudio de cada item e pode gerar custo.")
         cloud_text.setAccessibleName("Aviso permanente do modo OpenAI cloud")
         cloud_layout.addWidget(cloud_title)
         cloud_layout.addWidget(cloud_text, 1)
-        root.addWidget(cloud_card)
+        root.addWidget(cloud)
 
-        selection_card = QFrame()
-        selection_card.setObjectName("card")
-        grid = QGridLayout(selection_card)
-        grid.setContentsMargins(20, 20, 20, 20)
-        grid.setHorizontalSpacing(12)
-        grid.setVerticalSpacing(14)
+        self.banner = QFrame()
+        self.banner.setObjectName("banner")
+        banner_layout = QHBoxLayout(self.banner)
+        self.banner_label = QLabel()
+        self.banner_label.setWordWrap(True)
+        self.banner_label.setAccessibleName("Aviso de retomada")
+        self.banner_action = QPushButton("Continuar")
+        self.banner_dismiss = QPushButton("Descartar")
+        self.banner_dismiss.clicked.connect(self.banner.hide)
+        banner_layout.addWidget(self.banner_label, 1)
+        banner_layout.addWidget(self.banner_action)
+        banner_layout.addWidget(self.banner_dismiss)
+        self.banner.hide()
+        root.addWidget(self.banner)
 
-        source_label = QLabel("&Arquivo de áudio ou vídeo")
-        self.source_field = QLineEdit()
-        self.source_field.setReadOnly(True)
-        self.source_field.setPlaceholderText("Selecione um arquivo MP4, MP3 ou WAV")
-        self.source_field.setAccessibleName("Arquivo selecionado")
-        source_label.setBuddy(self.source_field)
-        self.source_button = QPushButton("&Selecionar arquivo")
-        self.source_button.clicked.connect(self._choose_source)
-
-        output_label = QLabel("&Pasta de saída")
-        self.output_field = QLineEdit()
-        self.output_field.setReadOnly(True)
-        self.output_field.setPlaceholderText("Escolha onde salvar o arquivo TXT")
-        self.output_field.setAccessibleName("Pasta de saída selecionada")
-        output_label.setBuddy(self.output_field)
-        self.output_button = QPushButton("Escolher &pasta")
+        toolbar = QHBoxLayout()
+        self.add_button = QPushButton("&Adicionar arquivos")
+        self.add_button.setAccessibleName("Adicionar vários arquivos à fila")
+        self.add_button.clicked.connect(self._choose_sources)
+        self.output_button = QPushButton("Escolher &pasta de saída")
         self.output_button.clicked.connect(self._choose_output)
+        self.output_label = QLabel("Pasta de saída não escolhida")
+        self.output_label.setObjectName("muted")
+        self.output_label.setAccessibleName("Pasta de saída selecionada")
+        self.format_combo = QComboBox()
+        self.format_combo.addItem("TXT", OutputFormat.TXT)
+        self.format_combo.addItem("SRT", OutputFormat.SRT)
+        self.format_combo.setAccessibleName("Formato de saída")
+        self.format_combo.currentIndexChanged.connect(self._refresh_format_column)
+        toolbar.addWidget(self.add_button)
+        toolbar.addWidget(self.output_button)
+        toolbar.addWidget(self.output_label, 1)
+        toolbar.addWidget(QLabel("Formato:"))
+        toolbar.addWidget(self.format_combo)
+        root.addLayout(toolbar)
 
-        format_label = QLabel("Formato de saída")
-        format_value = QLabel("TXT  •  UTF-8  •  sem sobrescrever arquivos")
-        format_value.setObjectName("muted")
+        self.table = QTableWidget(0, 5)
+        self.table.setHorizontalHeaderLabels(["Arquivo", "Duração", "Formato", "Estado", "Ação"])
+        self.table.setAccessibleName("Fila de arquivos para transcrição")
+        self.table.setAlternatingRowColors(True)
+        self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.table.verticalHeader().setVisible(False)
+        header_view = self.table.horizontalHeader()
+        header_view.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        for column in range(1, 5):
+            header_view.setSectionResizeMode(column, QHeaderView.ResizeMode.ResizeToContents)
+        root.addWidget(self.table, 1)
 
-        grid.addWidget(source_label, 0, 0, 1, 2)
-        grid.addWidget(self.source_field, 1, 0)
-        grid.addWidget(self.source_button, 1, 1)
-        grid.addWidget(output_label, 2, 0, 1, 2)
-        grid.addWidget(self.output_field, 3, 0)
-        grid.addWidget(self.output_button, 3, 1)
-        grid.addWidget(format_label, 4, 0)
-        grid.addWidget(format_value, 4, 1)
-        grid.setColumnStretch(0, 1)
-        root.addWidget(selection_card)
-
-        status_card = QFrame()
-        status_card.setObjectName("card")
-        status_layout = QVBoxLayout(status_card)
-        status_layout.setContentsMargins(20, 18, 20, 18)
-        status_heading = QLabel("Estado do trabalho")
-        status_heading.setObjectName("sectionTitle")
-        self.status_label = QLabel("Selecione o arquivo e a pasta de saída.")
-        self.status_label.setWordWrap(True)
-        self.status_label.setAccessibleName("Estado atual da transcrição")
+        status = QFrame()
+        status.setObjectName("card")
+        status_layout = QVBoxLayout(status)
+        self.summary_label = QLabel("Fila vazia — nenhum histórico é mantido.")
+        self.summary_label.setAccessibleName("Resumo da fila")
         self.progress = QProgressBar()
         self.progress.setTextVisible(False)
-        self.progress.setAccessibleName("Atividade da transcrição")
+        self.progress.setAccessibleName("Atividade do item atual")
         self.progress.hide()
-        self.detail_label = QLabel("Nenhum histórico é mantido.")
+        self.detail_label = QLabel(
+            "Adicione MP4, MP3 ou WAV; arquivos longos são divididos automaticamente."
+        )
         self.detail_label.setObjectName("muted")
         self.detail_label.setWordWrap(True)
-        status_layout.addWidget(status_heading)
-        status_layout.addWidget(self.status_label)
+        status_layout.addWidget(self.summary_label)
         status_layout.addWidget(self.progress)
         status_layout.addWidget(self.detail_label)
-        root.addWidget(status_card)
-        root.addStretch()
+        root.addWidget(status)
 
         actions = QHBoxLayout()
-        self.start_button = QPushButton("&Iniciar transcrição")
+        self.start_button = QPushButton("&Iniciar fila")
         self.start_button.setObjectName("primaryButton")
         self.start_button.clicked.connect(self._start)
-        self.cancel_button = QPushButton("&Cancelar")
-        self.cancel_button.clicked.connect(self._cancel)
-        self.retry_button = QPushButton("&Tentar novamente")
-        self.retry_button.clicked.connect(self._start)
-        self.open_output_button = QPushButton("&Abrir pasta de saída")
-        self.open_output_button.clicked.connect(self._open_output)
+        self.cancel_button = QPushButton("&Cancelar fila")
+        self.cancel_button.clicked.connect(self._cancel_all)
+        self.retry_button = QPushButton("&Repetir falhas")
+        self.retry_button.clicked.connect(self._retry_failed)
         actions.addWidget(self.start_button)
         actions.addWidget(self.cancel_button)
         actions.addWidget(self.retry_button)
         actions.addStretch()
-        actions.addWidget(self.open_output_button)
         root.addLayout(actions)
         self.setCentralWidget(central)
 
@@ -219,71 +211,55 @@ class MainWindow(QMainWindow):
         self.setStyleSheet(
             """
             QWidget { font-family: "Segoe UI"; font-size: 13px; color: #152238; }
-            QMainWindow { background: #F4F7FB; color: #152238; }
-            QLabel#title { font-size: 26px; font-weight: 700; color: #102A43; }
-            QLabel#subtitle, QLabel#muted { color: #62748A; }
-            QLabel#sectionTitle { font-size: 15px; font-weight: 700; color: #243B53; }
-            QFrame#card { background: white; border: 1px solid #D9E2EC; border-radius: 10px; }
-            QFrame#cloudCard {
-                background: #E8F3FF;
-                border: 1px solid #9BC7F5;
-                border-radius: 10px;
+            QMainWindow { background: #F4F7FB; }
+            QLabel#title { font-size: 25px; font-weight: 700; color: #102A43; }
+            QLabel#muted { color: #62748A; }
+            QFrame#card, QTableWidget {
+                background: white; border: 1px solid #D9E2EC; border-radius: 8px;
             }
+            QFrame#cloudCard { background: #E8F3FF; border: 1px solid #9BC7F5; border-radius: 8px; }
+            QFrame#banner { background: #FFF4D6; border: 1px solid #E0A800; border-radius: 8px; }
             QLabel#cloudTitle { font-weight: 700; color: #0B5CAD; }
-            QLineEdit {
-                background: #FFFFFF;
-                border: 1px solid #BCCCDC;
-                border-radius: 6px;
-                padding: 9px;
+            QPushButton, QComboBox {
+                background: white; border: 1px solid #9FB3C8;
+                border-radius: 6px; padding: 8px 12px;
             }
-            QLineEdit:focus { border: 2px solid #1677C8; }
-            QPushButton {
-                background: #FFFFFF;
-                border: 1px solid #9FB3C8;
-                border-radius: 6px;
-                padding: 9px 13px;
-            }
-            QPushButton:hover { background: #EDF2F7; }
-            QPushButton:focus { border: 2px solid #1677C8; }
+            QPushButton:focus, QComboBox:focus, QTableWidget:focus { border: 2px solid #1677C8; }
             QPushButton:disabled { color: #9AA9B8; background: #EEF2F6; }
             QPushButton#primaryButton {
-                background: #1261A0;
-                color: white;
-                border-color: #1261A0;
-                font-weight: 700;
+                background: #1261A0; color: white;
+                border-color: #1261A0; font-weight: 700;
             }
-            QPushButton#primaryButton:hover { background: #0B4F86; }
-            QProgressBar {
-                min-height: 8px;
-                max-height: 8px;
-                border: none;
-                border-radius: 4px;
-                background: #D9E2EC;
-            }
-            QProgressBar::chunk { background: #1677C8; border-radius: 4px; }
+            QProgressBar { min-height: 8px; max-height: 8px; border: none; background: #D9E2EC; }
+            QProgressBar::chunk { background: #1677C8; }
             """
         )
 
-    def set_source(self, source: Path) -> None:
-        self._source = source
-        self.source_field.setText(str(source))
-        self._show_ready_if_configured()
+    def set_sources(self, sources: Iterable[Path]) -> None:
+        supported = [source for source in sources if source.suffix.lower() in _SUPPORTED]
+        result = self._processor.add_sources(supported)
+        self._rebuild_table()
+        if result.duplicate_count:
+            self.detail_label.setText(
+                f"{result.duplicate_count} arquivo(s) duplicado(s) não foram adicionados."
+            )
+        elif len(supported) == 0:
+            self.detail_label.setText("Nenhum arquivo MP4, MP3 ou WAV válido foi adicionado.")
+        self._refresh()
 
     def set_output_directory(self, directory: Path) -> None:
         self._output_directory = directory
-        self.output_field.setText(str(directory))
-        self._show_ready_if_configured()
+        self.output_label.setText(str(directory))
+        self.output_label.setToolTip(str(directory))
+        self._refresh()
 
     @Slot()
-    def _choose_source(self) -> None:
-        filename, _ = QFileDialog.getOpenFileName(
-            self,
-            "Selecionar áudio ou vídeo",
-            "",
-            "Mídia suportada (*.mp4 *.mp3 *.wav)",
+    def _choose_sources(self) -> None:
+        filenames, _ = QFileDialog.getOpenFileNames(
+            self, "Adicionar áudios ou vídeos", "", "Mídia suportada (*.mp4 *.mp3 *.wav)"
         )
-        if filename:
-            self.set_source(Path(filename))
+        if filenames:
+            self.set_sources(Path(name) for name in filenames)
 
     @Slot()
     def _choose_output(self) -> None:
@@ -291,129 +267,210 @@ class MainWindow(QMainWindow):
         if directory:
             self.set_output_directory(Path(directory))
 
-    def _show_ready_if_configured(self) -> None:
-        if self._source is not None and self._output_directory is not None:
-            self.status_label.setText(_STATE_TEXT[AttemptState.READY])
-            self.detail_label.setText(
-                "Revise o arquivo, o destino e o aviso cloud antes de iniciar."
-            )
-        self._refresh_actions()
-
     @Slot()
     def _start(self) -> None:
-        if self._source is None or self._output_directory is None or self._thread is not None:
+        if self._thread is not None or self._output_directory is None:
             return
         if self._notice_policy.should_show():
             QMessageBox.information(
                 self,
                 "Antes de usar a OpenAI",
-                "Este modo envia somente o áudio preparado para a OpenAI "
-                "e pode gerar custo na sua conta.",
+                "Este modo envia somente áudio preparado para a OpenAI e pode gerar custo.",
             )
             self._notice_policy.mark_shown()
-
-        self._last_output = None
-        cancellation = CancellationToken()
-        command = TranscribeSingleFileCommand(
-            uuid.uuid4().hex,
-            self._source,
-            self._output_directory,
-            self._workspace,
+        self._processor.configure(
+            BatchSettings(
+                self._output_directory,
+                self._workspace,
+                self._format(),
+            )
         )
         thread = QThread(self)
-        worker = TranscriptionWorker(self._use_case, command, cancellation)
+        worker = BatchWorker(self._processor)
         worker.moveToThread(thread)
         thread.started.connect(worker.run)
-        worker.result_ready.connect(self._on_result)
+        worker.summary_ready.connect(lambda _: self._refresh())
         worker.safe_error.connect(self._on_worker_error)
         worker.finished.connect(thread.quit)
         worker.finished.connect(worker.deleteLater)
         thread.finished.connect(self._on_thread_finished)
         self._thread = thread
         self._worker = worker
-        self._cancellation = cancellation
-        self.status_label.setText("Iniciando trabalho...")
-        self.detail_label.setText(
-            "A etapa atual aparecerá aqui; o tempo depende do arquivo e da rede."
-        )
         self.progress.setRange(0, 0)
         self.progress.show()
-        self._refresh_actions()
+        self.detail_label.setText("Um item por vez; a etapa atual não é convertida em percentual.")
+        self._refresh()
         thread.start()
 
     @Slot()
-    def _cancel(self) -> None:
-        if self._cancellation is not None:
-            self._cancellation.request()
-            self.status_label.setText(_STATE_TEXT[AttemptState.CANCELLING])
-            self.cancel_button.setEnabled(False)
+    def _cancel_all(self) -> None:
+        self._processor.cancel_all()
+        self.detail_label.setText("Cancelamento solicitado; itens concluídos serão preservados.")
+        self._refresh()
+
+    @Slot()
+    def _retry_failed(self) -> None:
+        if self._processor.retry_failed():
+            self._rebuild_table()
+            self._start()
 
     @Slot(object)
-    def _on_attempt_event(self, value: object) -> None:
-        if not isinstance(value, AttemptEvent):
+    def _on_batch_event(self, value: object) -> None:
+        if not isinstance(value, BatchQueueEvent):
             return
-        self.status_label.setText(_STATE_TEXT[value.state])
-        if value.state in _ACTIVE_STATES:
-            self.progress.setRange(0, 0)
-            self.progress.show()
-        elif value.state is AttemptState.COMPLETED:
-            self.progress.setRange(0, 1)
-            self.progress.setValue(1)
-            self.progress.show()
-        else:
-            self.progress.hide()
+        if value.item_id not in self._rows:
+            self._rebuild_table()
+        row = self._rows.get(value.item_id)
+        if row is not None:
+            self.table.setItem(row, 3, QTableWidgetItem(_STATE_TEXT[value.state]))
+            self._set_action(row, value.item_id, value.state)
+        if value.state is BatchItemState.FAILED:
+            result = self._processor.result_for(value.item_id)
+            if isinstance(result, TranscribeSingleFileFailure) and (
+                result.category is AttemptFailure.AMBIGUOUS
+            ):
+                self._show_ambiguous_banner(value.item_id)
+        self._refresh_summary()
 
-    @Slot(object)
-    def _on_result(self, value: object) -> None:
-        if isinstance(value, TranscribeSingleFileSuccess):
-            self._last_output = value.output_path
-            self.status_label.setText(_STATE_TEXT[AttemptState.COMPLETED])
-            self.detail_label.setText(
-                "TXT vazio: nenhuma fala foi detectada."
-                if "no_speech_detected" in value.warnings
-                else f"Arquivo criado: {value.output_path.name}"
+    def _show_ambiguous_banner(self, item_id: str) -> None:
+        self.banner_label.setText("Esta parte pode já ter sido cobrada. Reenviar?")
+        self.banner_action.setText("Reenviar parte")
+        try:
+            self.banner_action.clicked.disconnect()
+        except RuntimeError:
+            pass
+        self.banner_action.clicked.connect(lambda: self._confirm_ambiguous(item_id))
+        self.banner_dismiss.setText("Não reenviar")
+        self.banner.show()
+
+    def show_resume_banner(self) -> None:
+        """Exibe o aviso aprovado quando o bootstrap detectar checkpoint compatível."""
+
+        self.banner_label.setText("Continuar processamento interrompido?")
+        self.banner_action.setText("Continuar")
+        self.banner_dismiss.setText("Descartar e começar de novo")
+        self.banner.show()
+
+    def _confirm_ambiguous(self, item_id: str) -> None:
+        if self._processor.retry_ambiguous(item_id):
+            self.banner.hide()
+            self._rebuild_table()
+            self._start()
+
+    def _rebuild_table(self) -> None:
+        items = self._processor.items
+        for row in range(self.table.rowCount()):
+            widget = self.table.cellWidget(row, 4)
+            if widget is not None:
+                self.table.removeCellWidget(row, 4)
+                widget.setParent(None)
+                widget.deleteLater()
+        self.table.setRowCount(0)
+        self.table.setRowCount(len(items))
+        self._rows.clear()
+        for row, item in enumerate(items):
+            self._rows[item.item_id] = row
+            source = Path(item.source_identity)
+            file_item = QTableWidgetItem(source.name)
+            file_item.setToolTip(item.source_identity)
+            self.table.setItem(row, 0, file_item)
+            self.table.setItem(row, 1, QTableWidgetItem("—"))
+            self.table.setItem(row, 2, QTableWidgetItem(self._format().value.upper()))
+            self.table.setItem(row, 3, QTableWidgetItem(_STATE_TEXT[item.state]))
+            self._set_action(row, item.item_id, item.state)
+
+    def _set_action(self, row: int, item_id: str, state: BatchItemState) -> None:
+        existing = self.table.cellWidget(row, 4)
+        button = existing if isinstance(existing, QPushButton) else QPushButton()
+        if existing is None:
+            button.clicked.connect(
+                lambda _checked=False, current=button: self._run_row_action(current)
             )
-            self.progress.setRange(0, 1)
-            self.progress.setValue(1)
-            self.progress.show()
-        elif isinstance(value, TranscribeSingleFileFailure):
-            self.status_label.setText(_STATE_TEXT[value.state])
-            self.detail_label.setText(_FAILURE_TEXT[value.category.value])
-            self.progress.hide()
+        button.setEnabled(True)
+        button.setProperty("item_id", item_id)
+        if state in {BatchItemState.QUEUED, BatchItemState.PREPARING, BatchItemState.TRANSCRIBING}:
+            button.setText("Cancelar")
+            button.setAccessibleName(f"Cancelar item {row + 1}")
+            button.setProperty("action", "cancel")
+        elif state is BatchItemState.COMPLETED:
+            button.setText("Abrir pasta")
+            button.setProperty("action", "open")
+        else:
+            button.setText("—")
+            button.setEnabled(False)
+            button.setProperty("action", "none")
+        if existing is None:
+            self.table.setCellWidget(row, 4, button)
+
+    def _run_row_action(self, button: QPushButton) -> None:
+        action = button.property("action")
+        if action == "cancel":
+            item_id = button.property("item_id")
+            if isinstance(item_id, str):
+                self._cancel_item(item_id)
+        elif action == "open":
+            self._open_output()
+
+    def _cancel_item(self, item_id: str) -> None:
+        self._processor.cancel_item(item_id)
+        self._refresh()
+
+    def _refresh_format_column(self) -> None:
+        for row in range(self.table.rowCount()):
+            self.table.setItem(row, 2, QTableWidgetItem(self._format().value.upper()))
+
+    def _format(self) -> OutputFormat:
+        value = self.format_combo.currentData()
+        try:
+            return OutputFormat(str(value))
+        except ValueError:
+            return OutputFormat.TXT
+
+    def _refresh(self) -> None:
+        active = self._thread is not None
+        summary = self._processor.summary()
+        queued = any(item.state is BatchItemState.QUEUED for item in self._processor.items)
+        self.start_button.setEnabled(not active and queued and self._output_directory is not None)
+        self.cancel_button.setEnabled(active)
+        self.retry_button.setEnabled(not active and summary.failed > 0)
+        for widget in (
+            self.add_button,
+            self.output_button,
+            self.format_combo,
+            self.settings_button,
+        ):
+            widget.setEnabled(not active)
+        self._refresh_summary()
+
+    def _refresh_summary(self) -> None:
+        summary = self._processor.summary()
+        if summary.total == 0:
+            text = "Fila vazia — nenhum histórico é mantido."
+        else:
+            text = (
+                f"{summary.terminal} de {summary.total} finalizados — "
+                f"{summary.completed} concluídos, {summary.failed} falharam, "
+                f"{summary.cancelled} cancelados"
+            )
+        self.summary_label.setText(text)
 
     @Slot(str)
     def _on_worker_error(self, message: str) -> None:
-        self.status_label.setText(_STATE_TEXT[AttemptState.FAILED])
         self.detail_label.setText(message)
-        self.progress.hide()
 
     @Slot()
     def _on_thread_finished(self) -> None:
         thread = self._thread
         self._thread = None
         self._worker = None
-        self._cancellation = None
         if thread is not None:
             thread.deleteLater()
-        self._refresh_actions()
+        self.progress.hide()
+        self._rebuild_table()
+        self._refresh()
         if self._close_when_finished:
             self._close_when_finished = False
             self.close()
-
-    def _refresh_actions(self) -> None:
-        configured = self._source is not None and self._output_directory is not None
-        active = self._thread is not None
-        failed_or_cancelled = self.status_label.text() in {
-            _STATE_TEXT[AttemptState.FAILED],
-            _STATE_TEXT[AttemptState.CANCELLED],
-        }
-        self.start_button.setEnabled(configured and not active)
-        self.source_button.setEnabled(not active)
-        self.output_button.setEnabled(not active)
-        self.settings_button.setEnabled(not active)
-        self.cancel_button.setEnabled(active)
-        self.retry_button.setEnabled(configured and not active and failed_or_cancelled)
-        self.open_output_button.setEnabled(self._last_output is not None and not active)
 
     @Slot()
     def _open_settings(self) -> None:
@@ -428,13 +485,35 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def _open_output(self) -> None:
-        if self._last_output is not None:
-            QDesktopServices.openUrl(QUrl.fromLocalFile(str(self._last_output.parent)))
+        if self._output_directory is not None:
+            QDesktopServices.openUrl(QUrl.fromLocalFile(str(self._output_directory)))
+
+    def dragEnterEvent(self, event: QDragEnterEvent) -> None:
+        if event.mimeData().hasUrls() and any(
+            Path(url.toLocalFile()).suffix.lower() in _SUPPORTED for url in event.mimeData().urls()
+        ):
+            event.acceptProposedAction()
+
+    def dropEvent(self, event: QDropEvent) -> None:
+        self.set_sources(
+            Path(url.toLocalFile()) for url in event.mimeData().urls() if url.isLocalFile()
+        )
+        event.acceptProposedAction()
 
     def closeEvent(self, event: QCloseEvent) -> None:
         if self._thread is not None:
             self._close_when_finished = True
-            self._cancel()
+            self._cancel_all()
             event.ignore()
             return
+        self._processor.clear()
         event.accept()
+
+
+def _application_icon_path() -> Path:
+    executable_root = Path(sys.executable).resolve().parent
+    bundle_root = Path(getattr(sys, "_MEIPASS", executable_root))
+    packaged = bundle_root / "assets" / "caleo-transcriber.png"
+    if packaged.is_file():
+        return packaged
+    return Path(__file__).resolve().parents[3] / "assets" / "caleo-transcriber.png"

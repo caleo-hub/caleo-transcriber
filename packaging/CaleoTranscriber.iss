@@ -23,6 +23,7 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 MinVersion=10.0.19045
 UninstallDisplayIcon={app}\CaleoTranscriber.exe
+SetupIconFile={#SourcePath}\..\assets\caleo-transcriber.ico
 OutputDir={#OutputDir}
 OutputBaseFilename=CaleoTranscriber-Setup-{#AppVersion}-x64
 Compression=lzma2/max

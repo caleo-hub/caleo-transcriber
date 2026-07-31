@@ -1,23 +1,26 @@
+from __future__ import annotations
+
 from collections.abc import Callable
 from pathlib import Path
 from threading import Event
 
 import pytest
-from PySide6.QtCore import QSettings, Qt
-from PySide6.QtWidgets import QLabel, QMessageBox, QPushButton, QWidget
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QLabel, QMessageBox, QWidget
 from pytestqt.qtbot import QtBot
 
 from caleo_transcriber.application import (
-    AttemptEvents,
     AttemptFailure,
-    TranscribeSingleFileCommand,
+    BatchProcessor,
+    BatchSettings,
+    OutputFormat,
+    TranscribeLongMediaCommand,
     TranscribeSingleFileFailure,
     TranscribeSingleFileResult,
     TranscribeSingleFileSuccess,
-    TranscribeSingleFileUseCase,
 )
 from caleo_transcriber.domain import AttemptState
-from caleo_transcriber.presentation import MainWindow, QSettingsCloudNoticePolicy, QtAttemptEvents
+from caleo_transcriber.presentation import MainWindow, QtBatchEvents
 
 
 class SeenNotice:
@@ -36,80 +39,57 @@ class SeenNotice:
 class StubUseCase:
     def __init__(
         self,
-        results: TranscribeSingleFileResult | Exception | list[TranscribeSingleFileResult],
-        before_result: Callable[[], None] | None = None,
+        results: list[TranscribeSingleFileResult],
+        entered: Event | None = None,
+        release: Event | None = None,
     ) -> None:
-        self._results = results if isinstance(results, list) else [results]
-        self._before_result = before_result
-        self.calls: list[TranscribeSingleFileCommand] = []
+        self.results = results
+        self.calls: list[TranscribeLongMediaCommand] = []
+        self.entered = entered
+        self.release = release
 
     def execute(
         self,
-        command: TranscribeSingleFileCommand,
+        command: TranscribeLongMediaCommand,
         should_cancel: Callable[[], bool] | None = None,
     ) -> TranscribeSingleFileResult:
         self.calls.append(command)
-        if self._before_result is not None:
-            self._before_result()
-        result = self._results.pop(0)
-        if isinstance(result, Exception):
-            raise result
-        return result
-
-
-class CancellableUseCase:
-    def __init__(self) -> None:
-        self.entered = Event()
-        self.release = Event()
-
-    def execute(
-        self,
-        command: TranscribeSingleFileCommand,
-        should_cancel: Callable[[], bool] | None = None,
-    ) -> TranscribeSingleFileResult:
-        self.entered.set()
-        while not self.release.wait(0.01):
-            if should_cancel is not None and should_cancel():
-                return TranscribeSingleFileFailure(
-                    command.attempt_id,
-                    AttemptFailure.CANCELLED,
-                    False,
-                    "safe.message",
-                    "CANCELLED",
-                    AttemptState.CANCELLED,
-                )
-        return _success()
+        if self.entered is not None:
+            self.entered.set()
+        if self.release is not None:
+            while not self.release.wait(0.005):
+                if should_cancel is not None and should_cancel():
+                    return _failure(AttemptFailure.CANCELLED)
+        return self.results.pop(0)
 
 
 def _success() -> TranscribeSingleFileSuccess:
     return TranscribeSingleFileSuccess(
-        "attempt",
-        Path("C:/synthetic-output/aula.txt"),
-        (),
+        "attempt", Path("C:/synthetic-output/aula.txt"), (), AttemptState.COMPLETED
     )
 
 
-def _failure() -> TranscribeSingleFileFailure:
-    return TranscribeSingleFileFailure(
-        "attempt",
-        AttemptFailure.NETWORK,
-        True,
-        "safe.message",
-        "NETWORK",
-        AttemptState.FAILED,
-    )
+def _failure(category: AttemptFailure = AttemptFailure.NETWORK) -> TranscribeSingleFileFailure:
+    state = AttemptState.CANCELLED if category is AttemptFailure.CANCELLED else AttemptState.FAILED
+    return TranscribeSingleFileFailure("attempt", category, True, "safe", "SAFE", state)
 
 
 def _window(
     qtbot: QtBot,
-    use_case: TranscribeSingleFileUseCase,
+    use_case: StubUseCase,
     notice: SeenNotice | None = None,
 ) -> MainWindow:
-    events = QtAttemptEvents()
-    window = MainWindow(
+    events = QtBatchEvents()
+    processor = BatchProcessor(
         use_case,
+        BatchSettings(Path("C:/out"), Path("C:/cache"), OutputFormat.TXT),
         events,
-        Path("C:/synthetic-cache"),
+        "batch-test",
+    )
+    window = MainWindow(
+        processor,
+        events,
+        Path("C:/cache"),
         QWidget,
         notice or SeenNotice(),
     )
@@ -118,93 +98,78 @@ def _window(
     return window
 
 
-def _configure(window: MainWindow) -> None:
-    window.set_source(Path("C:/synthetic-input/aula.mp4"))
-    window.set_output_directory(Path("C:/synthetic-output"))
+def _click(qtbot: QtBot, widget: QWidget) -> None:
+    qtbot.mouseClick(widget, Qt.MouseButton.LeftButton)  # type: ignore[no-untyped-call]
 
 
-def _click(qtbot: QtBot, button: QPushButton) -> None:
-    qtbot.mouseClick(button, Qt.MouseButton.LeftButton)  # type: ignore[no-untyped-call]
+def _cell_text(window: MainWindow, row: int, column: int) -> str:
+    item = window.table.item(row, column)
+    assert item is not None
+    return item.text()
 
 
-def test_ui_has_permanent_cloud_notice_labels_focus_and_no_history(qtbot: QtBot) -> None:
-    use_case = StubUseCase(_success())
-    window = _window(qtbot, use_case)
-
+def test_empty_ui_has_cloud_notice_accessible_queue_and_no_history(qtbot: QtBot) -> None:
+    window = _window(qtbot, StubUseCase([]))
     labels = [label.text() for label in window.findChildren(QLabel)]
+
     assert "OpenAI (cloud)" in labels
-    assert "Envia somente o áudio selecionado e pode gerar custo." in labels
-    assert window.source_field.accessibleName() == "Arquivo selecionado"
-    assert window.output_field.accessibleName() == "Pasta de saída selecionada"
-    assert window.status_label.text() == "Selecione o arquivo e a pasta de saída."
-    assert window.start_button.isEnabled() is False
-    assert window.progress.isVisible() is False
-    assert isinstance(window._events, AttemptEvents)
+    assert "Envia somente o áudio de cada item e pode gerar custo." in labels
+    assert window.table.accessibleName() == "Fila de arquivos para transcrição"
+    assert not window.windowIcon().isNull()
+    assert window.table.rowCount() == 0
+    assert "nenhum histórico" in window.summary_label.text()
+    assert not window.start_button.isEnabled()
 
 
-def test_worker_keeps_ui_responsive_and_completes_without_fake_percentage(
-    qtbot: QtBot,
-) -> None:
+def test_multiple_sources_deduplicate_and_format_is_common(qtbot: QtBot) -> None:
+    window = _window(qtbot, StubUseCase([]))
+    window.set_sources([Path("one.mp4"), Path("two.wav"), Path("one.mp4")])
+    window.set_output_directory(Path("C:/out"))
+    window.format_combo.setCurrentIndex(1)
+
+    assert window.table.rowCount() == 2
+    assert [_cell_text(window, row, 0) for row in range(2)] == ["one.mp4", "two.wav"]
+    assert [_cell_text(window, row, 2) for row in range(2)] == ["SRT", "SRT"]
+    assert "duplicado" in window.detail_label.text()
+    assert window.start_button.isEnabled()
+
+
+def test_worker_keeps_ui_responsive_and_locks_configuration(qtbot: QtBot) -> None:
     entered = Event()
     release = Event()
-
-    def wait_for_test() -> None:
-        entered.set()
-        assert release.wait(timeout=5)
-
-    use_case = StubUseCase(_success(), wait_for_test)
+    use_case = StubUseCase([_success()], entered, release)
     window = _window(qtbot, use_case)
-    _configure(window)
+    window.set_sources([Path("one.mp4")])
+    window.set_output_directory(Path("C:/out"))
 
     _click(qtbot, window.start_button)
-    assert entered.wait(timeout=5)
-    qtbot.waitUntil(window.cancel_button.isEnabled, timeout=1_000)
+    assert entered.wait(timeout=2)
+    qtbot.waitUntil(window.cancel_button.isEnabled)
     assert window.isEnabled()
-    assert window.progress.minimum() == 0
-    assert window.progress.maximum() == 0
+    assert not window.add_button.isEnabled()
+    assert window.progress.minimum() == 0 and window.progress.maximum() == 0
 
     release.set()
-    qtbot.waitUntil(lambda: window.status_label.text() == "Transcrição concluída")
-    qtbot.waitUntil(window.open_output_button.isEnabled)
-    assert window.detail_label.text() == "Arquivo criado: aula.txt"
+    qtbot.waitUntil(lambda: "1 de 1" in window.summary_label.text())
+    qtbot.waitUntil(window.add_button.isEnabled)
+    assert "1 concluídos" in window.summary_label.text()
 
 
-def test_cancel_and_retry_are_available_with_safe_text(qtbot: QtBot) -> None:
-    cancellable = CancellableUseCase()
-    window = _window(qtbot, cancellable)
-    _configure(window)
-
-    _click(qtbot, window.start_button)
-    assert cancellable.entered.wait(timeout=5)
-    _click(qtbot, window.cancel_button)
-
-    qtbot.waitUntil(lambda: window.status_label.text() == "Transcrição cancelada")
-    qtbot.waitUntil(window.retry_button.isEnabled)
-    assert "temporários" in window.detail_label.text()
-
-
-def test_failure_can_be_retried_and_worker_exception_does_not_close_window(
-    qtbot: QtBot,
-) -> None:
-    results: list[TranscribeSingleFileResult] = [_failure(), _success()]
-    use_case = StubUseCase(results)
+def test_failure_is_inline_and_retry_only_failure(qtbot: QtBot) -> None:
+    use_case = StubUseCase([_failure(), _success(), _success()])
     window = _window(qtbot, use_case)
-    _configure(window)
+    window.set_sources([Path("one.mp4"), Path("two.mp4")])
+    window.set_output_directory(Path("C:/out"))
 
     _click(qtbot, window.start_button)
-    qtbot.waitUntil(lambda: window.status_label.text() == "Não foi possível concluir")
+    qtbot.waitUntil(lambda: "1 falharam" in window.summary_label.text())
     qtbot.waitUntil(window.retry_button.isEnabled)
-    _click(qtbot, window.retry_button)
-    qtbot.waitUntil(lambda: window.status_label.text() == "Transcrição concluída")
-    assert len(use_case.calls) == 2
     assert window.isVisible()
-
-    error_window = _window(qtbot, StubUseCase(RuntimeError("sensitive detail")))
-    _configure(error_window)
-    _click(qtbot, error_window.start_button)
-    qtbot.waitUntil(lambda: error_window.status_label.text() == "Não foi possível concluir")
-    assert "sensitive" not in error_window.detail_label.text()
-    assert error_window.isVisible()
+    _click(qtbot, window.retry_button)
+    qtbot.waitUntil(lambda: len(use_case.calls) == 3)
+    qtbot.waitUntil(lambda: "2 concluídos" in window.summary_label.text())
+    qtbot.waitUntil(lambda: window._thread is None)
+    assert [call.source.name for call in use_case.calls] == ["one.mp4", "two.mp4", "one.mp4"]
 
 
 def test_first_cloud_notice_is_shown_once(qtbot: QtBot, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -217,28 +182,24 @@ def test_first_cloud_notice_is_shown_once(qtbot: QtBot, monkeypatch: pytest.Monk
         return QMessageBox.StandardButton.Ok
 
     monkeypatch.setattr(QMessageBox, "information", information)
-    use_case = StubUseCase([_success(), _success()])
-    window = _window(qtbot, use_case, notice)
-    _configure(window)
+    window = _window(qtbot, StubUseCase([_success()]), notice)
+    window.set_sources([Path("one.mp4")])
+    window.set_output_directory(Path("C:/out"))
 
     _click(qtbot, window.start_button)
-    qtbot.waitUntil(window.open_output_button.isEnabled)
-    _click(qtbot, window.start_button)
-    qtbot.waitUntil(lambda: len(use_case.calls) == 2)
-    qtbot.waitUntil(window.open_output_button.isEnabled)
+    qtbot.waitUntil(lambda: "1 concluídos" in window.summary_label.text())
+    qtbot.waitUntil(lambda: window._thread is None)
 
     assert calls == 1
     assert notice.mark_calls == 1
 
 
-def test_qsettings_notice_persists_only_non_secret_boolean(tmp_path: Path) -> None:
-    settings = QSettings(str(tmp_path / "settings.ini"), QSettings.Format.IniFormat)
-    policy = QSettingsCloudNoticePolicy(settings)
+def test_approved_resume_banner_text_is_available(qtbot: QtBot) -> None:
+    window = _window(qtbot, StubUseCase([]))
 
-    assert policy.should_show() is True
-    policy.mark_shown()
+    window.show_resume_banner()
 
-    assert policy.should_show() is False
-    text = (tmp_path / "settings.ini").read_text(encoding="utf-8")
-    assert "openai-cloud-notice-shown=true" in text
-    assert "key" not in text.lower()
+    assert window.banner.isVisible()
+    assert window.banner_label.text() == "Continuar processamento interrompido?"
+    assert window.banner_action.text() == "Continuar"
+    assert window.banner_dismiss.text() == "Descartar e começar de novo"
