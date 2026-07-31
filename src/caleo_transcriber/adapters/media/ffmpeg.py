@@ -1,6 +1,7 @@
 """Probe e extração segura com os executáveis FFmpeg aprovados."""
 
 import json
+import re
 import shutil
 import subprocess
 import tempfile
@@ -13,8 +14,7 @@ from typing import Self
 
 from caleo_transcriber.application.media import MediaError, MediaFailure, MediaInfo, PreparedAudio
 
-MAX_DURATION_SECONDS = 30 * 60
-MAX_PROVIDER_BYTES = 25_000_000
+MAX_PROVIDER_BYTES = 24_000_000
 SUPPORTED_FORMATS = {
     ".mp3": {"mp3"},
     ".wav": {"wav"},
@@ -86,8 +86,6 @@ class FfmpegMediaProbe:
             raise MediaError(MediaFailure.NO_AUDIO)
         if duration <= 0:
             raise MediaError(MediaFailure.INVALID_DURATION)
-        if duration > MAX_DURATION_SECONDS:
-            raise MediaError(MediaFailure.DURATION_LIMIT)
         return MediaInfo(
             duration_seconds=duration,
             format_name=format_name,
@@ -115,7 +113,81 @@ class FfmpegAudioExtractor:
             workspace,
             should_cancel or (lambda: False),
             self._timeout_seconds,
+            start_ms=0,
+            end_ms=None,
+            enforce_provider_limit=False,
         )
+
+
+class FfmpegChunkAudioExtractor:
+    """Extrai um intervalo MP3 e recusa qualquer arquivo fora da margem interna."""
+
+    def __init__(
+        self,
+        tools: FfmpegTools,
+        timeout_seconds: float = 30 * 60,
+        max_bytes: int = MAX_PROVIDER_BYTES,
+    ) -> None:
+        self._tools = tools
+        self._timeout_seconds = timeout_seconds
+        self._max_bytes = max_bytes
+
+    def prepare_chunk(
+        self,
+        source: Path,
+        start_ms: int,
+        end_ms: int,
+        workspace: Path,
+        should_cancel: Callable[[], bool] | None = None,
+    ) -> "FfmpegPreparedAudioLease":
+        if start_ms < 0 or end_ms <= start_ms:
+            raise MediaError(MediaFailure.INVALID_DURATION)
+        return FfmpegPreparedAudioLease(
+            self._tools,
+            source,
+            MediaInfo((end_ms - start_ms) / 1000, "mp3", True, False),
+            workspace,
+            should_cancel or (lambda: False),
+            self._timeout_seconds,
+            start_ms=start_ms,
+            end_ms=end_ms,
+            enforce_provider_limit=True,
+            max_bytes=self._max_bytes,
+        )
+
+
+class FfmpegSilenceDetector:
+    """Localiza centros de pausas; o planner decide quais estão perto da fronteira."""
+
+    _START = re.compile(r"silence_start:\s*([0-9.]+)")
+    _END = re.compile(r"silence_end:\s*([0-9.]+)")
+
+    def __init__(self, tools: FfmpegTools, timeout_seconds: float = 30 * 60) -> None:
+        self._tools = tools
+        self._timeout_seconds = timeout_seconds
+
+    def detect(
+        self,
+        source: Path,
+        should_cancel: Callable[[], bool] | None = None,
+    ) -> tuple[int, ...]:
+        args = [
+            str(self._tools.ffmpeg),
+            "-hide_banner",
+            "-nostdin",
+            "-i",
+            str(source.resolve()),
+            "-af",
+            "silencedetect=noise=-35dB:d=0.4",
+            "-f",
+            "null",
+            "NUL",
+        ]
+        stderr = _run_process(args, should_cancel or (lambda: False), self._timeout_seconds)
+        starts = [float(match.group(1)) for match in self._START.finditer(stderr)]
+        ends = [float(match.group(1)) for match in self._END.finditer(stderr)]
+        points = [round((start + end) * 500) for start, end in zip(starts, ends, strict=False)]
+        return tuple(sorted(set(point for point in points if point > 0)))
 
 
 class FfmpegPreparedAudioLease:
@@ -127,6 +199,11 @@ class FfmpegPreparedAudioLease:
         workspace: Path,
         should_cancel: Callable[[], bool],
         timeout_seconds: float,
+        *,
+        start_ms: int,
+        end_ms: int | None,
+        enforce_provider_limit: bool,
+        max_bytes: int = MAX_PROVIDER_BYTES,
     ) -> None:
         self._tools = tools
         self._source = source
@@ -134,6 +211,10 @@ class FfmpegPreparedAudioLease:
         self._workspace = workspace
         self._should_cancel = should_cancel
         self._timeout_seconds = timeout_seconds
+        self._start_ms = start_ms
+        self._end_ms = end_ms
+        self._enforce_provider_limit = enforce_provider_limit
+        self._max_bytes = max_bytes
         self._temporary_directory: Path | None = None
         self._audio: PreparedAudio | None = None
 
@@ -159,23 +240,31 @@ class FfmpegPreparedAudioLease:
             "-y",
             "-i",
             str(self._source.resolve()),
-            "-map",
-            "0:a:0",
-            "-vn",
-            "-ac",
-            "1",
-            "-codec:a",
-            "libmp3lame",
-            "-b:a",
-            "64k",
-            str(output),
         ]
+        if self._start_ms:
+            args.extend(["-ss", _seconds(self._start_ms)])
+        if self._end_ms is not None:
+            args.extend(["-t", _seconds(self._end_ms - self._start_ms)])
+        args.extend(
+            [
+                "-map",
+                "0:a:0",
+                "-vn",
+                "-ac",
+                "1",
+                "-codec:a",
+                "libmp3lame",
+                "-b:a",
+                "64k",
+                str(output),
+            ]
+        )
         try:
             self._run(args)
             size = output.stat().st_size
             if size <= 0:
                 raise MediaError(MediaFailure.PROCESSING)
-            if size >= MAX_PROVIDER_BYTES:
+            if self._enforce_provider_limit and size >= self._max_bytes:
                 raise MediaError(MediaFailure.PROVIDER_LIMIT)
             self._audio = PreparedAudio(output, self._info.duration_seconds, size)
             return self
@@ -192,50 +281,57 @@ class FfmpegPreparedAudioLease:
         self._cleanup()
 
     def _run(self, args: list[str]) -> None:
-        creation_flags = (
-            subprocess.CREATE_NO_WINDOW if hasattr(subprocess, "CREATE_NO_WINDOW") else 0
-        )
-        try:
-            process = subprocess.Popen(  # noqa: S603 - lista de argumentos, sem shell
-                args,
-                stdin=subprocess.DEVNULL,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                shell=False,
-                creationflags=creation_flags,
-            )
-        except OSError as error:
-            raise MediaError(MediaFailure.PROCESSING) from error
-
-        deadline = time.monotonic() + self._timeout_seconds
-        while True:
-            if self._should_cancel():
-                self._stop(process)
-                raise MediaError(MediaFailure.CANCELLED)
-            remaining = deadline - time.monotonic()
-            if remaining <= 0:
-                self._stop(process)
-                raise MediaError(MediaFailure.TIMEOUT)
-            try:
-                _, _ = process.communicate(timeout=min(0.1, remaining))
-                break
-            except subprocess.TimeoutExpired:
-                continue
-        if process.returncode != 0:
-            raise MediaError(MediaFailure.PROCESSING)
-
-    @staticmethod
-    def _stop(process: subprocess.Popen[str]) -> None:
-        process.terminate()
-        try:
-            process.communicate(timeout=2)
-        except subprocess.TimeoutExpired:
-            process.kill()
-            process.communicate()
+        _run_process(args, self._should_cancel, self._timeout_seconds)
 
     def _cleanup(self) -> None:
         self._audio = None
         if self._temporary_directory is not None:
             shutil.rmtree(self._temporary_directory, ignore_errors=True)
             self._temporary_directory = None
+
+
+def _seconds(milliseconds: int) -> str:
+    return f"{milliseconds / 1000:.3f}"
+
+
+def _run_process(args: list[str], should_cancel: Callable[[], bool], timeout_seconds: float) -> str:
+    creation_flags = subprocess.CREATE_NO_WINDOW if hasattr(subprocess, "CREATE_NO_WINDOW") else 0
+    try:
+        process = subprocess.Popen(  # noqa: S603 - lista de argumentos, sem shell
+            args,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            shell=False,
+            creationflags=creation_flags,
+        )
+    except OSError as error:
+        raise MediaError(MediaFailure.PROCESSING) from error
+
+    deadline = time.monotonic() + timeout_seconds
+    while True:
+        if should_cancel():
+            _stop_process(process)
+            raise MediaError(MediaFailure.CANCELLED)
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            _stop_process(process)
+            raise MediaError(MediaFailure.TIMEOUT)
+        try:
+            _, stderr = process.communicate(timeout=min(0.1, remaining))
+            break
+        except subprocess.TimeoutExpired:
+            continue
+    if process.returncode != 0:
+        raise MediaError(MediaFailure.PROCESSING)
+    return stderr
+
+
+def _stop_process(process: subprocess.Popen[str]) -> None:
+    process.terminate()
+    try:
+        process.communicate(timeout=2)
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.communicate()

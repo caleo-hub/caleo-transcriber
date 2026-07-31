@@ -6,15 +6,16 @@ Executar o gauntlet integrado, evidência visual e smoke do pacote com mídia si
 
 ## Contexto e fontes
 
-TASK-012–018; FEAT-002/003; gates aprovados; release runbook; TASK-010.
+TASK-012–018 e TASK-020; FEAT-002/003; gates aprovados; release runbook; TASK-010.
 
 ## Escopo de arquivos
 
-Aceitação/E2E, fixtures geradas, docs de evidência e versão de candidato. GitHub Release proibida.
+Aceitação/E2E, fixtures geradas, docs de evidência, candidato e GitHub prerelease beta.
 
 ## Restrições e autonomia
 
-Sem chave real, mídia pessoal, instalação ou publicação sem aprovação específica.
+Somente mídia sintética. O owner autorizou até cinco chamadas reais de teste e a publicação beta;
+instalação local do candidato continua fora do escopo sem aprovação separada.
 
 ## Critérios de aceitação
 

@@ -2,19 +2,18 @@
 
 ## Fase atual
 
-Fase 10 — especificação do segundo incremento (TASK-011).
+Fase 10 — fechamento do segundo incremento e beta de teste (TASK-019/TASK-020).
 
 ## Resultado esperado desta fase
 
-Fixar specs, arquitetura, riscos, contratos, tarefas e oráculos para mídia longa e lote antes de
-alterar o comportamento do aplicativo.
+Validar mídia longa, fila, TXT/SRT e identidade visual; produzir e publicar a primeira beta x64.
 
 ## Estado do gate
 
-**EM ANDAMENTO.** TASK-001–010 foram implementadas e mescladas até a PR #14. A TASK-010 passou em
-`verify`, gitleaks e workflow de pacote, produzindo candidato efêmero sem publicar Release. A
-TASK-011 propõe FEAT-002/003, ADR-0006/0007, contratos, threat model, tarefas e testes-oráculo. Em
-2026-07-31, o owner aprovou `GATE-SEC-002` e `GATE-UX-002`, liberando TASK-012 em diante.
+**EM ANDAMENTO.** TASK-001–011 foram mescladas. TASK-012–018 e TASK-020 foram implementadas com
+`verify.cmd` verde em 173 testes, gates SEC/UX aprovados e evidências visuais registradas. O owner
+autorizou até cinco chamadas OpenAI com mídia sintética e a publicação de uma GitHub prerelease beta.
+TASK-019 prepara o candidato 0.2.0 e valida os gates finais sem instalar o programa localmente.
 
 ## Artefatos canônicos
 
@@ -183,8 +182,13 @@ TASK-011 propõe FEAT-002/003, ADR-0006/0007, contratos, threat model, tarefas e
 - A PR #14 mesclou a TASK-010 em 2026-07-31 após `verify`, gitleaks e `package` verdes. O candidato
   remoto teve SHA-256 `8f26a13ae824cf361306422e2caf62e48039110bb77633bdcddb9066d3f1ed9b`
   e smoke de 2,816 segundos no runner; permaneceu efêmero, não instalado e não publicado.
-- O segundo incremento foi decomposto em TASK-011–019. Limites, DPAPI/retention, upload ambíguo,
-  concorrência e experiência da fila foram explicitados em gates ainda não aprovados.
+- Os gates `GATE-SEC-002` e `GATE-UX-002` foram aprovados; TASK-012–018 implementaram planner,
+  checkpoint DPAPI, chunks FFmpeg, TXT/SRT, orquestração longa, fila FIFO e UI responsiva.
+- TASK-020 adicionou ícone original PNG/ICO à janela, executável, atalhos e instalador.
+- A chave de teste foi removida do arquivo rastreado e permanece somente no Windows Credential
+  Manager; o diff de `.env.example` é vazio.
+- O smoke OpenAI autorizado consumiu 1 de até 5 chamadas usando voz sintética: sucesso com 5.740 ms
+  e um segmento; nenhum texto/áudio foi registrado e os temporários foram removidos.
 
 ## Fatos observados
 
@@ -208,10 +212,9 @@ TASK-011 propõe FEAT-002/003, ADR-0006/0007, contratos, threat model, tarefas e
 
 ## Decisões humanas pendentes
 
-Antes da primeira publicação, o owner ainda deve decidir sobre Authenticode, autorizar se desejar
-a chamada smoke real da OpenAI, aprovar a instalação/desinstalação do candidato e aprovar a GitHub
-Release. O incremento de mídia longa e lote exige gates próprios de segurança e UX antes da
-implementação correspondente avançar.
+Authenticode permanece pendente e será declarado como risco conhecido da beta. Instalação e
+desinstalação do candidato não foram autorizadas. A chamada smoke sintética e a GitHub prerelease
+foram autorizadas pelo owner para este fechamento.
 
 ## Riscos e bloqueios
 
@@ -228,5 +231,5 @@ implementação correspondente avançar.
 
 ## Próxima ação recomendada
 
-Mesclar a TASK-011 com checks verdes e iniciar TASK-012 pela implementação orientada pelos vetores
-versionados, mantendo uma tarefa revisável por PR.
+Executar smoke OpenAI sintético, auditoria, build/preflight 0.2.0, integrar o commit validado e
+publicar `v0.2.0-beta.1` como prerelease com os mesmos artefatos e checksum.

@@ -1,11 +1,13 @@
 # Caleo Transcriber
 
-Aplicativo desktop pessoal para Windows 10 x64 que extrai áudio de MP4/MP3/WAV, transcreve com a API OpenAI `whisper-1` e grava TXT. Whisper local, SRT, segmentos, lotes e mídia longa entram em incrementos posteriores.
+Aplicativo desktop pessoal para Windows 10 x64 que extrai somente o áudio de MP4/MP3/WAV,
+transcreve com a API OpenAI `whisper-1` e grava TXT ou SRT. Suporta fila de vários arquivos e divide
+mídia longa automaticamente, sem configuração manual de chunks.
 
 ## Estado
 
-O primeiro fluxo funcional está implementado e a versão 0.1.0 possui um candidato instalável não
-publicado. Instalação em Windows 10 limpo, assinatura e publicação continuam gates separados.
+A versão 0.2.0 é a primeira beta de teste. Whisper local e seleção de trecho permanecem para um
+incremento posterior. O instalador ainda não possui assinatura Authenticode.
 
 ## Setup no Windows
 
@@ -36,14 +38,14 @@ O preflight de um futuro candidato de release, sem publicá-lo, usa:
 O build local do candidato, também sem publicar ou instalar, usa:
 
 ```powershell
-.\build-package.cmd -Version 0.1.0
+.\build-package.cmd -Version 0.2.0
 ```
 
 Ele exige a versão aprovada do Inno Setup e baixa o build FFmpeg fixado e verificado pelo projeto.
 
 ## Fontes de verdade
 
-- comportamento: `specs/features/FEAT-001-transcribe-single-file.md`;
+- comportamento: `specs/features/FEAT-001-transcribe-single-file.md` até `FEAT-003`;
 - princípios: `specs/constitution.md`;
 - arquitetura: `docs/architecture/` e `docs/adr/`;
 - segurança: `docs/security/threat-model.md`;

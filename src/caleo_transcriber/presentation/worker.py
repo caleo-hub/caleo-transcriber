@@ -5,6 +5,7 @@ from threading import Event
 from PySide6.QtCore import QObject, Signal, Slot
 
 from caleo_transcriber.application import (
+    BatchProcessor,
     TranscribeSingleFileCommand,
     TranscribeSingleFileUseCase,
     TranscriptionAlreadyRunningError,
@@ -50,5 +51,27 @@ class TranscriptionWorker(QObject):
             )
         else:
             self.result_ready.emit(result)
+        finally:
+            self.finished.emit()
+
+
+class BatchWorker(QObject):
+    summary_ready = Signal(object)
+    safe_error = Signal(str)
+    finished = Signal()
+
+    def __init__(self, processor: BatchProcessor) -> None:
+        super().__init__()
+        self._processor = processor
+
+    @Slot()
+    def run(self) -> None:
+        try:
+            self.summary_ready.emit(self._processor.run())
+        except Exception:
+            self.safe_error.emit(
+                "A fila foi interrompida por uma falha interna. "
+                "Os itens concluídos foram preservados."
+            )
         finally:
             self.finished.emit()

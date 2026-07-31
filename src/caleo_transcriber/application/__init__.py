@@ -6,6 +6,20 @@ from caleo_transcriber.application.api_key_settings import (
     ApiKeySettings,
     LocalKeyValidation,
 )
+from caleo_transcriber.application.batch import (
+    BatchAddResult,
+    BatchEvents,
+    BatchProcessor,
+    BatchQueueEvent,
+    BatchSettings,
+    LongMediaUseCase,
+)
+from caleo_transcriber.application.checkpoints import (
+    CheckpointChunk,
+    CheckpointStore,
+    ChunkCheckpointState,
+    LongMediaCheckpoint,
+)
 from caleo_transcriber.application.credentials import (
     CredentialStore,
     CredentialStoreError,
@@ -13,6 +27,7 @@ from caleo_transcriber.application.credentials import (
     SecretValue,
 )
 from caleo_transcriber.application.media import (
+    AudioChunkExtractor,
     AudioExtractor,
     MediaError,
     MediaFailure,
@@ -20,11 +35,18 @@ from caleo_transcriber.application.media import (
     MediaProbe,
     PreparedAudio,
     PreparedAudioLease,
+    SilenceDetector,
 )
 from caleo_transcriber.application.output import (
+    OutputFormat,
     OutputWriteCancelled,
     OutputWriteError,
+    TranscriptOutputWriter,
     TxtOutputWriter,
+)
+from caleo_transcriber.application.transcribe_long_media import (
+    TranscribeLongMedia,
+    TranscribeLongMediaCommand,
 )
 from caleo_transcriber.application.transcribe_single_file import (
     AttemptEvent,
@@ -49,6 +71,16 @@ from caleo_transcriber.application.transcription import (
 )
 
 __all__ = [
+    "BatchAddResult",
+    "BatchEvents",
+    "BatchProcessor",
+    "BatchQueueEvent",
+    "BatchSettings",
+    "LongMediaUseCase",
+    "CheckpointChunk",
+    "CheckpointStore",
+    "ChunkCheckpointState",
+    "LongMediaCheckpoint",
     "CredentialStore",
     "CredentialStoreError",
     "CredentialStoreFailure",
@@ -59,14 +91,18 @@ __all__ = [
     "OPENAI_CREDENTIAL_SERVICE",
     "OutputWriteCancelled",
     "OutputWriteError",
+    "OutputFormat",
+    "TranscriptOutputWriter",
     "TxtOutputWriter",
     "AudioExtractor",
+    "AudioChunkExtractor",
     "MediaError",
     "MediaFailure",
     "MediaInfo",
     "MediaProbe",
     "PreparedAudio",
     "PreparedAudioLease",
+    "SilenceDetector",
     "ProviderFailure",
     "TranscriptionFailure",
     "TranscriptionProvider",
@@ -84,4 +120,6 @@ __all__ = [
     "TranscribeSingleFileSuccess",
     "TranscribeSingleFileUseCase",
     "TranscriptionAlreadyRunningError",
+    "TranscribeLongMedia",
+    "TranscribeLongMediaCommand",
 ]
