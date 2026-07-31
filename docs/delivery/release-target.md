@@ -3,7 +3,7 @@
 - **Decisão do owner:** 2026-07-31
 - **Canal:** GitHub Releases de `caleo-hub/caleo-transcriber`
 - **Plataforma:** Windows 10/11 x64
-- **Estado atual:** `v0.2.0-beta.1` publicada; patch `v0.2.1-beta.1` autorizado pelo owner
+- **Estado atual:** `v0.2.1-beta.1` publicada e validada após download; `v0.2.0-beta.1` preservada
 
 ## Artefato principal
 

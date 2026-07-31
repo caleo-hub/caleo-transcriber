@@ -10,9 +10,8 @@ Publicar `v0.2.1-beta.1` com contraste corrigido e falhas compreensíveis e acio
 
 ## Estado do gate
 
-**EM ANDAMENTO.** TASK-001–020 foram mescladas e `v0.2.0-beta.1` foi publicada. A TASK-021 corrige
-contraste e diagnóstico por item; smoke sintético confirmou chave recusada (401). O owner autorizou
-a correção do falso positivo de CI e a publicação do patch `v0.2.1-beta.1` pela TASK-022.
+**CONCLUÍDO.** TASK-021/022 foram mescladas na PR #17. A prerelease `v0.2.1-beta.1` foi publicada
+com contraste corrigido, diagnóstico por item e pacote Windows x64 validado após download.
 
 ## Artefatos canônicos
 
@@ -194,6 +193,9 @@ a correção do falso positivo de CI e a publicação do patch `v0.2.1-beta.1` p
 - Os smokes OpenAI autorizados consumiram 2 de até 5 chamadas com voz sintética. O primeiro passou
   em 5.740 ms; o segundo retornou `OPENAI_401`, confirmando que a chave atual foi recusada. Nenhum
   texto/áudio foi registrado e os temporários foram enviados à Lixeira.
+- A PR #17 mesclou TASK-021/022 no commit `1b01f3d`; CI, gitleaks e pacote remoto passaram. A
+  prerelease `v0.2.1-beta.1` foi publicada com seis assets e o instalador baixado novamente passou
+  pelo preflight com SHA-256 `c079f478cf5833d6c7ac589f16c789aaf3ed80c38035289a6c89e6ec095f99a6`.
 
 ## Fatos observados
 
@@ -217,9 +219,9 @@ a correção do falso positivo de CI e a publicação do patch `v0.2.1-beta.1` p
 
 ## Decisões humanas pendentes
 
-Authenticode permanece pendente e será declarado como risco conhecido da beta. Instalação e
+Authenticode permanece pendente e está declarado como risco conhecido da beta. Instalação e
 desinstalação do candidato não foram autorizadas. Restam três das cinco chamadas sintéticas
-autorizadas. Uma nova release ainda exige aprovação do owner.
+autorizadas. A chave atual foi recusada e precisa ser substituída pela UI antes do uso cloud.
 
 ## Riscos e bloqueios
 
@@ -229,12 +231,12 @@ autorizadas. Uma nova release ainda exige aprovação do owner.
 - PySide6, PyInstaller, FFmpeg e Inno Setup tiveram origem, versão e licença registradas; qualquer
   atualização dessas dependências reabre a revisão de cadeia de suprimentos.
 - Chunking e paralelismo exigem contrato de contexto, overlap, recomposição, checkpoints e limites de recurso.
-- O candidato ainda não foi instalado nem validado em Windows 10 x64 limpo; publicar agora seria
-  prematuro.
+- O instalador publicado ainda não foi instalado nem validado em Windows 10 x64 limpo; este risco
+  residual está explícito por se tratar de uma beta pessoal.
 - O RTO completo de rollback instalado é desconhecido; apenas a retirada do artefato não publicado
   foi medida.
 
 ## Próxima ação recomendada
 
-Concluir TASK-022: validar CI/pacote, integrar o commit, gerar o candidato 0.2.1 a partir de `main`,
-publicar `v0.2.1-beta.1` e conferir o checksum do artefato baixado sem instalar localmente.
+Substituir a chave recusada pela UI e testar a beta em uma máquina Windows x64, mantendo
+`v0.2.0-beta.1` disponível para rollback.
