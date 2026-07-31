@@ -20,6 +20,14 @@ jobs:
       - name: Install
         shell: pwsh
         run: .\setup.cmd
+      - name: Cache approved FFmpeg build
+        uses: actions/cache@v4
+        with:
+          path: vendor/ffmpeg/bin
+          key: ffmpeg-089e4169e93b2b3f3acbfced3c0704d24276a225641bdda04d796d28b07a2a38
+      - name: Fetch and verify approved FFmpeg build
+        shell: pwsh
+        run: .\scripts\fetch-ffmpeg.ps1 -Extract
       - name: Verify
         shell: pwsh
         run: .\verify.cmd
