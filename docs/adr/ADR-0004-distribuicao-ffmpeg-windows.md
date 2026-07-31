@@ -1,6 +1,6 @@
 # ADR-0004 — Distribuição FFmpeg para Windows x64
 
-- **Status:** proposto; aguarda aprovação do owner
+- **Status:** aceito pelo owner em 2026-07-31
 - **Data da investigação:** 2026-07-31
 - **Decisor:** `caleo-hub`
 
@@ -58,7 +58,9 @@ Este registro é evidência de engenharia, não aconselhamento jurídico.
 Atualizações exigem nova tag imutável, novo hash, auditoria de configuração/licença e smoke de
 MP4/MP3/WAV. Rollback restaura a versão anterior fixada e não altera chave ou saídas do usuário.
 
-## Gate humano
+## Decisão humana
 
-Antes de extrair, executar, incorporar ou distribuir o binário, o owner deve aprovar
-explicitamente esta versão, a origem BtbN e a licença LGPL-3.0-or-later.
+Em 2026-07-31, o owner autorizou seguir esta recomendação: origem BtbN, versão fixada e licença
+LGPL-3.0-or-later. Após a aprovação, o ZIP foi extraído no cache ignorado e `ffmpeg -version` e
+`ffprobe -version` confirmaram versão, arquitetura x86_64, `--enable-version3`,
+`--enable-libmp3lame` e ausência de `--enable-gpl`.
