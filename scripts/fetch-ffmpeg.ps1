@@ -70,10 +70,14 @@ finally {
 
 if ($Extract) {
     $extractPath = Join-Path $resolvedDestination "ffmpeg-8.1.2-lgpl"
-    if (Test-Path -LiteralPath $extractPath) {
-        throw "FFMPEG_EXTRACT_TARGET_EXISTS"
+    if (-not (Test-Path -LiteralPath $extractPath)) {
+        Expand-Archive -LiteralPath $archivePath -DestinationPath $extractPath
     }
-    Expand-Archive -LiteralPath $archivePath -DestinationPath $extractPath
+    $ffmpegExe = @(Get-ChildItem -LiteralPath $extractPath -Recurse -Filter "ffmpeg.exe")
+    $ffprobeExe = @(Get-ChildItem -LiteralPath $extractPath -Recurse -Filter "ffprobe.exe")
+    if ($ffmpegExe.Count -ne 1 -or $ffprobeExe.Count -ne 1) {
+        throw "FFMPEG_EXTRACT_INVALID"
+    }
 }
 
 [pscustomobject]@{

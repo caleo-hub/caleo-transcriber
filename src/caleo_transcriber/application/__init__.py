@@ -12,6 +12,15 @@ from caleo_transcriber.application.credentials import (
     CredentialStoreFailure,
     SecretValue,
 )
+from caleo_transcriber.application.media import (
+    AudioExtractor,
+    MediaError,
+    MediaFailure,
+    MediaInfo,
+    MediaProbe,
+    PreparedAudio,
+    PreparedAudioLease,
+)
 from caleo_transcriber.application.output import (
     OutputWriteCancelled,
     OutputWriteError,
@@ -30,4 +39,11 @@ __all__ = [
     "OutputWriteCancelled",
     "OutputWriteError",
     "TxtOutputWriter",
+    "AudioExtractor",
+    "MediaError",
+    "MediaFailure",
+    "MediaInfo",
+    "MediaProbe",
+    "PreparedAudio",
+    "PreparedAudioLease",
 ]
