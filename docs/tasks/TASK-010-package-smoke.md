@@ -6,7 +6,8 @@ Produzir artefato PyInstaller `onedir` não publicado e provar que abre em ambie
 
 ## Contexto e fontes
 
-TASK-009; ADR-0002; `release-target.md`; THIRD_PARTY; CA-010/T-08.
+TASK-009; ADR-0002; `release-target.md`; `release-runbook.md`; `rollback-runbook.md`;
+`observability.md`; THIRD_PARTY; CA-010/T-08.
 
 ## Escopo de arquivos
 
@@ -18,7 +19,9 @@ Risco moderado. Pode criar artefato local/CI temporário. Publicação, FFmpeg n
 
 ## Critérios de aceitação
 
-Build determinístico; app abre; imports/Qt/keyring funcionam; pacote não contém chave/log/mídia; licenças presentes; checksum gerado; smoke em Windows runner e VM Windows 10 planejada.
+Build determinístico; app abre; imports/Qt/keyring funcionam; pacote não contém chave/log/mídia;
+licenças presentes; checksum gerado; `release-preflight.cmd` passa; smoke em Windows runner e
+VM Windows 10 planejada; rollback é ensaiado e cronometrado.
 
 ## Validação e evidência
 
@@ -27,4 +30,3 @@ Build determinístico; app abre; imports/Qt/keyring funcionam; pacote não cont�
 ## Rollback
 
 Excluir artefatos locais/CI e reverter scripts; nenhuma release pública existe.
-
