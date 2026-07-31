@@ -1,8 +1,8 @@
 # Visão — Caleo Transcriber
 
-**Status:** em revisão  
-**Owner:** `caleo-hub`  
-**Data:** 2026-07-31
+- **Status:** em revisão
+- **Owner:** `caleo-hub`
+- **Data:** 2026-07-31
 
 ## Situação atual
 

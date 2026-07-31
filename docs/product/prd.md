@@ -1,8 +1,8 @@
 # PRD — Transcrição local e OpenAI v0.1
 
-**Status:** em revisão  
-**Owner:** `caleo-hub`  
-**Data:** 2026-07-31
+- **Status:** em revisão
+- **Owner:** `caleo-hub`
+- **Data:** 2026-07-31
 
 ## Resumo executivo
 
