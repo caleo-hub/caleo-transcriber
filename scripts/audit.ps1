@@ -17,7 +17,7 @@ try {
     $env:PYTHONUTF8 = "1"
     $env:PYTHONIOENCODING = "utf-8"
     Invoke-Checked $python -m pip_audit
-    git grep -n -E "sk-[A-Za-z0-9_-]{20,}|Bearer[[:space:]]+[A-Za-z0-9._-]{20,}" -- . ":(exclude).env.example" ":(exclude)scripts/audit.ps1"
+    git grep -n -E "(^|[^A-Za-z0-9])sk-[A-Za-z0-9_-]{20,}|Bearer[[:space:]]+[A-Za-z0-9._-]{20,}" -- . ":(exclude).env.example" ":(exclude)scripts/audit.ps1"
     if ($LASTEXITCODE -eq 0) {
         throw "Padrão semelhante a secret encontrado no repositório."
     }

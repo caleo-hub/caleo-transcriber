@@ -53,6 +53,9 @@ def test_build_scripts_pin_tools_and_never_embed_a_secret_slot() -> None:
     assert "--onedir" not in text
     assert "OPENAI_API_KEY" not in text
     assert "[switch]$RealOpenAISmoke" in text
+    assert "[switch]$RealOpenAISmokeCredentialRejected" in text
     assert "run-once-with-synthetic-audio-owner-approved" in text
+    assert "attempted-with-synthetic-audio-credential-rejected" in text
+    assert "PACKAGE_OPENAI_SMOKE_STATE_CONFLICT" in text
     assert not re.search(r"shell\s*=\s*True", text)
     assert "Get-AuthenticodeSignature -LiteralPath $installerPath" not in text

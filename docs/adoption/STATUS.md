@@ -2,17 +2,17 @@
 
 ## Fase atual
 
-Manutenção da beta — contraste e diagnóstico de falhas (TASK-021).
+Patch beta — contraste e diagnóstico de falhas (TASK-021/TASK-022).
 
 ## Resultado esperado desta fase
 
-Corrigir o contraste sob tema escuro do Windows e tornar falhas por item compreensíveis e acionáveis.
+Publicar `v0.2.1-beta.1` com contraste corrigido e falhas compreensíveis e acionáveis por item.
 
 ## Estado do gate
 
-**EM ANDAMENTO.** TASK-001–020 foram mescladas e `v0.2.0-beta.1` foi publicada. O owner relatou texto
-ilegível sob tema escuro do Windows e uma falha sem causa visível ao processar um MP4 válido. A
-TASK-021 corrige contraste e diagnóstico por item; smoke sintético confirmou chave recusada (401).
+**EM ANDAMENTO.** TASK-001–020 foram mescladas e `v0.2.0-beta.1` foi publicada. A TASK-021 corrige
+contraste e diagnóstico por item; smoke sintético confirmou chave recusada (401). O owner autorizou
+a correção do falso positivo de CI e a publicação do patch `v0.2.1-beta.1` pela TASK-022.
 
 ## Artefatos canônicos
 
@@ -236,5 +236,5 @@ autorizadas. Uma nova release ainda exige aprovação do owner.
 
 ## Próxima ação recomendada
 
-Concluir TASK-021, registrar a evidência visual do diálogo, executar `verify.cmd`/`audit.cmd` e abrir
-uma PR. Uma nova beta exige autorização separada do owner.
+Concluir TASK-022: validar CI/pacote, integrar o commit, gerar o candidato 0.2.1 a partir de `main`,
+publicar `v0.2.1-beta.1` e conferir o checksum do artefato baixado sem instalar localmente.

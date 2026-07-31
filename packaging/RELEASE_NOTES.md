@@ -6,6 +6,9 @@ da margem de upload, com timestamps, recomposição e retomada segura.
 
 ## Novidades desta beta
 
+- contraste corrigido no diálogo, campos, tabela e cabeçalhos mesmo com tema escuro do Windows;
+- falhas mostram categoria, ação de recuperação e código seguro, inclusive chave OpenAI recusada;
+- o botão de chave agora informa corretamente que verifica apenas o formato local;
 - fila FIFO: um item ativo, falhas isoladas, cancelamento e repetição somente das falhas;
 - mídia longa por tamanho real, silêncio próximo à fronteira e overlap conservador;
 - checkpoint temporário protegido pelo DPAPI, com expiração em sete dias;
@@ -29,6 +32,6 @@ da margem de upload, com timestamps, recomposição e retomada segura.
 
 ## Integridade e rollback
 
-Confira `SHA256SUMS.txt` antes de instalar. Como esta é a primeira versão, rollback significa
-desinstalar o aplicativo e interromper sua distribuição; a desinstalação não remove a chave do
-Credential Manager nem arquivos TXT criados pela pessoa usuária.
+Confira `SHA256SUMS.txt` antes de instalar. O rollback recomendado é desinstalar esta versão e
+reinstalar `v0.2.0-beta.1`; a desinstalação não remove a chave do Credential Manager nem arquivos
+TXT/SRT criados pela pessoa usuária.
