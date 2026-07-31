@@ -11,6 +11,7 @@
 | Evitar arquitetura por acidente | [Fluxo completo](https://github.com/caleo-hub/engenharia-de-software-com-agentes-de-codigo/blob/main/capitulos/03-parte-iii-spec-driven-development-sem-teatro-documental/012-o-fluxo-completo.md) | nenhuma linguagem, UI, empacotador, endpoint ou mecanismo de credenciais escolhido na Fase 0 | adotar | técnico | brief da iniciativa | em uso |
 | Preferir mudanças pequenas e reversíveis | [Princípios de controle](https://github.com/caleo-hub/engenharia-de-software-com-agentes-de-codigo/blob/main/capitulos/00-introducao/06-os-vinte-principios-de-controle.md) | primeiro incremento contém apenas artefatos de adoção | adotar | técnico | diff inicial | em uso |
 | Não usar o agente como único oráculo | [Princípios de controle](https://github.com/caleo-hub/engenharia-de-software-com-agentes-de-codigo/blob/main/capitulos/00-introducao/06-os-vinte-principios-de-controle.md) | decisões humanas e validação independente serão gates antes de implementação/entrega | adotar | produto + técnico | permissões e status | planejado |
+| Não inventar requisito ausente na fonte | [Critérios de avanço](https://github.com/caleo-hub/engenharia-de-software-com-agentes-de-codigo/blob/main/capitulos/03-parte-iii-spec-driven-development-sem-teatro-documental/017-criterios-de-avanco-entre-fases.md) | Whisper publica VRAM, mas não CPU/RAM mínimo; esses limites serão definidos por benchmark | adaptar | técnico | `INITIATIVE-BRIEF.md` e fonte oficial | decidido |
 
 ## Regra de manutenção
 

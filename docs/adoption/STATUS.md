@@ -10,7 +10,7 @@ Ter owner humano, problema inicial compreensível, perfil de risco aceito, conte
 
 ## Estado do gate
 
-**NÃO ATENDIDO.** Há uma proposta coerente, mas owners, contexto de distribuição, política de dados e recorte do MVP ainda precisam de decisão humana.
+**NÃO ATENDIDO.** Owners, uso pessoal e recorte principal foram confirmados. Restam a política mínima de transferência exigida pelo modo OpenAI e o aceite do perfil padrão.
 
 ## Artefatos canônicos
 
@@ -33,9 +33,11 @@ Ter owner humano, problema inicial compreensível, perfil de risco aceito, conte
 
 - Requisitos iniciais fornecidos pelo responsável em 2026-07-31.
 - Repositório local inicialmente sem arquivos e sem commits.
-- Repositório remoto `caleo-hub/caleo-transcriber` observado como público, vazio e com branch padrão `main`.
+- Repositório remoto `caleo-hub/caleo-transcriber` observado como público e vazio antes do commit inicial, com branch padrão `main`.
 - Perfil padrão proposto e riscos iniciais registrados antes de qualquer escolha tecnológica.
 - Matriz de permissões impede código, secrets, chamadas pagas e envio de mídia nesta fase.
+- Decisões humanas registradas em 2026-07-31: owner `caleo-hub`, uso pessoal, sem histórico/telemetria, dois modos no MVP, TXT/SRT selecionáveis e Windows 10.
+- O README oficial do Whisper informa VRAM aproximada por modelo (1 GB em `tiny/base` até 10 GB em `large`), mas não publica mínimo formal de CPU/RAM.
 
 ## Fatos observados
 
@@ -43,24 +45,24 @@ Ter owner humano, problema inicial compreensível, perfil de risco aceito, conte
 - Há dois modos desejados: OpenAI API e Whisper local.
 - Há necessidade de lote, intervalo, destino de saída e progresso.
 - A credencial deve ser configurada uma vez.
+- Não haverá histórico persistente nem telemetria.
+- O primeiro MVP incluirá os modos OpenAI e Whisper local.
+- TXT e SRT serão opções selecionáveis e Windows 10 será o mínimo.
 
 ## Inferências, hipóteses e desconhecidos
 
 - **Inferência:** o usuário primário não deve precisar de terminal.
 - **Hipótese:** o perfil padrão é proporcional ao risco.
-- **Desconhecido:** público-alvo e forma de distribuição.
-- **Desconhecido:** política de dados, retenção, histórico e telemetria.
-- **Desconhecido:** formatos, idiomas, timestamps, locutores e métricas de qualidade.
-- **Desconhecido:** Windows mínimo e hardware suportado para o modo local.
+- **Decisão:** o uso inicial é pessoal.
+- **Decisão:** não haverá histórico persistente ou telemetria.
+- **Desconhecido:** idiomas, timestamps, locutores e métricas de qualidade.
+- **Desconhecido:** mínimo de CPU/RAM e desempenho aceitável do modo local; a fonte oficial só quantifica VRAM.
+- **Ambiguidade bloqueadora:** o modo OpenAI exige enviar áudio, mas a resposta sobre conteúdos enviados foi “não”.
 
 ## Decisões humanas pendentes
 
-1. Aceite dos papéis de product owner e responsável técnico.
-2. Uso pessoal, interno, comercial ou distribuição pública.
-3. Política de envio, retenção, histórico, logs e telemetria.
-4. Um ou dois mecanismos de transcrição no primeiro MVP.
-5. Formatos, idiomas e metadados essenciais da transcrição.
-6. Windows e hardware mínimos suportados.
+1. Confirmar que, ao escolher o modo OpenAI, o usuário autoriza enviar somente o áudio selecionado para transcrição.
+2. Aceitar ou corrigir o perfil de adoção padrão.
 
 ## Riscos e bloqueios
 
@@ -71,4 +73,4 @@ Ter owner humano, problema inicial compreensível, perfil de risco aceito, conte
 
 ## Próxima ação recomendada
 
-O responsável humano revisa o brief e responde às seis decisões. Com o gate da Fase 0 aceito, iniciar a Fase 1 com visão e resultados mensuráveis; não gerar scaffold ou código de produto antes disso.
+O responsável humano resolve as duas confirmações restantes. Com o gate da Fase 0 aceito, iniciar a Fase 1 com visão e resultados mensuráveis; não gerar scaffold ou código de produto antes disso.
