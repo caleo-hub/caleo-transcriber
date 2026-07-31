@@ -7,6 +7,15 @@ from caleo_transcriber.domain.attempt import (
     can_transition,
     require_transition,
 )
+from caleo_transcriber.domain.batch import (
+    ACTIVE_BATCH_STATES,
+    TERMINAL_BATCH_STATES,
+    BatchItem,
+    BatchItemState,
+    BatchQueue,
+    BatchQueueError,
+    BatchSummary,
+)
 from caleo_transcriber.domain.long_media import (
     MAX_UPLOAD_BYTES,
     OVERLAP_MS,
@@ -20,6 +29,13 @@ from caleo_transcriber.domain.long_media import (
 )
 
 __all__ = [
+    "ACTIVE_BATCH_STATES",
+    "TERMINAL_BATCH_STATES",
+    "BatchItem",
+    "BatchItemState",
+    "BatchQueue",
+    "BatchQueueError",
+    "BatchSummary",
     "ALLOWED_TRANSITIONS",
     "AttemptState",
     "ChunkPlan",

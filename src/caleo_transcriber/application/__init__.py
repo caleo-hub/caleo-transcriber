@@ -6,6 +6,14 @@ from caleo_transcriber.application.api_key_settings import (
     ApiKeySettings,
     LocalKeyValidation,
 )
+from caleo_transcriber.application.batch import (
+    BatchAddResult,
+    BatchEvents,
+    BatchProcessor,
+    BatchQueueEvent,
+    BatchSettings,
+    LongMediaUseCase,
+)
 from caleo_transcriber.application.checkpoints import (
     CheckpointChunk,
     CheckpointStore,
@@ -63,6 +71,12 @@ from caleo_transcriber.application.transcription import (
 )
 
 __all__ = [
+    "BatchAddResult",
+    "BatchEvents",
+    "BatchProcessor",
+    "BatchQueueEvent",
+    "BatchSettings",
+    "LongMediaUseCase",
     "CheckpointChunk",
     "CheckpointStore",
     "ChunkCheckpointState",
