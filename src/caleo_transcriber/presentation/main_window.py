@@ -22,6 +22,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from caleo_transcriber import __version__
 from caleo_transcriber.application import (
     AttemptEvent,
     TranscribeSingleFileCommand,
@@ -91,7 +92,7 @@ class MainWindow(QMainWindow):
         self._cancellation: CancellationToken | None = None
         self._close_when_finished = False
 
-        self.setWindowTitle("Caleo Transcriber")
+        self.setWindowTitle(f"Caleo Transcriber {__version__}")
         self.setMinimumSize(760, 560)
         self.resize(860, 620)
         self._build_ui()
@@ -107,7 +108,7 @@ class MainWindow(QMainWindow):
 
         header = QHBoxLayout()
         title_box = QVBoxLayout()
-        title = QLabel("Caleo Transcriber")
+        title = QLabel(f"Caleo Transcriber  {__version__}")
         title.setObjectName("title")
         subtitle = QLabel("Transforme áudio ou vídeo em texto, sem complicação.")
         subtitle.setObjectName("subtitle")
