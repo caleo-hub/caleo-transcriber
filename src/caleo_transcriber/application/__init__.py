@@ -12,6 +12,11 @@ from caleo_transcriber.application.credentials import (
     CredentialStoreFailure,
     SecretValue,
 )
+from caleo_transcriber.application.output import (
+    OutputWriteCancelled,
+    OutputWriteError,
+    TxtOutputWriter,
+)
 
 __all__ = [
     "CredentialStore",
@@ -22,4 +27,7 @@ __all__ = [
     "LocalKeyValidation",
     "OPENAI_CREDENTIAL_ACCOUNT",
     "OPENAI_CREDENTIAL_SERVICE",
+    "OutputWriteCancelled",
+    "OutputWriteError",
+    "TxtOutputWriter",
 ]
