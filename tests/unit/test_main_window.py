@@ -164,12 +164,47 @@ def test_failure_is_inline_and_retry_only_failure(qtbot: QtBot) -> None:
     _click(qtbot, window.start_button)
     qtbot.waitUntil(lambda: "1 falharam" in window.summary_label.text())
     qtbot.waitUntil(window.retry_button.isEnabled)
+    assert _cell_text(window, 0, 3) == "Falhou — conexão"
+    assert "Verifique a internet" in window.detail_label.text()
+    assert "SAFE" in window.detail_label.text()
+    assert "one.mp4" not in window.detail_label.text()
     assert window.isVisible()
     _click(qtbot, window.retry_button)
     qtbot.waitUntil(lambda: len(use_case.calls) == 3)
     qtbot.waitUntil(lambda: "2 concluídos" in window.summary_label.text())
     qtbot.waitUntil(lambda: window._thread is None)
     assert [call.source.name for call in use_case.calls] == ["one.mp4", "two.mp4", "one.mp4"]
+
+
+def test_theme_explicitly_styles_dark_mode_surfaces(qtbot: QtBot) -> None:
+    window = _window(qtbot, StubUseCase([]))
+    style = window.styleSheet()
+
+    assert "QMainWindow, QDialog { background: #F4F7FB; }" in style
+    assert "QPushButton, QComboBox, QLineEdit" in style
+    assert "QHeaderView::section" in style
+    assert "background: #E8EEF6; color: #102A43" in style
+
+    dialog = window._create_settings_dialog()
+    qtbot.addWidget(dialog)
+    assert dialog.objectName() == "settingsDialog"
+    assert dialog.minimumWidth() >= 520
+    assert dialog.styleSheet() == style
+
+
+def test_credential_failure_explains_recovery_without_exposing_path(qtbot: QtBot) -> None:
+    use_case = StubUseCase([_failure(AttemptFailure.CREDENTIAL)])
+    window = _window(qtbot, use_case)
+    window.set_sources([Path("private-demo.mp4")])
+    window.set_output_directory(Path("C:/out"))
+
+    _click(qtbot, window.start_button)
+    qtbot.waitUntil(lambda: window._thread is None)
+
+    assert _cell_text(window, 0, 3) == "Falhou — chave OpenAI"
+    assert "Configurar chave" in window.detail_label.text()
+    assert "SAFE" in window.detail_label.text()
+    assert "private-demo.mp4" not in window.detail_label.text()
 
 
 def test_first_cloud_notice_is_shown_once(qtbot: QtBot, monkeypatch: pytest.MonkeyPatch) -> None:

@@ -2,18 +2,17 @@
 
 ## Fase atual
 
-Fase 10 — fechamento do segundo incremento e beta de teste (TASK-019/TASK-020).
+Patch beta — contraste e diagnóstico de falhas (TASK-021/TASK-022).
 
 ## Resultado esperado desta fase
 
-Validar mídia longa, fila, TXT/SRT e identidade visual; produzir e publicar a primeira beta x64.
+Publicar `v0.2.1-beta.1` com contraste corrigido e falhas compreensíveis e acionáveis por item.
 
 ## Estado do gate
 
-**EM ANDAMENTO.** TASK-001–011 foram mescladas. TASK-012–018 e TASK-020 foram implementadas com
-`verify.cmd` verde em 173 testes, gates SEC/UX aprovados e evidências visuais registradas. O owner
-autorizou até cinco chamadas OpenAI com mídia sintética e a publicação de uma GitHub prerelease beta.
-TASK-019 prepara o candidato 0.2.0 e valida os gates finais sem instalar o programa localmente.
+**EM ANDAMENTO.** TASK-001–020 foram mescladas e `v0.2.0-beta.1` foi publicada. A TASK-021 corrige
+contraste e diagnóstico por item; smoke sintético confirmou chave recusada (401). O owner autorizou
+a correção do falso positivo de CI e a publicação do patch `v0.2.1-beta.1` pela TASK-022.
 
 ## Artefatos canônicos
 
@@ -185,10 +184,16 @@ TASK-019 prepara o candidato 0.2.0 e valida os gates finais sem instalar o progr
 - Os gates `GATE-SEC-002` e `GATE-UX-002` foram aprovados; TASK-012–018 implementaram planner,
   checkpoint DPAPI, chunks FFmpeg, TXT/SRT, orquestração longa, fila FIFO e UI responsiva.
 - TASK-020 adicionou ícone original PNG/ICO à janela, executável, atalhos e instalador.
+- A PR #16 mesclou TASK-012–020 no commit `93bc9f3`; a prerelease `v0.2.0-beta.1` foi publicada com
+  instalador x64 e SHA-256 verificado após download.
+- Em 2026-07-31, o owner relatou contraste insuficiente no diálogo de chave sob tema escuro e falha
+  sem diagnóstico útil ao processar um MP4. O arquivo informado foi analisado somente localmente:
+  MP4/H.264, áudio AAC, 110,717 segundos. O pipeline com provedor substituto concluiu, sem upload.
 - A chave de teste foi removida do arquivo rastreado e permanece somente no Windows Credential
   Manager; o diff de `.env.example` é vazio.
-- O smoke OpenAI autorizado consumiu 1 de até 5 chamadas usando voz sintética: sucesso com 5.740 ms
-  e um segmento; nenhum texto/áudio foi registrado e os temporários foram removidos.
+- Os smokes OpenAI autorizados consumiram 2 de até 5 chamadas com voz sintética. O primeiro passou
+  em 5.740 ms; o segundo retornou `OPENAI_401`, confirmando que a chave atual foi recusada. Nenhum
+  texto/áudio foi registrado e os temporários foram enviados à Lixeira.
 
 ## Fatos observados
 
@@ -213,8 +218,8 @@ TASK-019 prepara o candidato 0.2.0 e valida os gates finais sem instalar o progr
 ## Decisões humanas pendentes
 
 Authenticode permanece pendente e será declarado como risco conhecido da beta. Instalação e
-desinstalação do candidato não foram autorizadas. A chamada smoke sintética e a GitHub prerelease
-foram autorizadas pelo owner para este fechamento.
+desinstalação do candidato não foram autorizadas. Restam três das cinco chamadas sintéticas
+autorizadas. Uma nova release ainda exige aprovação do owner.
 
 ## Riscos e bloqueios
 
@@ -231,5 +236,5 @@ foram autorizadas pelo owner para este fechamento.
 
 ## Próxima ação recomendada
 
-Executar smoke OpenAI sintético, auditoria, build/preflight 0.2.0, integrar o commit validado e
-publicar `v0.2.0-beta.1` como prerelease com os mesmos artefatos e checksum.
+Concluir TASK-022: validar CI/pacote, integrar o commit, gerar o candidato 0.2.1 a partir de `main`,
+publicar `v0.2.1-beta.1` e conferir o checksum do artefato baixado sem instalar localmente.

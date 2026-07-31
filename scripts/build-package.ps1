@@ -1,12 +1,18 @@
 param(
     [ValidatePattern('^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$')]
-    [string]$Version = "0.2.0",
+    [string]$Version = "0.2.1",
 
-    [switch]$RealOpenAISmoke
+    [switch]$RealOpenAISmoke,
+
+    [switch]$RealOpenAISmokeCredentialRejected
 )
 
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
+
+if ($RealOpenAISmoke -and $RealOpenAISmokeCredentialRejected) {
+    throw "PACKAGE_OPENAI_SMOKE_STATE_CONFLICT"
+}
 
 $projectRoot = (Resolve-Path (Split-Path -Parent $PSScriptRoot)).Path
 $python = Join-Path $projectRoot ".venv\Scripts\python.exe"
@@ -192,7 +198,9 @@ $evidence = [ordered]@{
     rollback_rehearsal = "withdraw-and-restore-unpublished-candidate"
     rollback_seconds = [Math]::Round($rollbackTimer.Elapsed.TotalSeconds, 3)
     authenticode = "not-signed"
-    real_openai_call = if ($RealOpenAISmoke) {
+    real_openai_call = if ($RealOpenAISmokeCredentialRejected) {
+        "attempted-with-synthetic-audio-credential-rejected"
+    } elseif ($RealOpenAISmoke) {
         "run-once-with-synthetic-audio-owner-approved"
     } else {
         "not-run-approval-required"

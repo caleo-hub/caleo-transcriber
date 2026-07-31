@@ -54,3 +54,11 @@ def test_no_media_or_environment_file_is_tracked() -> None:
 def test_env_example_contains_no_secret_slot() -> None:
     env_example = (PROJECT_ROOT / ".env.example").read_text(encoding="utf-8")
     assert "OPENAI_API_KEY=" not in env_example
+
+
+@pytest.mark.architecture
+def test_secret_scan_requires_boundary_before_openai_key_prefix() -> None:
+    audit = (PROJECT_ROOT / "scripts" / "audit.ps1").read_text(encoding="utf-8")
+
+    assert "(^|[^A-Za-z0-9])sk-" in audit
+    assert '"sk-[A-Za-z0-9_-]{20,}|' not in audit
