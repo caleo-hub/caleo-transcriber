@@ -10,8 +10,8 @@ Publicar `v0.3.0-beta.1` com seleção, remoção, limpeza, reordenação e paus
 
 ## Estado do gate
 
-**EM ANDAMENTO.** O owner aprovou a TASK-023 e a publicação de uma nova beta. Spec e ADR foram
-estendidos sem alterar privacidade, persistência, concorrência ou política de arquivos.
+**CONCLUÍDO.** A TASK-023 foi mesclada na PR #19. A prerelease `v0.3.0-beta.1` foi publicada e
+validada após download, sem alterar privacidade, persistência, concorrência ou política de arquivos.
 
 ## Artefatos canônicos
 
@@ -196,6 +196,9 @@ estendidos sem alterar privacidade, persistência, concorrência ou política de
 - A PR #17 mesclou TASK-021/022 no commit `1b01f3d`; CI, gitleaks e pacote remoto passaram. A
   prerelease `v0.2.1-beta.1` foi publicada com seis assets e o instalador baixado novamente passou
   pelo preflight com SHA-256 `c079f478cf5833d6c7ac589f16c789aaf3ed80c38035289a6c89e6ec095f99a6`.
+- A PR #19 mesclou TASK-023 no commit `9227009`; 191 testes, CI, gitleaks e pacote remoto passaram.
+  `v0.3.0-beta.1` foi publicada com seis assets e o instalador baixado passou pelo preflight com
+  SHA-256 `3175f209626c283ce2d5ef09bfbbc1da79aab0cd6fb34e05b58de2d5cd12acb5`.
 
 ## Fatos observados
 
@@ -238,5 +241,4 @@ autorizadas. A chave atual foi recusada e precisa ser substituída pela UI antes
 
 ## Próxima ação recomendada
 
-Concluir TASK-023, validar a UX e publicar `v0.3.0-beta.1`, mantendo `v0.2.1-beta.1` disponível para
-rollback.
+Testar a beta instalada no uso diário, mantendo `v0.2.1-beta.1` disponível para rollback.
