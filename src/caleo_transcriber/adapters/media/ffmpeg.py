@@ -177,7 +177,7 @@ class FfmpegPreparedAudioLease:
                 raise MediaError(MediaFailure.PROCESSING)
             if size >= MAX_PROVIDER_BYTES:
                 raise MediaError(MediaFailure.PROVIDER_LIMIT)
-            self._audio = PreparedAudio(output, self._info.duration_seconds)
+            self._audio = PreparedAudio(output, self._info.duration_seconds, size)
             return self
         except BaseException:
             self._cleanup()

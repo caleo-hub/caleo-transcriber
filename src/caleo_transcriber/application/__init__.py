@@ -26,6 +26,17 @@ from caleo_transcriber.application.output import (
     OutputWriteError,
     TxtOutputWriter,
 )
+from caleo_transcriber.application.transcribe_single_file import (
+    AttemptEvent,
+    AttemptEvents,
+    AttemptFailure,
+    TranscribeSingleFile,
+    TranscribeSingleFileCommand,
+    TranscribeSingleFileFailure,
+    TranscribeSingleFileResult,
+    TranscribeSingleFileSuccess,
+    TranscriptionAlreadyRunningError,
+)
 from caleo_transcriber.application.transcription import (
     ProviderFailure,
     TranscriptionFailure,
@@ -62,4 +73,13 @@ __all__ = [
     "TranscriptionResult",
     "TranscriptionSegment",
     "TranscriptionSuccess",
+    "AttemptEvent",
+    "AttemptEvents",
+    "AttemptFailure",
+    "TranscribeSingleFile",
+    "TranscribeSingleFileCommand",
+    "TranscribeSingleFileFailure",
+    "TranscribeSingleFileResult",
+    "TranscribeSingleFileSuccess",
+    "TranscriptionAlreadyRunningError",
 ]
