@@ -36,6 +36,10 @@ from caleo_transcriber.application.output import (
     TranscriptOutputWriter,
     TxtOutputWriter,
 )
+from caleo_transcriber.application.transcribe_long_media import (
+    TranscribeLongMedia,
+    TranscribeLongMediaCommand,
+)
 from caleo_transcriber.application.transcribe_single_file import (
     AttemptEvent,
     AttemptEvents,
@@ -102,4 +106,6 @@ __all__ = [
     "TranscribeSingleFileSuccess",
     "TranscribeSingleFileUseCase",
     "TranscriptionAlreadyRunningError",
+    "TranscribeLongMedia",
+    "TranscribeLongMediaCommand",
 ]

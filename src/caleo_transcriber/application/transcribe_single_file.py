@@ -36,6 +36,7 @@ class AttemptFailure(StrEnum):
     PROVIDER = "provider"
     CANCELLED = "cancelled"
     OUTPUT = "output"
+    AMBIGUOUS = "ambiguous"
 
 
 @dataclass(frozen=True, slots=True)
@@ -53,6 +54,9 @@ class AttemptEvent:
     state: AttemptState
     failure: AttemptFailure | None = None
     warnings: tuple[str, ...] = ()
+    completed_chunks: int = 0
+    total_chunks: int | None = None
+    active_chunk: int | None = None
 
 
 @runtime_checkable
