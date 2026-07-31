@@ -25,6 +25,12 @@ Os scripts usam `.venv` e não exigem chave da OpenAI. Nenhum teste padrão real
 .\audit.cmd
 ```
 
+O preflight de um futuro candidato de release, sem publicá-lo, usa:
+
+```powershell
+.\release-preflight.cmd -Version <versão-sem-v> -CandidateDirectory <diretório>
+```
+
 ## Fontes de verdade
 
 - comportamento: `specs/features/FEAT-001-transcribe-single-file.md`;

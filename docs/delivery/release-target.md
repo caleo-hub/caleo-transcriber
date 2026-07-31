@@ -3,6 +3,7 @@
 - **Decisão do owner:** 2026-07-31
 - **Canal:** GitHub Releases de `caleo-hub/caleo-transcriber`
 - **Plataforma:** Windows 10/11 x64
+- **Estado atual:** preparação; nenhuma release é publicável antes da TASK-010
 
 ## Artefato principal
 
@@ -14,6 +15,7 @@
 - notas de release com requisitos, mudanças, riscos conhecidos e rollback;
 - ZIP portátil opcional, sem substituir o instalador principal;
 - SBOM e avisos de licenças quando a release for preparada.
+- `RELEASE_NOTES.md` com decisão pós-validação e instruções de rollback.
 
 ## Gate de publicação
 
@@ -25,7 +27,9 @@
 6. FFmpeg possui origem, checksum e licença registrados;
 7. owner aprova a release.
 
+O fluxo completo e a adaptação de rollout estão em `release-runbook.md`; observabilidade em
+`observability.md`; recuperação em `rollback-runbook.md`.
+
 ## Assinatura
 
 Assinatura Authenticode é recomendada para reduzir alertas do SmartScreen, mas requer certificado e processo de proteção da chave de assinatura. A decisão entre release inicialmente não assinada ou aquisição de certificado será tomada antes da primeira publicação pública.
-

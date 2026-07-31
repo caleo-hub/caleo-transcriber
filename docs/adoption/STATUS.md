@@ -2,15 +2,19 @@
 
 ## Fase atual
 
-Fase 8 — executar o piloto com autonomia limitada.
+Fase 9 — preparar entrega, observabilidade e rollback.
 
 ## Resultado esperado desta fase
 
-Executar a TASK-001 como piloto pequeno e reversível, demonstrando aderência ao contrato, uso do harness, evidência reproduzível e revisão humana antes de ampliar autonomia.
+Preparar um caminho de release Windows verificável, privado por padrão e reversível, sem publicar
+um scaffold como produto nem introduzir telemetria.
 
 ## Estado do gate
 
-**EM ANDAMENTO.** As Fases 0–7 foram concluídas em 2026-07-31. O primeiro incremento possui grafo, dez contratos verificáveis e gates humanos; a TASK-001 está pronta para um PR pequeno sem secret, rede ou efeito externo.
+**EM ANDAMENTO.** A Fase 8 foi concluída em 2026-07-31 com a TASK-001, PR #4, checks verdes,
+aprovação humana e merge. A Fase 9 definiu observabilidade local, promoção de candidato, preflight,
+validação pós-release e rollback. O gate permanece aberto porque não existe aplicativo funcional,
+instalador, smoke em Windows 10 x64 nem rollback ensaiado; esses itens dependem das TASK-002–010.
 
 ## Artefatos canônicos
 
@@ -42,6 +46,12 @@ Executar a TASK-001 como piloto pequeno e reversível, demonstrando aderência a
 - `.github/workflows/secret-scan.yml`
 - `docs/quality/test-plan.md`
 - `docs/delivery/release-target.md`
+- `docs/delivery/observability.md`
+- `docs/delivery/release-runbook.md`
+- `docs/delivery/rollback-runbook.md`
+- `docs/delivery/release-evidence-template.md`
+- `release-preflight.cmd`
+- `scripts/release-preflight.ps1`
 - `contracts/transcription-provider-v1.schema.json`
 - `contracts/examples/`
 - `tests/architecture/`
@@ -98,6 +108,19 @@ Executar a TASK-001 como piloto pequeno e reversível, demonstrando aderência a
 - `capitulos/08-parte-viii-decomposicao-e-delegacao-do-trabalho/046-criterios-para-reduzir-ou-dividir.md`
 - `capitulos/21-apendice-a-templates-reutilizaveis/a-09-plano-de-implementacao.md`
 - `capitulos/21-apendice-a-templates-reutilizaveis/a-10-contrato-de-tarefa-para-agente.md`
+- `capitulos/09-parte-ix-o-loop-operacional-do-agente/047-um-loop-que-comeca-por-entender-e-pode-terminar-sem-mudar.md`
+- `capitulos/09-parte-ix-o-loop-operacional-do-agente/048-baseline-antes-do-diff.md`
+- `capitulos/09-parte-ix-o-loop-operacional-do-agente/049-mudanca-incremental-e-checkpoints.md`
+- `capitulos/09-parte-ix-o-loop-operacional-do-agente/050-aprovacao-humana-por-classe-de-risco.md`
+- `capitulos/09-parte-ix-o-loop-operacional-do-agente/051-relatorio-final-orientado-a-evidencias.md`
+- `capitulos/11-parte-xi-revisao-de-codigo-no-mundo-agent-first/060-o-que-procurar-no-diff-de-um-agente.md`
+- `capitulos/15-parte-xv-observabilidade-e-operacao/079-software-que-passa-nos-testes-ainda-pode-ser-inoperavel.md`
+- `capitulos/15-parte-xv-observabilidade-e-operacao/080-telemetria-como-evidencia.md`
+- `capitulos/15-parte-xv-observabilidade-e-operacao/081-slos-e-error-budgets.md`
+- `capitulos/15-parte-xv-observabilidade-e-operacao/083-validacao-pos-deploy.md`
+- `capitulos/14-parte-xiv-ci-cd-como-sistema-de-governanca/077-preview-feature-flags-e-progressive-delivery.md`
+- `capitulos/21-apendice-a-templates-reutilizaveis/a-25-checklist-de-deploy.md`
+- `capitulos/21-apendice-a-templates-reutilizaveis/a-26-plano-de-rollback.md`
 
 ## Evidências disponíveis
 
@@ -131,6 +154,13 @@ Executar a TASK-001 como piloto pequeno e reversível, demonstrando aderência a
 - A Fase 7 decompôs o primeiro incremento em dez PRs: credencial, cofre, UI da chave, saída, FFmpeg, mídia, OpenAI, caso de uso, UI principal e pacote smoke.
 - O grafo reserva gates humanos antes de incorporar FFmpeg, chamar OpenAI real, aceitar UX e publicar artefato.
 - TASK-001 foi escolhida como piloto: porta/fake de credencial, sem keyring, UI, filesystem, rede, secrets ou API paga.
+- A TASK-001 foi implementada e mesclada na PR #4 após 33 testes, lint, tipos, contratos
+  arquiteturais, build, auditoria, CI e secret scan aprovados.
+- A Fase 9 adapta progressive delivery para uso pessoal: artefato efêmero de CI, candidato do
+  owner e somente então GitHub Release, sem auto-update ou coortes remotas.
+- O baseline da Fase 9 passou com 33 testes e auditoria sem vulnerabilidades conhecidas.
+- O preflight de release verifica os cinco arquivos obrigatórios, SBOM JSON e SHA-256 sem criar
+  ou publicar uma Release.
 
 ## Fatos observados
 
@@ -154,7 +184,9 @@ Executar a TASK-001 como piloto pequeno e reversível, demonstrando aderência a
 
 ## Decisões humanas pendentes
 
-Nenhuma decisão bloqueia a TASK-001. TASK-005 exigirá aprovação do build/licença FFmpeg; chamada real OpenAI, UX e publicação permanecem bloqueadas pelos contratos posteriores.
+TASK-005 exigirá aprovação do build/licença FFmpeg. Antes da primeira publicação, o owner ainda
+deve aprovar a tecnologia do instalador, decidir sobre Authenticode e autorizar a chamada smoke
+real da OpenAI. A publicação permanece bloqueada até a TASK-010 e seu aceite em Windows 10 x64.
 
 ## Riscos e bloqueios
 
@@ -163,7 +195,10 @@ Nenhuma decisão bloqueia a TASK-001. TASK-005 exigirá aprovação do build/lic
 - Custo de API e consumo local imprevisíveis sem limites.
 - PySide6 e PyInstaller tiveram licenças identificadas; o build concreto de FFmpeg ainda exige origem, versão, checksum e revisão LGPL/GPL antes de ser incorporado.
 - Chunking e paralelismo exigem contrato de contexto, overlap, recomposição, checkpoints e limites de recurso.
+- Ainda não existe entrada gráfica nem pacote instalável; qualquer release atual seria enganosa.
+- O RTO de rollback é desconhecido e deve ser medido no ensaio da TASK-010.
 
 ## Próxima ação recomendada
 
-Executar a Fase 8 com a TASK-001 exatamente conforme `docs/tasks/TASK-001-credential-store-port.md`, em branch/PR pequeno, e revisar evidências antes de avançar para TASK-002.
+Revisar a preparação operacional da Fase 9 e continuar o incremento pela TASK-002. Usar os
+runbooks e o preflight quando a TASK-010 produzir o primeiro candidato instalável.
