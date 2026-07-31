@@ -105,7 +105,7 @@ Vazio, arquivo inválido, pronto, aguardando modelo, em preparação, enviando, 
 
 ## Dependências e integrações
 
-- OpenAI Transcription API; modelo e contrato serão decididos na fase de arquitetura com documentação oficial atual.
+- OpenAI Transcription API com `whisper-1` como primeiro adaptador; manter a escolha isolada atrás de uma porta para evolução futura.
 - `openai/whisper` local; seleção de modelos e empacotamento serão decididos após benchmark.
 - FFmpeg ou capacidade equivalente para leitura/extração de mídia; escolha exige licença e avaliação de distribuição.
 - Armazenamento protegido do Windows; mecanismo será decidido por ADR.
@@ -152,6 +152,8 @@ Não haverá coleta de produto. Evidências virão de:
 4. Vídeos de até 30 minutos são o baseline obrigatório.
 5. Acima de 30 minutos, o aplicativo escolhe automaticamente divisão, concorrência limitada ou outra estratégia adequada, sem configuração do usuário.
 6. O limite máximo técnico será definido por benchmark e restrições dos provedores na arquitetura.
+7. A entrega será OpenAI primeiro para funcionar sem requisitos especiais de hardware; Whisper local entra depois como alternativa opcional sem custo de API.
+8. A primeira fatia aceita MP4, MP3 e WAV e, para vídeo, processa e envia somente o áudio extraído.
 
 ## Critérios de saída do discovery
 

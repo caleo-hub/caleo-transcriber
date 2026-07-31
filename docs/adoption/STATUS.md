@@ -61,6 +61,8 @@ Aprovar o comportamento da primeira fatia vertical com requisitos, invariantes, 
 - A estratégia tradicional foi contrastada com fontes oficiais: OpenAI limita arquivo de transcrição a 25 MB e recomenda compressão/divisão sem cortar sentenças; Whisper local usa janelas deslizantes de 30 segundos.
 - Em 2026-07-31, `caleo-hub` aprovou a constituição, os required checks e a estratégia de mídia longa.
 - A primeira fatia proposta reduz o fluxo a um arquivo inteiro de até 30 minutos, saída TXT e provedor previamente configurado.
+- Em 2026-07-31, `caleo-hub` aprovou MP4, MP3 e WAV na primeira fatia, com extração exclusiva do áudio de vídeos, e TXT vazio com aviso para áudio silencioso.
+- A primeira fatia seguirá as fronteiras da arquitetura de referência e entregará primeiro a API OpenAI com `whisper-1`; Whisper local será um adaptador opcional posterior para quem preferir evitar custo de API.
 
 ## Fatos observados
 
@@ -69,7 +71,7 @@ Aprovar o comportamento da primeira fatia vertical com requisitos, invariantes, 
 - Há necessidade de lote, intervalo, destino de saída e progresso.
 - A credencial deve ser configurada uma vez.
 - Não haverá histórico persistente nem telemetria.
-- O primeiro MVP incluirá os modos OpenAI e Whisper local.
+- O MVP incluirá os modos OpenAI e Whisper local, em incrementos: OpenAI primeiro e local depois.
 - TXT e SRT serão opções selecionáveis e Windows 10 será o mínimo.
 
 ## Inferências, hipóteses e desconhecidos
@@ -84,8 +86,7 @@ Aprovar o comportamento da primeira fatia vertical com requisitos, invariantes, 
 
 ## Decisões humanas pendentes
 
-1. Aprovar ou corrigir o recorte da primeira fatia.
-2. Resolver as perguntas classificadas no fim da feature spec.
+1. Decidir a Q3: aviso único mais indicador cloud permanente, ou modal de confirmação em toda execução.
 
 ## Riscos e bloqueios
 
@@ -97,4 +98,4 @@ Aprovar o comportamento da primeira fatia vertical com requisitos, invariantes, 
 
 ## Próxima ação recomendada
 
-O responsável humano revisa `specs/features/FEAT-001-transcribe-single-file.md`. Com o gate da Fase 3 aceito, iniciar arquitetura e contratos; não gerar scaffold ou código de produto antes disso.
+O responsável humano decide a Q3 em `specs/features/FEAT-001-transcribe-single-file.md`. Com o gate da Fase 3 aceito, iniciar arquitetura e contratos; não gerar scaffold ou código de produto antes disso.

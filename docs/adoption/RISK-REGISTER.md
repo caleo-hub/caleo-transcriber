@@ -5,7 +5,7 @@ Escala provisória: probabilidade **B** (baixa), **M** (média), **A** (alta) ou
 | ID | Risco | Prob. | Impacto | Resposta proposta | Owner | Estado |
 |---|---|---:|---:|---|---|---|
 | R-001 | A chave da OpenAI ser exposta em configuração legível, log, erro, pacote ou repositório público | M | C | armazenamento protegido do Windows; mascaramento; secret scanning; testes que vetem vazamento | técnico | aberto |
-| R-002 | Conteúdo pessoal, confidencial ou protegido ser enviado à OpenAI sem compreensão do usuário | M | A | enviar somente o áudio do arquivo/segmento escolhido, após seleção explícita do modo OpenAI; sem histórico ou telemetria | produto + privacidade | decisão tomada; controles pendentes |
+| R-002 | Conteúdo pessoal, confidencial ou protegido ser enviado à OpenAI sem compreensão do usuário | M | A | enviar somente o áudio do arquivo/segmento escolhido; aviso inicial e indicador cloud persistente propostos; sem histórico ou telemetria | produto + privacidade | decisão de UX Q3 pendente |
 | R-003 | Arquivos grandes ou lotes provocarem custo de API inesperado | M | A | estimativa/preflight quando possível; confirmação; limites configuráveis; estado e custo observáveis | produto | aberto |
 | R-004 | Whisper local falhar ou tornar a máquina inutilizável por falta de CPU, GPU, memória ou disco | A | M | usar a tabela oficial de VRAM (1–10 GB conforme modelo) e definir CPU/RAM/tempo por benchmark em Windows 10; limitar concorrência e permitir cancelamento | técnico | aberto |
 | R-005 | Falha de um item interromper o lote ou perder resultados concluídos | M | A | estado por item; isolamento de falhas; escrita atômica; retomada/repetição segura | técnico | aberto |
