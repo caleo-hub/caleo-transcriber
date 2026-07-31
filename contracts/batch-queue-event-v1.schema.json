@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://caleo.local/contracts/batch-queue-event-v1.schema.json",
+  "title": "BatchQueueEventV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "batch_id", "item_id", "position", "state", "failure"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "batch_id": { "type": "string", "minLength": 1 },
+    "item_id": { "type": "string", "minLength": 1 },
+    "position": { "type": "integer", "minimum": 0 },
+    "state": {
+      "enum": [
+        "queued",
+        "preparing",
+        "transcribing",
+        "saving",
+        "completed",
+        "failed",
+        "cancelling",
+        "cancelled"
+      ]
+    },
+    "failure": {
+      "type": ["string", "null"],
+      "enum": [
+        null,
+        "invalid_input",
+        "unsupported_media",
+        "credential",
+        "network",
+        "rate_limit",
+        "provider",
+        "cancelled",
+        "output"
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "state": { "const": "failed" } } },
+      "then": { "properties": { "failure": { "type": "string", "not": { "const": "cancelled" } } } }
+    },
+    {
+      "if": { "properties": { "state": { "const": "cancelled" } } },
+      "then": { "properties": { "failure": { "const": "cancelled" } } }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "enum": ["queued", "preparing", "transcribing", "saving", "completed", "cancelling"]
+          }
+        }
+      },
+      "then": { "properties": { "failure": { "type": "null" } } }
+    }
+  ]
+}

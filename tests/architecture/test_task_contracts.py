@@ -16,9 +16,9 @@ REQUIRED_HEADINGS = {
 
 
 @pytest.mark.architecture
-def test_first_increment_has_ten_bounded_task_contracts() -> None:
+def test_increment_plans_have_nineteen_bounded_task_contracts() -> None:
     tasks = sorted(TASKS_ROOT.glob("TASK-*.md"))
-    assert [path.name[:8] for path in tasks] == [f"TASK-{number:03d}" for number in range(1, 11)]
+    assert [path.name[:8] for path in tasks] == [f"TASK-{number:03d}" for number in range(1, 20)]
 
 
 @pytest.mark.architecture

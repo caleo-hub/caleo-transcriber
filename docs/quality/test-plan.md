@@ -73,3 +73,18 @@ Nenhum teste isolado prova correção. O gauntlet combina verificações rápida
 - `audit.cmd`: pip-audit e secret scan local;
 - CI Windows e gitleaks configurados;
 - matriz acima rastreia cada CA e ameaça material.
+
+## Extensão proposta — segundo incremento
+
+| Fonte | Pergunta | Verificação | Gate |
+|---|---|---|---|
+| LM-CA-001/002, T2-01 | todo upload respeita tipo e 24 MB? | planner + extração real curta + spy | SEC |
+| LM-CA-003–005, T2-10 | fronteira/timeline/dedup preservam fala? | propriedades e goldens versionados | SEC |
+| LM-CA-006 | TXT/SRT são válidos e equivalentes? | parser independente e golden Unicode | SEC |
+| LM-CA-007–010, T2-02–06 | retomada evita custo e vazamento? | crash por estado, schema, DPAPI, adulteração e TTL | SEC |
+| LM-CA-011/012 | cancelar/progresso são honestos? | componente com token e eventos | SEC/UX |
+| BATCH-CA-001–007 | fila isola, cancela e repete corretamente? | máquina de estados + falha em cada posição | SEC |
+| BATCH-CA-008–010 | tabela é compreensível, acessível e efêmera? | pytest-qt, screenshot e reinício | UX |
+
+TASK-011 valida os oráculos sem importar `src`. Depois dos gates, cada teste comportamental é
+conectado à API pública antes da implementação correspondente.

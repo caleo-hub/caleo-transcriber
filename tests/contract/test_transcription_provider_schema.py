@@ -22,7 +22,7 @@ def test_schema_is_valid_draft_2020_12() -> None:
 
 
 @pytest.mark.contract
-@pytest.mark.parametrize("example", sorted(EXAMPLES_PATH.glob("*.json")))
+@pytest.mark.parametrize("example", sorted(EXAMPLES_PATH.glob("transcription-*.json")))
 def test_approved_examples_match_provider_schema(example: Path) -> None:
     Draft202012Validator(load_json(SCHEMA_PATH)).validate(load_json(example))
 

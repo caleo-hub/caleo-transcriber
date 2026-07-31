@@ -13,6 +13,9 @@
 | 6 | Honestidade | percentual só existe quando há medida real | teste de projeção rejeita `known(percent)` sem total/progresso mensurável |
 | 7 | Evolução | provider local pode ser adicionado sem alterar caso de uso | teste arquitetural impede imports de adapters no core |
 | 8 | Usabilidade | primeiro trabalho configurável em até 3 minutos | roteiro de teste manual cronometrado |
+| 9 | Retomada | crash não repete chunk confirmado nem reutiliza dado incompatível | testes de estado/fingerprint/integridade do checkpoint |
+| 10 | Isolamento | falha de um item não impede os demais nem altera sucessos | aceitação com falha em cada posição da fila |
+| 11 | Timeline | merge longo não cria lacuna/inversão e limita dedup ao overlap | propriedades + goldens TXT/SRT |
 
 ## Checks obrigatórios antes de merge
 

@@ -2,19 +2,19 @@
 
 ## Fase atual
 
-Fase 9 — fechamento técnico da TASK-010 e gate de promoção do candidato.
+Fase 10 — especificação do segundo incremento (TASK-011).
 
 ## Resultado esperado desta fase
 
-Preparar um caminho de release Windows verificável, privado por padrão e reversível, sem publicar
-um scaffold como produto nem introduzir telemetria.
+Fixar specs, arquitetura, riscos, contratos, tarefas e oráculos para mídia longa e lote antes de
+alterar o comportamento do aplicativo.
 
 ## Estado do gate
 
-**EM ANDAMENTO.** TASK-001–009 foram implementadas e mescladas. A TASK-010 produz localmente o
-candidato 0.1.0, instalador Inno Setup, SBOM, licenças, checksum, inspeção, preflight e smoke do
-pacote sem Python externo. O gate de publicação permanece aberto: instalação/desinstalação e smoke
-em Windows 10 x64 limpo, Authenticode e aprovação explícita da GitHub Release não foram concluídos.
+**EM ANDAMENTO.** TASK-001–010 foram implementadas e mescladas até a PR #14. A TASK-010 passou em
+`verify`, gitleaks e workflow de pacote, produzindo candidato efêmero sem publicar Release. A
+TASK-011 propõe FEAT-002/003, ADR-0006/0007, contratos, threat model, tarefas e testes-oráculo. Em
+2026-07-31, o owner aprovou `GATE-SEC-002` e `GATE-UX-002`, liberando TASK-012 em diante.
 
 ## Artefatos canônicos
 
@@ -35,7 +35,10 @@ em Windows 10 x64 limpo, Authenticode e aprovação explícita da GitHub Release
 - `docs/adr/ADR-0003-contrato-openai-whisper.md`
 - `docs/adr/ADR-0004-distribuicao-ffmpeg-windows.md`
 - `docs/adr/ADR-0005-inno-setup-windows.md`
+- `docs/adr/ADR-0006-long-media-checkpoint-recomposition.md`
+- `docs/adr/ADR-0007-sequential-batch-queue.md`
 - `docs/security/threat-model.md`
+- `docs/security/threat-model-increment-2.md`
 - `contracts/transcription-provider.md`
 - `README.md`
 - `AGENTS.md`
@@ -63,6 +66,11 @@ em Windows 10 x64 limpo, Authenticode e aprovação explícita da GitHub Release
 - `docs/tasks/TASK-001-credential-store-port.md` até `TASK-010-package-smoke.md`
 - `specs/constitution.md`
 - `specs/features/FEAT-001-transcribe-single-file.md`
+- `specs/features/FEAT-002-long-media.md`
+- `specs/features/FEAT-003-batch-processing.md`
+- `docs/plans/second-increment.md`
+- `docs/gates/GATE-SEC-002-long-media-batch.md`
+- `docs/gates/GATE-UX-002-batch-queue.md`
 
 ## Fontes lidas nesta fase
 
@@ -172,6 +180,11 @@ em Windows 10 x64 limpo, Authenticode e aprovação explícita da GitHub Release
 - O ensaio de rollback do artefato não publicado retirou e restaurou o instalador preservando o
   digest. Isso não substitui o ensaio posterior de instalação/desinstalação.
 - Nenhuma chave, mídia real, chamada paga, instalação do candidato ou publicação foi realizada.
+- A PR #14 mesclou a TASK-010 em 2026-07-31 após `verify`, gitleaks e `package` verdes. O candidato
+  remoto teve SHA-256 `8f26a13ae824cf361306422e2caf62e48039110bb77633bdcddb9066d3f1ed9b`
+  e smoke de 2,816 segundos no runner; permaneceu efêmero, não instalado e não publicado.
+- O segundo incremento foi decomposto em TASK-011–019. Limites, DPAPI/retention, upload ambíguo,
+  concorrência e experiência da fila foram explicitados em gates ainda não aprovados.
 
 ## Fatos observados
 
@@ -215,6 +228,5 @@ implementação correspondente avançar.
 
 ## Próxima ação recomendada
 
-Concluir CI e revisão da TASK-010 sem publicar o candidato. Em seguida, especificar e testar o
-incremento de mídia longa e lote (TASK-011 em diante), apresentando os gates de segurança e UX ao
-owner antes de implementar cada fronteira de risco.
+Mesclar a TASK-011 com checks verdes e iniciar TASK-012 pela implementação orientada pelos vetores
+versionados, mantendo uma tarefa revisável por PR.
