@@ -22,6 +22,15 @@ Definir componentes, fronteiras, contratos, dependências, ADRs e estratégia de
 - `docs/product/vision.md`
 - `docs/product/prd.md`
 - `docs/product/long-media-strategy.md`
+- `docs/architecture/context.md`
+- `docs/architecture/containers.md`
+- `docs/architecture/modules.md`
+- `docs/architecture/quality-attributes.md`
+- `docs/adr/ADR-0001-monolito-modular-ports-adapters.md`
+- `docs/adr/ADR-0002-stack-desktop-windows.md`
+- `docs/adr/ADR-0003-contrato-openai-whisper.md`
+- `docs/security/threat-model.md`
+- `contracts/transcription-provider.md`
 - `specs/constitution.md`
 - `specs/features/FEAT-001-transcribe-single-file.md`
 
@@ -46,6 +55,13 @@ Definir componentes, fronteiras, contratos, dependências, ADRs e estratégia de
 - `capitulos/03-parte-iii-spec-driven-development-sem-teatro-documental/014-clarificacao-o-gate-que-mais-economiza-retrabalho.md`
 - `capitulos/21-apendice-a-templates-reutilizaveis/a-03-especificacao-de-feature.md`
 - `capitulos/21-apendice-a-templates-reutilizaveis/a-07-criterios-de-aceitacao.md`
+- `capitulos/04-parte-iv-arquitetura-como-mecanismo-de-controle/018-arquitetura-nao-e-um-desenho-bonito-e-um-conjunto-de-decisoes-que-exclui-opcoes.md`
+- `capitulos/04-parte-iv-arquitetura-como-mecanismo-de-controle/019-escolha-de-estilo-comece-pelo-menor-sistema-que-sustenta-os-atributos-de-qualidade.md`
+- `capitulos/04-parte-iv-arquitetura-como-mecanismo-de-controle/020-o-pacote-minimo-de-arquitetura.md`
+- `capitulos/04-parte-iv-arquitetura-como-mecanismo-de-controle/021-adrs-memoria-de-decisao-nao-ata-de-reuniao.md`
+- `capitulos/04-parte-iv-arquitetura-como-mecanismo-de-controle/022-fitness-functions-arquitetura-com-poder-de-veto.md`
+- `capitulos/04-parte-iv-arquitetura-como-mecanismo-de-controle/023-contratos-schemas-e-fronteiras.md`
+- `capitulos/21-apendice-a-templates-reutilizaveis/a-20-threat-model.md`
 
 ## Evidências disponíveis
 
@@ -64,6 +80,8 @@ Definir componentes, fronteiras, contratos, dependências, ADRs e estratégia de
 - Em 2026-07-31, `caleo-hub` aprovou MP4, MP3 e WAV na primeira fatia, com extração exclusiva do áudio de vídeos, e TXT vazio com aviso para áudio silencioso.
 - A primeira fatia seguirá as fronteiras da arquitetura de referência e entregará primeiro a API OpenAI com `whisper-1`; Whisper local será um adaptador opcional posterior para quem preferir evitar custo de API.
 - Em 2026-07-31, `caleo-hub` aprovou aviso explicativo somente no primeiro uso da OpenAI, indicador cloud permanente e ausência de modal repetitivo; com isso, o gate da Fase 3 foi atendido.
+- A proposta da Fase 4 define monólito modular com ports-and-adapters, Python/PySide6, FFmpeg, Credential Manager, PyInstaller `onedir`, contrato `whisper-1`, fitness functions e threat model.
+- A documentação oficial da OpenAI limita uploads de transcrição a 25 MB, recomenda compressão ou divisão para entradas maiores e informa que timestamps por segmento de `whisper-1` não adicionam latência.
 
 ## Fatos observados
 
@@ -87,7 +105,11 @@ Definir componentes, fronteiras, contratos, dependências, ADRs e estratégia de
 
 ## Decisões humanas pendentes
 
-Nenhuma decisão de produto pendente para a primeira fatia. Eventuais decisões arquiteturais materiais serão apresentadas com alternativas e consequências na Fase 4.
+1. Aprovar o monólito modular com ports-and-adapters e suas dependências proibidas.
+2. Aprovar a stack Python 3.12 + PySide6 + FFmpeg + Credential Manager/keyring + PyInstaller `onedir`.
+3. Aprovar o contrato OpenAI: `whisper-1`, `verbose_json`, timestamps por segmento, áudio MP3 abaixo de 25 MB e sem retry automático após upload.
+4. Aprovar compra versus construção: reutilizar SDK/frameworks/binários maduros e construir somente domínio, orquestração, UX e adapters.
+5. Aceitar os riscos residuais do threat model para uso pessoal.
 
 ## Riscos e bloqueios
 
@@ -99,4 +121,4 @@ Nenhuma decisão de produto pendente para a primeira fatia. Eventuais decisões 
 
 ## Próxima ação recomendada
 
-Produzir a arquitetura mínima, ADRs e contratos verificáveis da primeira fatia; não gerar scaffold ou código de produto antes do gate da Fase 4.
+O owner revisa as cinco decisões arquiteturais. Após aprovação, marcar ADRs como aceitos e o gate da Fase 4 como atendido; não gerar scaffold ou código antes disso.
