@@ -2,15 +2,15 @@
 
 ## Fase atual
 
-Fase 7 — planejar e decompor o primeiro incremento.
+Fase 8 — executar o piloto com autonomia limitada.
 
 ## Resultado esperado desta fase
 
-Converter spec, arquitetura e gauntlet em tarefas pequenas, ordenadas, reversíveis e verificáveis, sem decisões ocultas durante a implementação.
+Executar a TASK-001 como piloto pequeno e reversível, demonstrando aderência ao contrato, uso do harness, evidência reproduzível e revisão humana antes de ampliar autonomia.
 
 ## Estado do gate
 
-**EM ANDAMENTO.** As Fases 0–6 foram concluídas em 2026-07-31. Todos os critérios da primeira fatia e ameaças materiais possuem verificação ativa ou teste planejado na camada adequada; checks locais e de CI falham de forma bloqueadora.
+**EM ANDAMENTO.** As Fases 0–7 foram concluídas em 2026-07-31. O primeiro incremento possui grafo, dez contratos verificáveis e gates humanos; a TASK-001 está pronta para um PR pequeno sem secret, rede ou efeito externo.
 
 ## Artefatos canônicos
 
@@ -46,6 +46,8 @@ Converter spec, arquitetura e gauntlet em tarefas pequenas, ordenadas, reversív
 - `contracts/examples/`
 - `tests/architecture/`
 - `tests/contract/`
+- `docs/plans/first-increment.md`
+- `docs/tasks/TASK-001-credential-store-port.md` até `TASK-010-package-smoke.md`
 - `specs/constitution.md`
 - `specs/features/FEAT-001-transcribe-single-file.md`
 
@@ -89,6 +91,13 @@ Converter spec, arquitetura e gauntlet em tarefas pequenas, ordenadas, reversív
 - `capitulos/14-parte-xiv-ci-cd-como-sistema-de-governanca/074-o-pipeline-precisa-dizer-nao.md`
 - `capitulos/14-parte-xiv-ci-cd-como-sistema-de-governanca/076-quality-gates-sem-caca-ao-numero.md`
 - `capitulos/21-apendice-a-templates-reutilizaveis/a-21-plano-de-testes.md`
+- `capitulos/03-parte-iii-spec-driven-development-sem-teatro-documental/015-plano-nao-e-tarefa-e-tarefa-nao-e-prompt.md`
+- `capitulos/08-parte-viii-decomposicao-e-delegacao-do-trabalho/043-a-unidade-segura-de-delegacao.md`
+- `capitulos/08-parte-viii-decomposicao-e-delegacao-do-trabalho/044-dependencias-e-paralelismo.md`
+- `capitulos/08-parte-viii-decomposicao-e-delegacao-do-trabalho/045-o-contrato-de-tarefa.md`
+- `capitulos/08-parte-viii-decomposicao-e-delegacao-do-trabalho/046-criterios-para-reduzir-ou-dividir.md`
+- `capitulos/21-apendice-a-templates-reutilizaveis/a-09-plano-de-implementacao.md`
+- `capitulos/21-apendice-a-templates-reutilizaveis/a-10-contrato-de-tarefa-para-agente.md`
 
 ## Evidências disponíveis
 
@@ -119,6 +128,9 @@ Converter spec, arquitetura e gauntlet em tarefas pequenas, ordenadas, reversív
 - `.\verify.cmd` passou com 14 testes, três contratos arquiteturais, lint, tipos, build e dependências íntegras.
 - O secret scan independente com Gitleaks foi adicionado ao GitHub Actions; CODEOWNERS protege specs, contratos, aceitação e segurança para revisão do owner.
 - Em 2026-07-31, o owner definiu GitHub Releases como canal final, com instalador `.exe` Windows x64 autocontido e smoke test do arquivo efetivamente baixado.
+- A Fase 7 decompôs o primeiro incremento em dez PRs: credencial, cofre, UI da chave, saída, FFmpeg, mídia, OpenAI, caso de uso, UI principal e pacote smoke.
+- O grafo reserva gates humanos antes de incorporar FFmpeg, chamar OpenAI real, aceitar UX e publicar artefato.
+- TASK-001 foi escolhida como piloto: porta/fake de credencial, sem keyring, UI, filesystem, rede, secrets ou API paga.
 
 ## Fatos observados
 
@@ -142,7 +154,7 @@ Converter spec, arquitetura e gauntlet em tarefas pequenas, ordenadas, reversív
 
 ## Decisões humanas pendentes
 
-Nenhuma decisão bloqueia a passagem para planejamento. Antes da primeira release ainda serão necessárias as decisões de build/licença do FFmpeg e assinatura Authenticode.
+Nenhuma decisão bloqueia a TASK-001. TASK-005 exigirá aprovação do build/licença FFmpeg; chamada real OpenAI, UX e publicação permanecem bloqueadas pelos contratos posteriores.
 
 ## Riscos e bloqueios
 
@@ -154,4 +166,4 @@ Nenhuma decisão bloqueia a passagem para planejamento. Antes da primeira releas
 
 ## Próxima ação recomendada
 
-Executar a Fase 7: decompor a primeira fatia em tarefas/PRs e reservar gates humanos para FFmpeg, chamada real OpenAI e publicação de release.
+Executar a Fase 8 com a TASK-001 exatamente conforme `docs/tasks/TASK-001-credential-store-port.md`, em branch/PR pequeno, e revisar evidências antes de avançar para TASK-002.

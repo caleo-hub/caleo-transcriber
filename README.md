@@ -33,4 +33,5 @@ Os scripts usam `.venv` e não exigem chave da OpenAI. Nenhum teste padrão real
 - segurança: `docs/security/threat-model.md`;
 - contrato do provider: `contracts/transcription-provider.md`;
 - estado da adoção: `docs/adoption/STATUS.md`;
+- plano do primeiro incremento: `docs/plans/first-increment.md` e `docs/tasks/`;
 - instruções para agentes: `AGENTS.md`.
