@@ -1,5 +1,6 @@
+from tests.fakes.credential_store import InMemoryCredentialStore
+
 from caleo_transcriber.application import ApiKeySettings
-from fakes.credential_store import InMemoryCredentialStore
 
 
 def test_key_can_be_saved_replaced_validated_and_removed() -> None:
