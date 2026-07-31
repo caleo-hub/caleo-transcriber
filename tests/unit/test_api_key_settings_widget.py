@@ -1,9 +1,9 @@
 from PySide6.QtWidgets import QLabel, QLineEdit
 from pytestqt.qtbot import QtBot
+from tests.fakes.credential_store import InMemoryCredentialStore
 
 from caleo_transcriber.application import ApiKeySettings
 from caleo_transcriber.presentation.settings import ApiKeySettingsWidget
-from fakes.credential_store import InMemoryCredentialStore
 
 CANARY = "synthetic-ui-canary"
 

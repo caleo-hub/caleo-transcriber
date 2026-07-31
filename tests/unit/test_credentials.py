@@ -1,10 +1,11 @@
+from tests.fakes.credential_store import InMemoryCredentialStore
+
 from caleo_transcriber.application import (
     CredentialStore,
     CredentialStoreError,
     CredentialStoreFailure,
     SecretValue,
 )
-from fakes.credential_store import InMemoryCredentialStore
 
 SERVICE = "caleo-transcriber-tests"
 ACCOUNT = "openai"

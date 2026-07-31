@@ -26,6 +26,15 @@ from caleo_transcriber.application.output import (
     OutputWriteError,
     TxtOutputWriter,
 )
+from caleo_transcriber.application.transcription import (
+    ProviderFailure,
+    TranscriptionFailure,
+    TranscriptionProvider,
+    TranscriptionRequest,
+    TranscriptionResult,
+    TranscriptionSegment,
+    TranscriptionSuccess,
+)
 
 __all__ = [
     "CredentialStore",
@@ -46,4 +55,11 @@ __all__ = [
     "MediaProbe",
     "PreparedAudio",
     "PreparedAudioLease",
+    "ProviderFailure",
+    "TranscriptionFailure",
+    "TranscriptionProvider",
+    "TranscriptionRequest",
+    "TranscriptionResult",
+    "TranscriptionSegment",
+    "TranscriptionSuccess",
 ]
