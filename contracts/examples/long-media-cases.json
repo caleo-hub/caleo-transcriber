@@ -1,0 +1,62 @@
+{
+  "feature": "FEAT-002",
+  "acceptance_coverage": [
+    "LM-CA-001",
+    "LM-CA-002",
+    "LM-CA-003",
+    "LM-CA-004",
+    "LM-CA-005",
+    "LM-CA-006",
+    "LM-CA-007",
+    "LM-CA-008",
+    "LM-CA-009",
+    "LM-CA-010",
+    "LM-CA-011",
+    "LM-CA-012"
+  ],
+  "cases": [
+    {
+      "id": "duration-30m01-under-bytes",
+      "acceptance": "LM-CA-001",
+      "duration_ms": 1801000,
+      "prepared_bytes": 23999999,
+      "expected_request_count": 1
+    },
+    {
+      "id": "duration-under-30m-over-bytes",
+      "acceptance": "LM-CA-001",
+      "duration_ms": 1200000,
+      "prepared_bytes": 24000000,
+      "expected_request_count": 2
+    },
+    {
+      "id": "overlap-duplicate-phrase",
+      "acceptance": "LM-CA-005",
+      "overlap_ms": 2000,
+      "left": "Vamos revisar o próximo capítulo agora",
+      "right": "o próximo capítulo agora com exemplos",
+      "expected": "Vamos revisar o próximo capítulo agora com exemplos"
+    },
+    {
+      "id": "legitimate-repeat-outside-overlap",
+      "acceptance": "LM-CA-005",
+      "overlap_ms": 0,
+      "left": "sim sim sim",
+      "right": "sim sim sim",
+      "expected": "sim sim sim sim sim sim"
+    },
+    {
+      "id": "resume-middle-failure",
+      "acceptance": "LM-CA-007",
+      "initial_states": ["confirmed", "failed", "pending"],
+      "expected_upload_ids": [1, 2]
+    },
+    {
+      "id": "resume-ambiguous-upload",
+      "acceptance": "LM-CA-008",
+      "initial_states": ["confirmed", "uploading", "pending"],
+      "expected_resumed_states": ["confirmed", "ambiguous", "pending"],
+      "automatic_upload_ids": []
+    }
+  ]
+}

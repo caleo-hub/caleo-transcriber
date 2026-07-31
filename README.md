@@ -50,4 +50,5 @@ Ele exige a versão aprovada do Inno Setup e baixa o build FFmpeg fixado e verif
 - contrato do provider: `contracts/transcription-provider.md`;
 - estado da adoção: `docs/adoption/STATUS.md`;
 - plano do primeiro incremento: `docs/plans/first-increment.md` e `docs/tasks/`;
+- segundo incremento e gates: `docs/plans/second-increment.md` e `docs/gates/`;
 - instruções para agentes: `AGENTS.md`.

@@ -1,0 +1,44 @@
+{
+  "feature": "FEAT-003",
+  "acceptance_coverage": [
+    "BATCH-CA-001",
+    "BATCH-CA-002",
+    "BATCH-CA-003",
+    "BATCH-CA-004",
+    "BATCH-CA-005",
+    "BATCH-CA-006",
+    "BATCH-CA-007",
+    "BATCH-CA-008",
+    "BATCH-CA-009",
+    "BATCH-CA-010"
+  ],
+  "cases": [
+    {
+      "id": "continue-after-second-fails",
+      "acceptance": "BATCH-CA-003",
+      "initial": ["queued", "queued", "queued", "queued"],
+      "outcomes": ["completed", "failed", "completed", "completed"],
+      "expected_started_positions": [0, 1, 2, 3]
+    },
+    {
+      "id": "cancel-pending-without-effects",
+      "acceptance": "BATCH-CA-005",
+      "initial": ["transcribing", "queued", "queued"],
+      "cancel_position": 1,
+      "expected": ["transcribing", "cancelled", "queued"],
+      "provider_calls_for_cancelled": 0
+    },
+    {
+      "id": "retry-only-failures",
+      "acceptance": "BATCH-CA-007",
+      "initial": ["completed", "failed", "cancelled", "failed"],
+      "expected_requeued_positions": [1, 3]
+    },
+    {
+      "id": "one-active-item",
+      "acceptance": "BATCH-CA-002",
+      "observed": ["completed", "transcribing", "queued", "queued"],
+      "expected_active_count": 1
+    }
+  ]
+}

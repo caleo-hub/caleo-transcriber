@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "batch_id": "batch-synthetic-1",
+  "item_id": "item-synthetic-2",
+  "position": 1,
+  "state": "failed",
+  "failure": "network"
+}

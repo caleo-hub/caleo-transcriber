@@ -44,6 +44,19 @@ bootstrap -------> presentation + application + adapters
 
 Não serão criadas interfaces para funções puras internas. Portas existem apenas em efeitos externos, variabilidade futura ou isolamento de testes.
 
+## Extensão proposta para o segundo incremento
+
+Pendente dos gates SEC/UX, sem mudar a direção de dependências:
+
+- `domain.long_media`: plano, intervalos e recomposição puros;
+- `domain.batch`: estados e invariantes FIFO;
+- `application.long_media`: coordenação de chunks e porta `CheckpointStore`;
+- `application.batch`: scheduler de um item ativo;
+- `adapters.filesystem`: checkpoint DPAPI, cleanup e writer TXT/SRT;
+- `adapters.media`: detecção de silêncio e extração de intervalos.
+
+Fila, chunking, deduplicação e SRT não pertencem à apresentação nem aos adapters.
+
 ## Estados e erros
 
 O estado canônico pertence a `domain`; a UI apenas o projeta. Erros externos são traduzidos na fronteira para categorias estáveis: `invalid_input`, `unsupported_media`, `credential`, `network`, `rate_limit`, `provider`, `cancelled`, `insufficient_disk` e `output`.
