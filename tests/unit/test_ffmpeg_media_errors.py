@@ -19,7 +19,7 @@ def _tools() -> FfmpegTools:
     return FfmpegTools(Path("ffmpeg.exe"), Path("ffprobe.exe"))
 
 
-def test_probe_rejects_duration_above_thirty_minutes(tmp_path: Path) -> None:
+def test_probe_accepts_duration_above_thirty_minutes(tmp_path: Path) -> None:
     payload = {
         "format": {"format_name": "wav", "duration": "1800.001"},
         "streams": [{"codec_type": "audio"}],
@@ -27,10 +27,9 @@ def test_probe_rejects_duration_above_thirty_minutes(tmp_path: Path) -> None:
     completed = subprocess.CompletedProcess([], 0, json.dumps(payload), "")
 
     with patch("subprocess.run", return_value=completed):
-        with pytest.raises(MediaError) as caught:
-            FfmpegMediaProbe(_tools()).probe(_source(tmp_path))
+        info = FfmpegMediaProbe(_tools()).probe(_source(tmp_path))
 
-    assert caught.value.reason is MediaFailure.DURATION_LIMIT
+    assert info.duration_seconds == 1800.001
 
 
 def test_probe_maps_timeout_without_exposing_path(tmp_path: Path) -> None:

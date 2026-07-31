@@ -5,8 +5,21 @@ from pathlib import Path
 
 import pytest
 
-from caleo_transcriber.adapters.media import FfmpegAudioExtractor, FfmpegMediaProbe, FfmpegTools
-from caleo_transcriber.application import MediaError, MediaFailure, MediaProbe, PreparedAudioLease
+from caleo_transcriber.adapters.media import (
+    FfmpegAudioExtractor,
+    FfmpegChunkAudioExtractor,
+    FfmpegMediaProbe,
+    FfmpegSilenceDetector,
+    FfmpegTools,
+)
+from caleo_transcriber.application import (
+    AudioChunkExtractor,
+    MediaError,
+    MediaFailure,
+    MediaProbe,
+    PreparedAudioLease,
+    SilenceDetector,
+)
 
 pytestmark = pytest.mark.integration
 
@@ -161,3 +174,69 @@ def test_cancelled_preparation_has_no_residue(
 
     assert caught.value.reason is MediaFailure.CANCELLED
     assert workspace.exists() is False or list(workspace.iterdir()) == []
+
+
+def test_chunk_extraction_is_bounded_audio_and_cleans_up(
+    synthetic_media: dict[str, Path], tmp_path: Path
+) -> None:
+    extractor = FfmpegChunkAudioExtractor(_tools())
+    workspace = tmp_path / "chunks"
+
+    assert isinstance(extractor, AudioChunkExtractor)
+    with extractor.prepare_chunk(synthetic_media["wav"], 100, 800, workspace) as lease:
+        output = lease.audio.path
+        assert 0 < lease.audio.size_bytes < 24_000_000
+        assert lease.audio.duration_seconds == pytest.approx(0.7)
+    assert not output.exists()
+    assert list(workspace.iterdir()) == []
+
+
+def test_silence_detector_finds_pause_in_synthetic_audio(tmp_path: Path) -> None:
+    tools = _tools()
+    source = tmp_path / "tone-pause-tone.wav"
+    _run(
+        [
+            str(tools.ffmpeg),
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-nostdin",
+            "-y",
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=800:duration=1",
+            "-f",
+            "lavfi",
+            "-i",
+            "anullsrc=r=44100:cl=mono:d=1",
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=800:duration=1",
+            "-filter_complex",
+            "[0:a][1:a][2:a]concat=n=3:v=0:a=1[out]",
+            "-map",
+            "[out]",
+            str(source),
+        ]
+    )
+    detector = FfmpegSilenceDetector(tools)
+
+    assert isinstance(detector, SilenceDetector)
+    points = detector.detect(source)
+    assert any(1400 <= point <= 1600 for point in points)
+
+
+def test_oversized_chunk_is_rejected_and_removed(
+    synthetic_media: dict[str, Path], tmp_path: Path
+) -> None:
+    workspace = tmp_path / "chunks"
+    extractor = FfmpegChunkAudioExtractor(_tools(), max_bytes=1)
+
+    with pytest.raises(MediaError) as caught:
+        with extractor.prepare_chunk(synthetic_media["wav"], 0, 800, workspace):
+            pass
+
+    assert caught.value.reason is MediaFailure.PROVIDER_LIMIT
+    assert list(workspace.iterdir()) == []

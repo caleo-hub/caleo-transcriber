@@ -75,3 +75,22 @@ class AudioExtractor(Protocol):
         workspace: Path,
         should_cancel: Callable[[], bool] | None = None,
     ) -> PreparedAudioLease: ...
+
+
+@runtime_checkable
+class AudioChunkExtractor(Protocol):
+    def prepare_chunk(
+        self,
+        source: Path,
+        start_ms: int,
+        end_ms: int,
+        workspace: Path,
+        should_cancel: Callable[[], bool] | None = None,
+    ) -> PreparedAudioLease: ...
+
+
+@runtime_checkable
+class SilenceDetector(Protocol):
+    def detect(
+        self, source: Path, should_cancel: Callable[[], bool] | None = None
+    ) -> tuple[int, ...]: ...
