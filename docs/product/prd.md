@@ -1,6 +1,6 @@
 # PRD — Transcrição local e OpenAI v0.1
 
-- **Status:** em revisão
+- **Status:** aprovado
 - **Owner:** `caleo-hub`
 - **Data:** 2026-07-31
 
@@ -36,21 +36,22 @@ A necessidade foi declarada pelo owner, mas ainda não possui baseline quantitat
 
 | ID | Requisito | Estado |
 |---|---|---|
-| RF-001 | Selecionar arquivos por diálogo e arrastar/soltar | proposto |
+| RF-001 | Selecionar arquivos por diálogo e arrastar/soltar | aceito no PRD |
 | RF-002 | Adicionar vários arquivos a uma fila e remover itens antes do início | decidido |
-| RF-003 | Escolher arquivo inteiro ou início/fim válidos por item | decidido; UX em aberto |
+| RF-003 | Escolher arquivo inteiro ou início/fim válidos por item | decidido |
 | RF-004 | Escolher explicitamente entre OpenAI e Whisper local | decidido |
 | RF-005 | Salvar, substituir, testar e remover a chave da OpenAI em armazenamento protegido | decidido; mecanismo posterior |
 | RF-006 | No modo OpenAI, enviar somente o áudio do arquivo/segmento escolhido | decidido |
-| RF-007 | Instalar/selecionar modelo local com tamanho, progresso e erros visíveis | proposto |
+| RF-007 | Instalar/selecionar modelo local com tamanho, progresso e erros visíveis | aceito no PRD |
 | RF-008 | Escolher o diretório de saída | decidido |
 | RF-009 | Escolher TXT ou SRT por execução | decidido |
 | RF-010 | Exibir etapa, estado e progresso por item e do lote sem inventar precisão indisponível | decidido |
-| RF-011 | Cancelar itens pendentes e fazer cancelamento de melhor esforço do item ativo | proposto |
-| RF-012 | Repetir somente itens com falha | proposto |
-| RF-013 | Nunca sobrescrever arquivo existente silenciosamente | proposto |
-| RF-014 | Excluir temporários ao concluir, falhar ou cancelar, com recuperação no próximo início após encerramento abrupto | proposto |
+| RF-011 | Cancelar itens pendentes e fazer cancelamento de melhor esforço do item ativo | aceito no PRD |
+| RF-012 | Repetir somente itens com falha | aceito no PRD |
+| RF-013 | Nunca sobrescrever arquivo existente silenciosamente | aceito no PRD |
+| RF-014 | Excluir temporários ao concluir, falhar ou cancelar, com recuperação no próximo início após encerramento abrupto | aceito no PRD |
 | RF-015 | Não manter histórico persistente nem enviar telemetria | decidido |
+| RF-016 | Processar vídeos acima de 30 minutos com estratégia interna automática, sem configuração manual de divisão | decidido; referência em `long-media-strategy.md` |
 
 ### Atributos de qualidade
 
@@ -60,7 +61,7 @@ A necessidade foi declarada pelo owner, mas ainda não possui baseline quantitat
 - **Privacidade:** modo local sem chamadas de rede após modelo disponível; modo OpenAI visível e explícito.
 - **Confiabilidade:** escrita atômica, isolamento por item e nenhuma sobrescrita silenciosa.
 - **Compatibilidade:** Windows 10 x64 como baseline proposto; executável autocontido para o usuário.
-- **Desempenho:** sem meta inventada; medir por modelo, CPU/GPU, duração e tamanho antes de definir limite.
+- **Desempenho:** vídeos de até 30 minutos formam o baseline obrigatório; medir por modelo, CPU/GPU, duração e tamanho antes de definir metas de tempo.
 - **Manutenibilidade:** fronteiras entre UI, fila, mídia, provedores e saída deverão ser verificáveis na arquitetura.
 
 ## Regras e invariantes
@@ -74,6 +75,10 @@ A necessidade foi declarada pelo owner, mas ainda não possui baseline quantitat
 7. TXT e SRT derivam da mesma transcrição do item; o formato escolhido não dispara nova transcrição.
 8. Percentuais só são exibidos quando há base real; caso contrário, mostrar etapa e atividade indeterminada.
 9. Temporários não são tratados como histórico e devem ter ciclo de vida limitado ao processamento/recuperação.
+10. Divisão de mídia longa deve preservar conteúdo, ordem e timestamps da fonte, sem lacunas ou duplicações observáveis.
+11. Concorrência interna deve respeitar limites de CPU/GPU, memória, API e custo; o usuário não configura chunks.
+12. A estratégia deve preferir limites reais do provedor e fronteiras de fala; “30 minutos” é baseline de aceitação, não tamanho fixo de chunk.
+13. Resultados parciais podem existir apenas como temporários técnicos; após sucesso, são consolidados e removidos sem criar histórico de usuário.
 
 ## UX e acessibilidade
 
@@ -104,6 +109,7 @@ Vazio, arquivo inválido, pronto, aguardando modelo, em preparação, enviando, 
 - `openai/whisper` local; seleção de modelos e empacotamento serão decididos após benchmark.
 - FFmpeg ou capacidade equivalente para leitura/extração de mídia; escolha exige licença e avaliação de distribuição.
 - Armazenamento protegido do Windows; mecanismo será decidido por ADR.
+- A estratégia candidata para mídia longa está em [`long-media-strategy.md`](long-media-strategy.md) e será ratificada na arquitetura.
 
 ## Métricas e instrumentação
 
@@ -124,7 +130,7 @@ Não haverá coleta de produto. Evidências virão de:
 - Release deve ser substituível pela versão anterior sem perder a chave ou saídas.
 - Configurações persistentes precisarão de schema versionado e caminho de downgrade quando existirem.
 
-## Defaults propostos para decisão
+## Defaults aprovados
 
 | Tema | Default proposto | Motivo |
 |---|---|---|
@@ -136,25 +142,27 @@ Não haverá coleta de produto. Evidências virão de:
 | Conflito de nome | gerar sufixo sem sobrescrever | preserva dados sem interromper o lote |
 | Identificação de locutores | fora do MVP | reduz escopo e diferença entre provedores |
 | Modelo local inicial | `base`, com seleção de outros modelos | requisito oficial baixo (~1 GB de VRAM) e escolha reversível; validar desempenho |
-| Concorrência | um item ativo por vez no MVP | limita custo e pressão de CPU/GPU; paralelismo pode vir depois |
+| Concorrência | um item da fila ativo; paralelismo interno limitado quando seguro | mantém UX simples e permite acelerar chunks sem competir entre arquivos |
 
-## Questões abertas
+## Decisões de discovery resolvidas
 
-1. Os defaults acima são aceitos integralmente ou precisam de ajustes?
-2. O limite “Windows 10” significa apenas x64 ou deve incluir ARM64?
-3. A meta proposta de configurar o primeiro trabalho em até três minutos é útil?
-4. Existe uma duração/tamanho de arquivo que obrigatoriamente deve funcionar no MVP?
+1. Todos os defaults da tabela foram aceitos.
+2. O MVP suporta Windows 10 x64; ARM64 está fora do escopo inicial.
+3. A meta de configurar o primeiro trabalho em até três minutos foi aceita.
+4. Vídeos de até 30 minutos são o baseline obrigatório.
+5. Acima de 30 minutos, o aplicativo escolhe automaticamente divisão, concorrência limitada ou outra estratégia adequada, sem configuração do usuário.
+6. O limite máximo técnico será definido por benchmark e restrições dos provedores na arquitetura.
 
 ## Critérios de saída do discovery
 
-- visão e defaults aprovados pelo owner;
-- jornadas prioritárias aceitas;
-- pelo menos uma meta de usabilidade e um limite de arquivo definidos;
-- não objetivos aceitos;
-- nenhuma contradição crítica entre privacidade, modos e formatos;
-- desconhecidos restantes podem ser resolvidos por spec ou arquitetura sem decisão de negócio oculta.
+- [x] visão e defaults aprovados pelo owner;
+- [x] jornadas prioritárias aceitas;
+- [x] meta de usabilidade e baseline de arquivo definidos;
+- [x] não objetivos aceitos;
+- [x] nenhuma contradição crítica entre privacidade, modos e formatos;
+- [x] desconhecidos restantes podem ser resolvidos por spec ou arquitetura sem decisão de negócio oculta.
 
 ## Aprovações
 
-- **Owner:** `caleo-hub`; aprovação do conteúdo pendente.
-- **Gate da Fase 1:** não atendido.
+- **Owner:** `caleo-hub`; aprovado em 2026-07-31.
+- **Gate da Fase 1:** atendido.

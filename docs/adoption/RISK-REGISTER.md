@@ -16,6 +16,7 @@ Escala provisória: probabilidade **B** (baixa), **M** (média), **A** (alta) ou
 | R-010 | Executável não assinado ou distribuição informal reduzir confiança e gerar alertas do Windows | M | M | definir canal de distribuição, assinatura e política de release antes da entrega pública | produto + técnico | aberto |
 | R-011 | Logs, dumps ou mensagens de erro incluírem nomes de arquivos, trechos ou transcrições sensíveis | M | A | logging mínimo e estruturado; redaction; opt-in para diagnóstico; revisão de dumps | técnico + privacidade | aberto |
 | R-012 | A qualidade variar por idioma, ruído e modelo sem o usuário entender limitações | A | M | declarar limites; amostras/evals sintéticos ou licenciados; opção de idioma e timestamps conforme spec | produto | aberto |
+| R-013 | Divisão ou paralelismo de vídeos longos gerar lacunas, duplicações, texto fora de ordem ou timestamps incorretos | M | A | corte preferencial em silêncio, overlap controlado, offsets globais, merge/deduplicação determinísticos, checkpoints e concorrência limitada | técnico | estratégia candidata documentada |
 
 ## Riscos que impedem aumento de autonomia
 
@@ -23,3 +24,4 @@ Escala provisória: probabilidade **B** (baixa), **M** (média), **A** (alta) ou
 - R-006 impede implementar escrita de saída sem política de conflito.
 - R-007 impede escolher e empacotar dependências centrais sem avaliação arquitetural.
 - R-010 impede release público antes de uma decisão de distribuição e confiança do binário.
+- R-013 impede implementar chunking/paralelismo sem contrato de recomposição e testes de fronteira.

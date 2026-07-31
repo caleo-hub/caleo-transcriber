@@ -1,6 +1,6 @@
 # Visão — Caleo Transcriber
 
-- **Status:** em revisão
+- **Status:** aprovada
 - **Owner:** `caleo-hub`
 - **Data:** 2026-07-31
 
@@ -36,7 +36,7 @@ Uma única interface torna explícitas as escolhas que importam — arquivos, tr
 
 Como não haverá telemetria, as métricas serão verificadas por testes de aceitação, benchmarks locais e validação do owner.
 
-| Métrica | Baseline | Meta proposta | Evidência |
+| Métrica | Baseline | Meta aprovada | Evidência |
 |---|---|---|---|
 | Instalação e abertura em Windows 10 limpo | desconhecida | iniciar sem Python, terminal ou ambiente de desenvolvimento instalado pelo usuário | teste em VM limpa |
 | Conclusão das jornadas críticas | inexistente | 100% das jornadas de referência passam antes da release | suíte de aceitação + validação humana |
@@ -45,9 +45,9 @@ Como não haverá telemetria, as métricas serão verificadas por testes de acei
 | Privacidade local | inexistente | zero chamadas de rede durante transcrição local com modelo já instalado | teste de integração com rede observada |
 | Isolamento de lote | inexistente | falha de um item não remove resultados concluídos nem bloqueia os demais | teste de aceitação |
 | Correção dos formatos | inexistente | TXT legível e SRT válido nos casos de referência | golden files + parser SRT |
+| Arquivo de referência | inexistente | vídeos de até 30 minutos integram a suíte obrigatória | teste de aceitação |
+| Vídeo longo | inexistente | acima de 30 minutos, processamento automático sem configuração de divisão e com timeline preservada | teste de integração por fronteiras |
 | Desempenho local | desconhecida | meta definida após benchmark por modelo/hardware | relatório de benchmark |
-
-Todas as metas são propostas até aprovação do gate da Fase 1.
 
 ## Hipóteses
 
@@ -67,6 +67,7 @@ Todas as metas são propostas até aprovação do gate da Fase 1.
 - A chave nunca deve ser versionada, exibida integralmente ou gravada em log.
 - Requisitos de CPU/RAM serão derivados de benchmark; a fonte oficial só quantifica VRAM por modelo.
 - O executável não deve exigir ambiente de desenvolvimento na máquina do usuário.
+- Vídeos acima de 30 minutos devem ser tratados automaticamente; divisão e paralelismo são detalhes internos sujeitos a limites de recursos.
 
 ## Não objetivos do MVP
 
@@ -77,7 +78,7 @@ Todas as metas são propostas até aprovação do gate da Fase 1.
 - Histórico persistente, telemetria ou analytics.
 - Plataformas diferentes de Windows.
 - Atualização automática.
-- Identificação de locutores, salvo decisão explícita na revisão do PRD.
+- Identificação de locutores.
 
 ## Riscos iniciais
 
@@ -85,4 +86,4 @@ O registro canônico está em [`docs/adoption/RISK-REGISTER.md`](../adoption/RIS
 
 ## Gate da visão
 
-**NÃO ATENDIDO.** O owner precisa aprovar as métricas candidatas e os defaults de produto registrados no PRD.
+**ATENDIDO em 2026-07-31.** O owner aprovou os defaults, Windows x64, a meta de configuração e o comportamento esperado para vídeos longos.

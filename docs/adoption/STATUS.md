@@ -2,15 +2,15 @@
 
 ## Fase atual
 
-Fase 1 — descobrir o problema e o resultado esperado.
+Fase 2 — escrever a constituição do projeto.
 
 ## Resultado esperado desta fase
 
-Aprovar visão, atores, resultados mensuráveis, primeira fatia, não objetivos, hipóteses e restrições sem antecipar arquitetura.
+Aprovar poucas regras estáveis que governem fontes de verdade, privacidade, arquitetura, qualidade, evidência, autonomia e reversibilidade.
 
 ## Estado do gate
 
-**NÃO ATENDIDO.** A Fase 0 foi aprovada em 2026-07-31. A visão e o PRD da Fase 1 estão em revisão e contêm decisões de comportamento ainda abertas.
+**NÃO ATENDIDO.** As Fases 0 e 1 foram aprovadas em 2026-07-31. A constituição está proposta e aguarda aprovação do owner.
 
 ## Artefatos canônicos
 
@@ -21,6 +21,8 @@ Aprovar visão, atores, resultados mensuráveis, primeira fatia, não objetivos,
 - `docs/adoption/STATUS.md`
 - `docs/product/vision.md`
 - `docs/product/prd.md`
+- `docs/product/long-media-strategy.md`
+- `specs/constitution.md`
 
 ## Fontes lidas nesta fase
 
@@ -33,6 +35,9 @@ Aprovar visão, atores, resultados mensuráveis, primeira fatia, não objetivos,
 - `capitulos/02-parte-ii-da-ideia-a-especificacao/006-a-especificacao-comeca-com-uma-conversa-nao-com-um-template.md`
 - `capitulos/21-apendice-a-templates-reutilizaveis/a-01-visao-do-produto.md`
 - `capitulos/21-apendice-a-templates-reutilizaveis/a-02-prd.md`
+- `capitulos/03-parte-iii-spec-driven-development-sem-teatro-documental/013-constituicao-poucas-regras-que-realmente-governam.md`
+- `capitulos/21-apendice-a-templates-reutilizaveis/a-04-constituicao-do-projeto.md`
+- `capitulos/05-parte-v-o-repositorio-preparado-para-agentes/029-o-que-nunca-deve-estar-nesses-arquivos.md`
 
 ## Evidências disponíveis
 
@@ -44,6 +49,8 @@ Aprovar visão, atores, resultados mensuráveis, primeira fatia, não objetivos,
 - Decisões humanas registradas em 2026-07-31: owner `caleo-hub`, uso pessoal, sem histórico/telemetria, dois modos no MVP, TXT/SRT selecionáveis e Windows 10.
 - O README oficial do Whisper informa VRAM aproximada por modelo (1 GB em `tiny/base` até 10 GB em `large`), mas não publica mínimo formal de CPU/RAM.
 - Em 2026-07-31, `caleo-hub` autorizou o envio explícito somente do áudio selecionado no modo OpenAI e aceitou o perfil padrão.
+- Em 2026-07-31, `caleo-hub` aprovou todos os defaults, Windows 10 x64, a meta de três minutos e tratamento automático acima de 30 minutos.
+- A estratégia tradicional foi contrastada com fontes oficiais: OpenAI limita arquivo de transcrição a 25 MB e recomenda compressão/divisão sem cortar sentenças; Whisper local usa janelas deslizantes de 30 segundos.
 
 ## Fatos observados
 
@@ -67,8 +74,8 @@ Aprovar visão, atores, resultados mensuráveis, primeira fatia, não objetivos,
 
 ## Decisões humanas pendentes
 
-1. Aceitar ou corrigir os defaults de produto propostos em `docs/product/prd.md`.
-2. Definir os critérios de saída do discovery que ainda estão marcados como propostas.
+1. Aceitar ou corrigir os princípios da constituição.
+2. Aceitar os required checks e as ações que sempre exigem aprovação.
 
 ## Riscos e bloqueios
 
@@ -76,7 +83,8 @@ Aprovar visão, atores, resultados mensuráveis, primeira fatia, não objetivos,
 - Possível envio de conteúdo sensível a serviço externo.
 - Custo de API e consumo local imprevisíveis sem limites.
 - Dependências nativas e distribuição de binário ainda não avaliadas.
+- Chunking e paralelismo exigem contrato de contexto, overlap, recomposição, checkpoints e limites de recurso.
 
 ## Próxima ação recomendada
 
-O responsável humano revisa visão, PRD e defaults propostos. Com o gate da Fase 1 aceito, iniciar a constituição do projeto; não gerar scaffold ou código de produto antes disso.
+O responsável humano revisa `specs/constitution.md`. Com o gate da Fase 2 aceito, iniciar especificação e clarificação; não gerar scaffold ou código de produto antes disso.
