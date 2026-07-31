@@ -1,6 +1,6 @@
 # ADR-0001 — Monólito modular com ports-and-adapters
 
-- **Status:** proposta
+- **Status:** aceito
 - **Data:** 2026-07-31
 - **Decisor:** `caleo-hub`
 
@@ -25,4 +25,3 @@ Usar um monólito modular em processo único. O núcleo contém domínio e casos
 - **UI chamando SDKs diretamente:** menor início, mas mistura estado, rede, mídia e segredo e dificulta o modo local.
 - **Microsserviço/backend próprio:** não há escala, ownership ou deploy independente que justifique operação e superfície de ataque adicionais.
 - **Plugin system genérico:** complexidade prematura; adapters internos cobrem a variação conhecida.
-

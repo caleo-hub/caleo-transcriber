@@ -1,6 +1,6 @@
 # ADR-0003 — Contrato OpenAI `whisper-1`
 
-- **Status:** proposta
+- **Status:** aceito
 - **Data:** 2026-07-31
 - **Decisor:** `caleo-hub`
 
@@ -30,4 +30,3 @@ O áudio preparado deve ser MP3 mono, com parâmetros de qualidade definidos e v
 - **`response_format=text`:** mais simples, mas descartaria timestamps úteis ao SRT; rejeitada.
 - **modelo geral recomendado mais novo:** potencial de melhor qualidade, mas não atende à decisão explícita pelo Whisper e ao mesmo contrato de timestamps; mantido como evolução possível.
 - **retry automático:** pode duplicar cobrança quando não há certeza se a requisição foi processada; rejeitado inicialmente.
-

@@ -1,6 +1,6 @@
 # Containers e implantação
 
-- **Status:** proposta para aprovação
+- **Status:** aprovado
 - **Data:** 2026-07-31
 
 ## Containers
@@ -39,4 +39,3 @@ C4Container
 ## Decisão de concorrência
 
 A UI roda na thread principal. Cada tentativa roda em worker dedicado, com cancelamento cooperativo. Na primeira fatia existe no máximo uma tentativa ativa. Processos FFmpeg recebem handle explícito e são encerrados em cancelamento. A chamada HTTP possui timeouts finitos; seu cancelamento é de melhor esforço.
-

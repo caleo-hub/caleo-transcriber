@@ -1,6 +1,6 @@
 # Contexto arquitetural — Caleo Transcriber
 
-- **Status:** proposta para aprovação
+- **Status:** aprovado
 - **Owner:** `caleo-hub`
 - **Data:** 2026-07-31
 - **Escopo:** primeira fatia aprovada em `specs/features/FEAT-001-transcribe-single-file.md`
@@ -43,4 +43,3 @@ C4Context
 
 - [OpenAI — File transcription](https://developers.openai.com/api/docs/guides/speech-to-text)
 - [OpenAI — Create transcription](https://developers.openai.com/api/reference/resources/audio/subresources/transcriptions/methods/create)
-

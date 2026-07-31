@@ -1,6 +1,6 @@
 # Atributos de qualidade e fitness functions
 
-- **Status:** proposta para aprovação
+- **Status:** aprovado
 - **Data:** 2026-07-31
 
 | Prioridade | Atributo | Cenário verificável | Fitness function planejada |
@@ -25,4 +25,3 @@
 7. inventário de dependências e licenças.
 
 Chamadas reais à OpenAI ficam fora do CI padrão: exigem chave e custo explicitamente aprovados e usam somente áudio sintético.
-

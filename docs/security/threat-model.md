@@ -1,6 +1,6 @@
 # Threat model proporcional — primeira fatia
 
-- **Status:** proposta para aceitação de risco residual
+- **Status:** controles e risco residual aceitos pelo owner em 2026-07-31
 - **Data:** 2026-07-31
 - **Método:** fronteiras de confiança + STRIDE adaptado
 
@@ -45,7 +45,6 @@
 - TXT final existe apenas no destino escolhido;
 - OpenAI recebe somente áudio após ação explícita no modo cloud.
 
-## Risco residual para decisão humana
+## Risco residual aceito
 
-Mesmo com os controles, a OpenAI processará o áudio enviado, malware executado na mesma conta Windows pode acessar dados do usuário, e decoders de mídia possuem risco de vulnerabilidades. A aceitação da Fase 4 deve confirmar que esse residual é proporcional ao uso pessoal.
-
+Mesmo com os controles, a OpenAI processará o áudio enviado, malware executado na mesma conta Windows pode acessar dados do usuário, e decoders de mídia possuem risco de vulnerabilidades. Em 2026-07-31, `caleo-hub` aceitou esse residual como proporcional ao uso pessoal.

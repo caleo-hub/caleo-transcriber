@@ -1,6 +1,6 @@
 # Contrato `TranscriptionProvider` v1
 
-- **Status:** proposta
+- **Status:** aprovado
 - **Consumidor:** `application.TranscribeSingleFile`
 - **Implementação inicial:** `OpenAIWhisperAdapter`
 
@@ -62,4 +62,3 @@
 ## Compatibilidade
 
 Campos novos opcionais podem ser adicionados. Alterar significado, unidade, enum existente ou pré/pós-condição exige nova versão do contrato e ADR.
-

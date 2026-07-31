@@ -1,6 +1,6 @@
 # ADR-0002 — Stack desktop Windows
 
-- **Status:** proposta
+- **Status:** aceito
 - **Data:** 2026-07-31
 - **Decisor:** `caleo-hub`
 
@@ -32,4 +32,3 @@ Python reduz atrito para o futuro Whisper local; PySide6 oferece desktop nativo 
 - provar build e execução em VM Windows 10 x64;
 - provar que Credential Manager funciona no pacote;
 - medir tamanho, startup e falso positivo de antivírus antes da release.
-

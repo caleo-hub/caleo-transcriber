@@ -2,15 +2,15 @@
 
 ## Fase atual
 
-Fase 4 — definir arquitetura suficiente e contratos verificáveis.
+Fase 5 — preparar o repositório e o harness.
 
 ## Resultado esperado desta fase
 
-Definir componentes, fronteiras, contratos, dependências, ADRs e estratégia de testes da primeira fatia sem antecipar complexidade dos incrementos posteriores.
+Construir o ambiente operacional reproduzível do projeto: estrutura, instruções, dependências travadas, comandos determinísticos, CI e checks arquiteturais, ainda sem implementar a feature completa.
 
 ## Estado do gate
 
-**EM ANDAMENTO.** As Fases 0–3 foram aprovadas em 2026-07-31. A arquitetura e os contratos da primeira fatia ainda serão definidos.
+**EM ANDAMENTO.** As Fases 0–4 foram aprovadas em 2026-07-31. O gate da Fase 4 foi atendido com arquitetura, contratos, segurança, fitness functions, compra versus construção e riscos residuais aprovados.
 
 ## Artefatos canônicos
 
@@ -82,6 +82,7 @@ Definir componentes, fronteiras, contratos, dependências, ADRs e estratégia de
 - Em 2026-07-31, `caleo-hub` aprovou aviso explicativo somente no primeiro uso da OpenAI, indicador cloud permanente e ausência de modal repetitivo; com isso, o gate da Fase 3 foi atendido.
 - A proposta da Fase 4 define monólito modular com ports-and-adapters, Python/PySide6, FFmpeg, Credential Manager, PyInstaller `onedir`, contrato `whisper-1`, fitness functions e threat model.
 - A documentação oficial da OpenAI limita uploads de transcrição a 25 MB, recomenda compressão ou divisão para entradas maiores e informa que timestamps por segmento de `whisper-1` não adicionam latência.
+- Em 2026-07-31, `caleo-hub` aprovou integralmente as cinco decisões da Fase 4: estilo e fronteiras, stack, contrato OpenAI, compra versus construção e risco residual do threat model.
 
 ## Fatos observados
 
@@ -105,11 +106,7 @@ Definir componentes, fronteiras, contratos, dependências, ADRs e estratégia de
 
 ## Decisões humanas pendentes
 
-1. Aprovar o monólito modular com ports-and-adapters e suas dependências proibidas.
-2. Aprovar a stack Python 3.12 + PySide6 + FFmpeg + Credential Manager/keyring + PyInstaller `onedir`.
-3. Aprovar o contrato OpenAI: `whisper-1`, `verbose_json`, timestamps por segmento, áudio MP3 abaixo de 25 MB e sem retry automático após upload.
-4. Aprovar compra versus construção: reutilizar SDK/frameworks/binários maduros e construir somente domínio, orquestração, UX e adapters.
-5. Aceitar os riscos residuais do threat model para uso pessoal.
+Nenhuma decisão pendente da Fase 4. A Fase 5 poderá exigir aprovação de versões/licenças concretas e configuração de CI antes de consolidar o harness.
 
 ## Riscos e bloqueios
 
@@ -121,4 +118,4 @@ Definir componentes, fronteiras, contratos, dependências, ADRs e estratégia de
 
 ## Próxima ação recomendada
 
-O owner revisa as cinco decisões arquiteturais. Após aprovação, marcar ADRs como aceitos e o gate da Fase 4 como atendido; não gerar scaffold ou código antes disso.
+Ler as fontes obrigatórias da Fase 5, propor o harness mínimo e verificar versões, licenças e compatibilidade das dependências antes de criar o scaffold.

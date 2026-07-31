@@ -1,6 +1,6 @@
 # Módulos, responsabilidades e dependências
 
-- **Status:** proposta para aprovação
+- **Status:** aprovado
 - **Data:** 2026-07-31
 
 ## Módulos
@@ -47,4 +47,3 @@ Não serão criadas interfaces para funções puras internas. Portas existem ape
 ## Estados e erros
 
 O estado canônico pertence a `domain`; a UI apenas o projeta. Erros externos são traduzidos na fronteira para categorias estáveis: `invalid_input`, `unsupported_media`, `credential`, `network`, `rate_limit`, `provider`, `cancelled`, `insufficient_disk` e `output`.
-
