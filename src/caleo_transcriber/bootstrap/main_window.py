@@ -25,7 +25,6 @@ from caleo_transcriber.adapters.media import (
 from caleo_transcriber.adapters.openai import OpenAISdkTransport, OpenAIWhisperAdapter
 from caleo_transcriber.application import (
     ApiKeySettings,
-    AttemptEvent,
     BatchProcessor,
     BatchSettings,
     OutputFormat,
@@ -34,6 +33,7 @@ from caleo_transcriber.application import (
 from caleo_transcriber.presentation import (
     MainWindow,
     QSettingsCloudNoticePolicy,
+    QtAttemptEvents,
     QtBatchEvents,
 )
 from caleo_transcriber.presentation.settings import ApiKeySettingsWidget
@@ -62,7 +62,7 @@ def create_main_window() -> MainWindow:
         QStandardPaths.writableLocation(QStandardPaths.StandardLocation.CacheLocation)
     )
     workspace = cache_root / "work"
-    attempt_events = _NullAttemptEvents()
+    attempt_events = QtAttemptEvents()
     use_case = TranscribeLongMedia(
         FfmpegMediaProbe(tools),
         FfmpegAudioExtractor(tools),
@@ -92,9 +92,5 @@ def create_main_window() -> MainWindow:
         workspace,
         settings_factory,
         QSettingsCloudNoticePolicy(),
+        attempt_events,
     )
-
-
-class _NullAttemptEvents:
-    def publish(self, event: AttemptEvent) -> None:
-        return None

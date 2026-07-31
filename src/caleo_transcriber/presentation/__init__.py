@@ -1,6 +1,6 @@
 """Apresentação desktop PySide6."""
 
-from caleo_transcriber.presentation.main_window import MainWindow, QtBatchEvents
+from caleo_transcriber.presentation.main_window import MainWindow, QtAttemptEvents, QtBatchEvents
 from caleo_transcriber.presentation.notices import CloudNoticePolicy, QSettingsCloudNoticePolicy
 from caleo_transcriber.presentation.worker import (
     BatchWorker,
@@ -15,5 +15,6 @@ __all__ = [
     "MainWindow",
     "QSettingsCloudNoticePolicy",
     "QtBatchEvents",
+    "QtAttemptEvents",
     "TranscriptionWorker",
 ]

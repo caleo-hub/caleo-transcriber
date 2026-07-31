@@ -28,6 +28,7 @@ from PySide6.QtWidgets import (
 
 from caleo_transcriber import __version__
 from caleo_transcriber.application import (
+    AttemptEvent,
     AttemptFailure,
     BatchProcessor,
     BatchQueueEvent,
@@ -35,7 +36,7 @@ from caleo_transcriber.application import (
     OutputFormat,
     TranscribeSingleFileFailure,
 )
-from caleo_transcriber.domain import BatchItemState
+from caleo_transcriber.domain import AttemptState, BatchItemState
 from caleo_transcriber.presentation.notices import CloudNoticePolicy
 from caleo_transcriber.presentation.worker import BatchWorker
 
@@ -59,6 +60,13 @@ class QtBatchEvents(QObject):
         self.event_published.emit(event)
 
 
+class QtAttemptEvents(QObject):
+    event_published = Signal(object)
+
+    def publish(self, event: AttemptEvent) -> None:
+        self.event_published.emit(event)
+
+
 class MainWindow(QMainWindow):
     def __init__(
         self,
@@ -67,6 +75,7 @@ class MainWindow(QMainWindow):
         workspace: Path,
         settings_widget_factory: Callable[[], QWidget],
         notice_policy: CloudNoticePolicy,
+        attempt_events: QtAttemptEvents | None = None,
     ) -> None:
         super().__init__()
         self._processor = processor
@@ -74,6 +83,7 @@ class MainWindow(QMainWindow):
         self._workspace = workspace
         self._settings_widget_factory = settings_widget_factory
         self._notice_policy = notice_policy
+        self._attempt_events = attempt_events
         self._output_directory: Path | None = None
         self._thread: QThread | None = None
         self._worker: BatchWorker | None = None
@@ -90,6 +100,8 @@ class MainWindow(QMainWindow):
         self._build_ui()
         self._apply_style()
         self._events.event_published.connect(self._on_batch_event)
+        if self._attempt_events is not None:
+            self._attempt_events.event_published.connect(self._on_attempt_event)
         self._refresh()
 
     def _build_ui(self) -> None:
@@ -331,6 +343,27 @@ class MainWindow(QMainWindow):
             ):
                 self._show_ambiguous_banner(value.item_id)
         self._refresh_summary()
+
+    @Slot(object)
+    def _on_attempt_event(self, value: object) -> None:
+        if not isinstance(value, AttemptEvent):
+            return
+        row = self._rows.get(value.attempt_id)
+        if row is None:
+            return
+        state_text = {
+            AttemptState.READY: "Pronto",
+            AttemptState.PREPARING: "Preparando áudio",
+            AttemptState.TRANSCRIBING: "Transcrevendo",
+            AttemptState.SAVING: "Salvando",
+            AttemptState.COMPLETED: "Concluído",
+            AttemptState.FAILED: "Falhou",
+            AttemptState.CANCELLING: "Cancelando",
+            AttemptState.CANCELLED: "Cancelado",
+        }[value.state]
+        if value.total_chunks is not None and value.state is AttemptState.TRANSCRIBING:
+            state_text += f" — {value.completed_chunks}/{value.total_chunks} partes"
+        self.table.setItem(row, 3, QTableWidgetItem(state_text))
 
     def _show_ambiguous_banner(self, item_id: str) -> None:
         self.banner_label.setText("Esta parte pode já ter sido cobrada. Reenviar?")

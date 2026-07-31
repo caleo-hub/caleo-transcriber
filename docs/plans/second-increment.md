@@ -19,6 +19,8 @@ flowchart LR
   GU --> T18["TASK-018 UI de lote"]
   T17 --> T18
   T18 --> T19["TASK-019 Aceitação e pacote"]
+  T18 --> T20["TASK-020 Ícone do aplicativo"]
+  T20 --> T19
 ```
 
 | Ordem | Tarefa | Resultado observável | Gate |
@@ -32,6 +34,7 @@ flowchart LR
 | 17 | TASK-017 | fila FIFO isolada, um ativo | segurança aprovada |
 | 18 | TASK-018 | tabela/ações acessíveis e responsivas | UX aprovada |
 | 19 | TASK-019 | gauntlet, screenshots e candidato | novo aceite UX antes de release |
+| 20 | TASK-020 | ícone próprio no app, EXE e instalador | validação visual e pacote |
 
 ## Estratégia de testes antes do código
 
