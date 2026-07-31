@@ -1,0 +1,83 @@
+[build-system]
+requires = ["setuptools==82.0.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "caleo-transcriber"
+version = "0.0.0"
+description = "Aplicativo desktop pessoal para transcrição de áudio e vídeo."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = "LicenseRef-Proprietary"
+authors = [{ name = "caleo-hub", email = "caleomenesessantos@gmail.com" }]
+dependencies = [
+  "keyring==25.7.0",
+  "openai==2.52.0",
+  "PySide6==6.11.1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "build==1.5.0",
+  "import-linter==2.13",
+  "mypy==2.3.0",
+  "pip-audit==2.10.1",
+  "pyinstaller==6.21.0",
+  "pytest==9.1.1",
+  "pytest-qt==4.5.0",
+  "ruff==0.16.1",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src", "tests"]
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-config --strict-markers"
+testpaths = ["tests"]
+qt_api = "pyside6"
+
+[tool.importlinter]
+root_packages = ["caleo_transcriber"]
+
+[[tool.importlinter.contracts]]
+name = "O domínio não depende de camadas externas"
+type = "forbidden"
+source_modules = ["caleo_transcriber.domain"]
+forbidden_modules = [
+  "caleo_transcriber.application",
+  "caleo_transcriber.presentation",
+  "caleo_transcriber.adapters",
+  "caleo_transcriber.bootstrap",
+]
+
+[[tool.importlinter.contracts]]
+name = "A aplicação não depende de UI ou adapters"
+type = "forbidden"
+source_modules = ["caleo_transcriber.application"]
+forbidden_modules = [
+  "caleo_transcriber.presentation",
+  "caleo_transcriber.adapters",
+  "caleo_transcriber.bootstrap",
+]
+
+[[tool.importlinter.contracts]]
+name = "Adapters não dependem da apresentação"
+type = "forbidden"
+source_modules = ["caleo_transcriber.adapters"]
+forbidden_modules = ["caleo_transcriber.presentation"]

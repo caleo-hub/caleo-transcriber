@@ -2,15 +2,15 @@
 
 ## Fase atual
 
-Fase 5 — preparar o repositório e o harness.
+Fase 6 — construir o sistema de verificação antes da autonomia.
 
 ## Resultado esperado desta fase
 
-Construir o ambiente operacional reproduzível do projeto: estrutura, instruções, dependências travadas, comandos determinísticos, CI e checks arquiteturais, ainda sem implementar a feature completa.
+Mapear requisitos e riscos para verificações independentes, completar o test gauntlet e tornar os checks proporcionais bloqueadores antes de implementar a feature.
 
 ## Estado do gate
 
-**EM ANDAMENTO.** As Fases 0–4 foram aprovadas em 2026-07-31. O gate da Fase 4 foi atendido com arquitetura, contratos, segurança, fitness functions, compra versus construção e riscos residuais aprovados.
+**EM ANDAMENTO.** As Fases 0–5 foram concluídas em 2026-07-31. Uma sessão nova consegue instalar, formatar, verificar, auditar e localizar fontes/limites sem acessar secrets ou serviços pagos.
 
 ## Artefatos canônicos
 
@@ -31,6 +31,14 @@ Construir o ambiente operacional reproduzível do projeto: estrutura, instruçõ
 - `docs/adr/ADR-0003-contrato-openai-whisper.md`
 - `docs/security/threat-model.md`
 - `contracts/transcription-provider.md`
+- `README.md`
+- `AGENTS.md`
+- `CONTRIBUTING.md`
+- `SECURITY.md`
+- `THIRD_PARTY.md`
+- `pyproject.toml`
+- `scripts/`
+- `.github/workflows/ci.yml`
 - `specs/constitution.md`
 - `specs/features/FEAT-001-transcribe-single-file.md`
 
@@ -62,6 +70,12 @@ Construir o ambiente operacional reproduzível do projeto: estrutura, instruçõ
 - `capitulos/04-parte-iv-arquitetura-como-mecanismo-de-controle/022-fitness-functions-arquitetura-com-poder-de-veto.md`
 - `capitulos/04-parte-iv-arquitetura-como-mecanismo-de-controle/023-contratos-schemas-e-fronteiras.md`
 - `capitulos/21-apendice-a-templates-reutilizaveis/a-20-threat-model.md`
+- `capitulos/05-parte-v-o-repositorio-preparado-para-agentes/025-o-repositorio-como-ambiente-operacional.md`
+- `capitulos/05-parte-v-o-repositorio-preparado-para-agentes/026-o-que-cada-arquivo-deve-fazer.md`
+- `capitulos/05-parte-v-o-repositorio-preparado-para-agentes/027-um-agents-md-completo-e-enxuto.md`
+- `capitulos/05-parte-v-o-repositorio-preparado-para-agentes/028-instrucoes-por-diretorio-e-monorepos.md`
+- `capitulos/07-parte-vii-instrucao-prompt-comando-skill-script-ou-mcp/037-escolha-o-mecanismo-pelo-tipo-de-problema.md`
+- `capitulos/13-parte-xiii-seguranca-permissoes-e-cadeia-de-suprimentos/068-matriz-de-permissoes.md`
 
 ## Evidências disponíveis
 
@@ -83,6 +97,11 @@ Construir o ambiente operacional reproduzível do projeto: estrutura, instruçõ
 - A proposta da Fase 4 define monólito modular com ports-and-adapters, Python/PySide6, FFmpeg, Credential Manager, PyInstaller `onedir`, contrato `whisper-1`, fitness functions e threat model.
 - A documentação oficial da OpenAI limita uploads de transcrição a 25 MB, recomenda compressão ou divisão para entradas maiores e informa que timestamps por segmento de `whisper-1` não adicionam latência.
 - Em 2026-07-31, `caleo-hub` aprovou integralmente as cinco decisões da Fase 4: estilo e fronteiras, stack, contrato OpenAI, compra versus construção e risco residual do threat model.
+- O harness usa Python 3.12.10 local, dependências diretas fixadas, `.venv`, comandos `.cmd`/PowerShell, Ruff, mypy, Import Linter, pytest, build, pip-audit e CI Windows.
+- `.\verify.cmd` passou: formatação, lint, tipos, três contratos de dependência, dois testes, build de sdist/wheel e `pip check`.
+- `.\audit.cmd` passou sem vulnerabilidades conhecidas; o pacote local `caleo-transcriber` foi corretamente ignorado por não existir no PyPI.
+- O caminho com caracteres acentuados expôs uma incompatibilidade de encoding no `pip-audit`; o script agora força UTF-8 e foi revalidado.
+- A chave OpenAI permanece fora de `.env.example`; a UI futura usará o Windows Credential Manager por `CredentialStore`.
 
 ## Fatos observados
 
@@ -106,16 +125,16 @@ Construir o ambiente operacional reproduzível do projeto: estrutura, instruçõ
 
 ## Decisões humanas pendentes
 
-Nenhuma decisão pendente da Fase 4. A Fase 5 poderá exigir aprovação de versões/licenças concretas e configuração de CI antes de consolidar o harness.
+Nenhuma decisão humana bloqueia o harness. A escolha do build de FFmpeg e suas obrigações de licença permanece deliberadamente bloqueada antes de vendorização/release.
 
 ## Riscos e bloqueios
 
 - Segredo persistente e repositório público.
 - Possível envio de conteúdo sensível a serviço externo.
 - Custo de API e consumo local imprevisíveis sem limites.
-- Dependências nativas e distribuição de binário ainda não avaliadas.
+- PySide6 e PyInstaller tiveram licenças identificadas; o build concreto de FFmpeg ainda exige origem, versão, checksum e revisão LGPL/GPL antes de ser incorporado.
 - Chunking e paralelismo exigem contrato de contexto, overlap, recomposição, checkpoints e limites de recurso.
 
 ## Próxima ação recomendada
 
-Ler as fontes obrigatórias da Fase 5, propor o harness mínimo e verificar versões, licenças e compatibilidade das dependências antes de criar o scaffold.
+Executar a Fase 6: criar o plano de testes e ampliar o gauntlet de requisitos/riscos sem usar chave, rede ou mídia pessoal.
