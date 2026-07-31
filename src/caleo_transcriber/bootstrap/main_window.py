@@ -21,15 +21,18 @@ from caleo_transcriber.presentation.settings import ApiKeySettingsWidget
 
 def _ffmpeg_tools() -> FfmpegTools:
     executable_root = Path(sys.executable).resolve().parent
-    packaged = executable_root / "ffmpeg"
-    if (packaged / "ffmpeg.exe").is_file() and (packaged / "ffprobe.exe").is_file():
-        return FfmpegTools(packaged / "ffmpeg.exe", packaged / "ffprobe.exe")
+    bundle_root = Path(getattr(sys, "_MEIPASS", executable_root))
+    packaged_roots = (executable_root / "ffmpeg", bundle_root / "ffmpeg")
+    for packaged in packaged_roots:
+        if (packaged / "ffmpeg.exe").is_file() and (packaged / "ffprobe.exe").is_file():
+            return FfmpegTools(packaged / "ffmpeg.exe", packaged / "ffprobe.exe")
 
     project_root = Path(__file__).resolve().parents[3]
     candidates = list((project_root / "vendor" / "ffmpeg" / "bin").glob("ffmpeg-8.1.2-lgpl/**/bin"))
     if len(candidates) == 1:
         return FfmpegTools(candidates[0] / "ffmpeg.exe", candidates[0] / "ffprobe.exe")
-    return FfmpegTools(packaged / "ffmpeg.exe", packaged / "ffprobe.exe")
+    fallback = executable_root / "ffmpeg"
+    return FfmpegTools(fallback / "ffmpeg.exe", fallback / "ffprobe.exe")
 
 
 def create_main_window() -> MainWindow:

@@ -2,7 +2,7 @@
 
 ## Fase atual
 
-Fase 9 — preparar entrega, observabilidade e rollback.
+Fase 9 — fechamento técnico da TASK-010 e gate de promoção do candidato.
 
 ## Resultado esperado desta fase
 
@@ -11,10 +11,10 @@ um scaffold como produto nem introduzir telemetria.
 
 ## Estado do gate
 
-**EM ANDAMENTO.** A Fase 8 foi concluída em 2026-07-31 com a TASK-001, PR #4, checks verdes,
-aprovação humana e merge. A Fase 9 definiu observabilidade local, promoção de candidato, preflight,
-validação pós-release e rollback. O gate permanece aberto porque não existe aplicativo funcional,
-instalador, smoke em Windows 10 x64 nem rollback ensaiado; esses itens dependem das TASK-002–010.
+**EM ANDAMENTO.** TASK-001–009 foram implementadas e mescladas. A TASK-010 produz localmente o
+candidato 0.1.0, instalador Inno Setup, SBOM, licenças, checksum, inspeção, preflight e smoke do
+pacote sem Python externo. O gate de publicação permanece aberto: instalação/desinstalação e smoke
+em Windows 10 x64 limpo, Authenticode e aprovação explícita da GitHub Release não foram concluídos.
 
 ## Artefatos canônicos
 
@@ -33,6 +33,8 @@ instalador, smoke em Windows 10 x64 nem rollback ensaiado; esses itens dependem 
 - `docs/adr/ADR-0001-monolito-modular-ports-adapters.md`
 - `docs/adr/ADR-0002-stack-desktop-windows.md`
 - `docs/adr/ADR-0003-contrato-openai-whisper.md`
+- `docs/adr/ADR-0004-distribuicao-ffmpeg-windows.md`
+- `docs/adr/ADR-0005-inno-setup-windows.md`
 - `docs/security/threat-model.md`
 - `contracts/transcription-provider.md`
 - `README.md`
@@ -50,6 +52,7 @@ instalador, smoke em Windows 10 x64 nem rollback ensaiado; esses itens dependem 
 - `docs/delivery/release-runbook.md`
 - `docs/delivery/rollback-runbook.md`
 - `docs/delivery/release-evidence-template.md`
+- `docs/delivery/task-010-validation.md`
 - `release-preflight.cmd`
 - `scripts/release-preflight.ps1`
 - `contracts/transcription-provider-v1.schema.json`
@@ -161,6 +164,14 @@ instalador, smoke em Windows 10 x64 nem rollback ensaiado; esses itens dependem 
 - O baseline da Fase 9 passou com 33 testes e auditoria sem vulnerabilidades conhecidas.
 - O preflight de release verifica os cinco arquivos obrigatórios, SBOM JSON e SHA-256 sem criar
   ou publicar uma Release.
+- TASK-002–009 foram implementadas, validadas por CI e mescladas até a PR #13.
+- Em 2026-07-31, o owner autorizou o Inno Setup 6.7.3. A origem, o SHA-256, a assinatura
+  Authenticode da ferramenta e a atestação do GitHub foram verificados antes da instalação.
+- A TASK-010 gerou um primeiro candidato local 0.1.0: pacote `onedir` x64, instalador único,
+  SBOM/licenças/checksum, inspeção sem padrões proibidos, preflight e smoke sem Python externo.
+- O ensaio de rollback do artefato não publicado retirou e restaurou o instalador preservando o
+  digest. Isso não substitui o ensaio posterior de instalação/desinstalação.
+- Nenhuma chave, mídia real, chamada paga, instalação do candidato ou publicação foi realizada.
 
 ## Fatos observados
 
@@ -184,21 +195,26 @@ instalador, smoke em Windows 10 x64 nem rollback ensaiado; esses itens dependem 
 
 ## Decisões humanas pendentes
 
-TASK-005 exigirá aprovação do build/licença FFmpeg. Antes da primeira publicação, o owner ainda
-deve aprovar a tecnologia do instalador, decidir sobre Authenticode e autorizar a chamada smoke
-real da OpenAI. A publicação permanece bloqueada até a TASK-010 e seu aceite em Windows 10 x64.
+Antes da primeira publicação, o owner ainda deve decidir sobre Authenticode, autorizar se desejar
+a chamada smoke real da OpenAI, aprovar a instalação/desinstalação do candidato e aprovar a GitHub
+Release. O incremento de mídia longa e lote exige gates próprios de segurança e UX antes da
+implementação correspondente avançar.
 
 ## Riscos e bloqueios
 
 - Segredo persistente e repositório público.
 - Possível envio de conteúdo sensível a serviço externo.
 - Custo de API e consumo local imprevisíveis sem limites.
-- PySide6 e PyInstaller tiveram licenças identificadas; o build concreto de FFmpeg ainda exige origem, versão, checksum e revisão LGPL/GPL antes de ser incorporado.
+- PySide6, PyInstaller, FFmpeg e Inno Setup tiveram origem, versão e licença registradas; qualquer
+  atualização dessas dependências reabre a revisão de cadeia de suprimentos.
 - Chunking e paralelismo exigem contrato de contexto, overlap, recomposição, checkpoints e limites de recurso.
-- Ainda não existe entrada gráfica nem pacote instalável; qualquer release atual seria enganosa.
-- O RTO de rollback é desconhecido e deve ser medido no ensaio da TASK-010.
+- O candidato ainda não foi instalado nem validado em Windows 10 x64 limpo; publicar agora seria
+  prematuro.
+- O RTO completo de rollback instalado é desconhecido; apenas a retirada do artefato não publicado
+  foi medida.
 
 ## Próxima ação recomendada
 
-Revisar a preparação operacional da Fase 9 e continuar o incremento pela TASK-002. Usar os
-runbooks e o preflight quando a TASK-010 produzir o primeiro candidato instalável.
+Concluir CI e revisão da TASK-010 sem publicar o candidato. Em seguida, especificar e testar o
+incremento de mídia longa e lote (TASK-011 em diante), apresentando os gates de segurança e UX ao
+owner antes de implementar cada fronteira de risco.
