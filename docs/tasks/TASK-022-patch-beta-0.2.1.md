@@ -42,3 +42,10 @@ verificação pós-download controlada.
 
 Marcar o patch como não recomendado e orientar reinstalação de `v0.2.0-beta.1`; preservar tags,
 evidências, credencial protegida e saídas TXT/SRT.
+
+## Resultado
+
+Concluída em 2026-07-31 pela PR #17. O tag `v0.2.1-beta.1` aponta para `1b01f3d`, contém os seis
+assets previstos e o instalador baixado passou pelo preflight com SHA-256
+`c079f478cf5833d6c7ac589f16c789aaf3ed80c38035289a6c89e6ec095f99a6`. Nenhuma instalação local
+ou mídia pessoal foi usada na validação da release.
