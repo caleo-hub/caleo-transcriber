@@ -6,6 +6,12 @@ from caleo_transcriber.application.api_key_settings import (
     ApiKeySettings,
     LocalKeyValidation,
 )
+from caleo_transcriber.application.checkpoints import (
+    CheckpointChunk,
+    CheckpointStore,
+    ChunkCheckpointState,
+    LongMediaCheckpoint,
+)
 from caleo_transcriber.application.credentials import (
     CredentialStore,
     CredentialStoreError,
@@ -49,6 +55,10 @@ from caleo_transcriber.application.transcription import (
 )
 
 __all__ = [
+    "CheckpointChunk",
+    "CheckpointStore",
+    "ChunkCheckpointState",
+    "LongMediaCheckpoint",
     "CredentialStore",
     "CredentialStoreError",
     "CredentialStoreFailure",
