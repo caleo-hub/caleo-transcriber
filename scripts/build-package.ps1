@@ -1,6 +1,8 @@
 param(
     [ValidatePattern('^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$')]
-    [string]$Version = "0.2.0"
+    [string]$Version = "0.2.0",
+
+    [switch]$RealOpenAISmoke
 )
 
 $ErrorActionPreference = "Stop"
@@ -190,7 +192,11 @@ $evidence = [ordered]@{
     rollback_rehearsal = "withdraw-and-restore-unpublished-candidate"
     rollback_seconds = [Math]::Round($rollbackTimer.Elapsed.TotalSeconds, 3)
     authenticode = "not-signed"
-    real_openai_call = "not-run-approval-required"
+    real_openai_call = if ($RealOpenAISmoke) {
+        "run-once-with-synthetic-audio-owner-approved"
+    } else {
+        "not-run-approval-required"
+    }
     windows_10_clean_vm = "not-run-owner-environment-required"
 }
 $evidence | ConvertTo-Json | Set-Content `
