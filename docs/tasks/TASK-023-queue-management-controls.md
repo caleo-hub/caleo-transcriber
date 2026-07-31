@@ -42,3 +42,10 @@ checksum e preflight pós-download sem instalação.
 
 Preservar `v0.2.1-beta.1`; reverter métodos de ordenação/remoção e barra de ações. Saídas e
 credenciais permanecem intocadas.
+
+## Resultado
+
+Concluída em 2026-07-31 pela PR #19. O tag `v0.3.0-beta.1` aponta para `9227009`, contém os seis
+assets previstos e o instalador baixado passou pelo preflight com SHA-256
+`3175f209626c283ce2d5ef09bfbbc1da79aab0cd6fb34e05b58de2d5cd12acb5`. Nenhuma instalação, mídia
+pessoal ou nova chamada OpenAI foi usada na validação da release.
