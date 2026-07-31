@@ -45,7 +45,7 @@ jobs:
         run: .\scripts\install-inno-setup.ps1
       - name: Build and smoke candidate
         shell: pwsh
-        run: .\build-package.cmd -Version 0.1.0
+        run: .\scripts\build-package.ps1 -Version 0.1.0
       - name: Upload unpublished candidate
         uses: actions/upload-artifact@v7
         with:

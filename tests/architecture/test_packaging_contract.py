@@ -24,6 +24,8 @@ def test_package_workflow_is_temporary_and_cannot_publish_release() -> None:
     assert "gh release" not in workflow
     assert "OPENAI_API_KEY" not in workflow
     assert "release:" not in workflow
+    assert "run: .\\scripts\\build-package.ps1 -Version 0.1.0" in workflow
+    assert "run: .\\build-package.cmd" not in workflow
 
 
 def test_installer_is_x64_only_non_admin_and_preserves_user_data() -> None:
