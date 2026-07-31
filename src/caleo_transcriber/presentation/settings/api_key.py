@@ -39,10 +39,10 @@ class ApiKeySettingsWidget(QWidget):
         key_label.setBuddy(self.key_input)
 
         self.save_button = QPushButton("&Salvar ou substituir")
-        self.test_button = QPushButton("&Testar localmente")
+        self.test_button = QPushButton("&Verificar formato")
         self.remove_button = QPushButton("&Remover")
         self.save_button.setAccessibleName("Salvar ou substituir chave OpenAI")
-        self.test_button.setAccessibleName("Testar chave OpenAI localmente")
+        self.test_button.setAccessibleName("Verificar formato da chave OpenAI localmente")
         self.remove_button.setAccessibleName("Remover chave OpenAI")
 
         self.feedback_label = QLabel()

@@ -52,6 +52,47 @@ _STATE_TEXT = {
     BatchItemState.CANCELLED: "Cancelado",
 }
 
+_FAILURE_STATUS = {
+    AttemptFailure.INVALID_INPUT: "Falhou — mídia inválida",
+    AttemptFailure.UNSUPPORTED_MEDIA: "Falhou — formato não suportado",
+    AttemptFailure.CREDENTIAL: "Falhou — chave OpenAI",
+    AttemptFailure.NETWORK: "Falhou — conexão",
+    AttemptFailure.RATE_LIMIT: "Falhou — limite OpenAI",
+    AttemptFailure.PROVIDER: "Falhou — OpenAI",
+    AttemptFailure.CANCELLED: "Cancelado",
+    AttemptFailure.OUTPUT: "Falhou — pasta de saída",
+    AttemptFailure.AMBIGUOUS: "Falhou — envio incerto",
+}
+
+_FAILURE_GUIDANCE = {
+    AttemptFailure.INVALID_INPUT: (
+        "Não foi possível preparar a mídia. Confirme se o arquivo contém uma faixa de áudio "
+        "legível e tente novamente."
+    ),
+    AttemptFailure.UNSUPPORTED_MEDIA: "Use um arquivo MP4, MP3 ou WAV válido.",
+    AttemptFailure.CREDENTIAL: (
+        "A chave da OpenAI está ausente ou foi recusada. Abra Configurar chave, salve uma chave "
+        "válida e repita o item."
+    ),
+    AttemptFailure.NETWORK: (
+        "Não foi possível conectar à OpenAI. Verifique a internet e repita o item."
+    ),
+    AttemptFailure.RATE_LIMIT: (
+        "A OpenAI recusou temporariamente a solicitação por limite ou cota. Aguarde e repita."
+    ),
+    AttemptFailure.PROVIDER: (
+        "A OpenAI não concluiu a transcrição. Repita o item; se continuar, informe o código abaixo."
+    ),
+    AttemptFailure.CANCELLED: "O item foi cancelado sem publicar uma saída parcial.",
+    AttemptFailure.OUTPUT: (
+        "Não foi possível salvar a transcrição. Escolha outra pasta de saída e repita o item."
+    ),
+    AttemptFailure.AMBIGUOUS: (
+        "O envio pode ter sido processado pela OpenAI. Confirme antes de reenviar para evitar "
+        "cobrança duplicada."
+    ),
+}
+
 
 class QtBatchEvents(QObject):
     event_published = Signal(object)
@@ -223,7 +264,7 @@ class MainWindow(QMainWindow):
         self.setStyleSheet(
             """
             QWidget { font-family: "Segoe UI"; font-size: 13px; color: #152238; }
-            QMainWindow { background: #F4F7FB; }
+            QMainWindow, QDialog { background: #F4F7FB; }
             QLabel#title { font-size: 25px; font-weight: 700; color: #102A43; }
             QLabel#muted { color: #62748A; }
             QFrame#card, QTableWidget {
@@ -232,15 +273,41 @@ class MainWindow(QMainWindow):
             QFrame#cloudCard { background: #E8F3FF; border: 1px solid #9BC7F5; border-radius: 8px; }
             QFrame#banner { background: #FFF4D6; border: 1px solid #E0A800; border-radius: 8px; }
             QLabel#cloudTitle { font-weight: 700; color: #0B5CAD; }
-            QPushButton, QComboBox {
-                background: white; border: 1px solid #9FB3C8;
+            QPushButton, QComboBox, QLineEdit {
+                background: white; color: #152238; border: 1px solid #829AB1;
                 border-radius: 6px; padding: 8px 12px;
             }
-            QPushButton:focus, QComboBox:focus, QTableWidget:focus { border: 2px solid #1677C8; }
-            QPushButton:disabled { color: #9AA9B8; background: #EEF2F6; }
+            QPushButton:hover, QComboBox:hover { background: #EDF6FF; border-color: #1677C8; }
+            QPushButton:focus, QComboBox:focus, QLineEdit:focus, QTableWidget:focus {
+                border: 2px solid #1677C8;
+            }
+            QPushButton:disabled, QComboBox:disabled, QLineEdit:disabled {
+                color: #6B7C8F; background: #E8EDF3; border-color: #B8C4D1;
+            }
             QPushButton#primaryButton {
                 background: #1261A0; color: white;
                 border-color: #1261A0; font-weight: 700;
+            }
+            QPushButton#primaryButton:hover { background: #0B528D; }
+            QTableWidget {
+                color: #152238; gridline-color: #D9E2EC;
+                alternate-background-color: #F4F7FB;
+                selection-background-color: #D6E9FF; selection-color: #102A43;
+            }
+            QHeaderView::section {
+                background: #E8EEF6; color: #102A43; font-weight: 700;
+                border: none; border-right: 1px solid #C8D4E1;
+                border-bottom: 1px solid #B8C7D9; padding: 7px 8px;
+            }
+            QTableCornerButton::section {
+                background: #E8EEF6; border: none; border-bottom: 1px solid #B8C7D9;
+            }
+            QComboBox QAbstractItemView {
+                background: white; color: #152238; border: 1px solid #829AB1;
+                selection-background-color: #D6E9FF; selection-color: #102A43;
+            }
+            QToolTip {
+                background: #102A43; color: white; border: 1px solid #486581; padding: 4px;
             }
             QProgressBar { min-height: 8px; max-height: 8px; border: none; background: #D9E2EC; }
             QProgressBar::chunk { background: #1677C8; }
@@ -333,11 +400,23 @@ class MainWindow(QMainWindow):
         if value.item_id not in self._rows:
             self._rebuild_table()
         row = self._rows.get(value.item_id)
+        result = self._processor.result_for(value.item_id)
         if row is not None:
-            self.table.setItem(row, 3, QTableWidgetItem(_STATE_TEXT[value.state]))
+            status_text = _STATE_TEXT[value.state]
+            if value.state is BatchItemState.FAILED and isinstance(
+                result, TranscribeSingleFileFailure
+            ):
+                status_text = _FAILURE_STATUS[result.category]
+                guidance = _failure_guidance(result)
+                self.detail_label.setText(guidance)
+            status_item = QTableWidgetItem(status_text)
+            if value.state is BatchItemState.FAILED and isinstance(
+                result, TranscribeSingleFileFailure
+            ):
+                status_item.setToolTip(_failure_guidance(result))
+            self.table.setItem(row, 3, status_item)
             self._set_action(row, value.item_id, value.state)
         if value.state is BatchItemState.FAILED:
-            result = self._processor.result_for(value.item_id)
             if isinstance(result, TranscribeSingleFileFailure) and (
                 result.category is AttemptFailure.AMBIGUOUS
             ):
@@ -409,7 +488,15 @@ class MainWindow(QMainWindow):
             self.table.setItem(row, 0, file_item)
             self.table.setItem(row, 1, QTableWidgetItem("—"))
             self.table.setItem(row, 2, QTableWidgetItem(self._format().value.upper()))
-            self.table.setItem(row, 3, QTableWidgetItem(_STATE_TEXT[item.state]))
+            status_text = _STATE_TEXT[item.state]
+            result = self._processor.result_for(item.item_id)
+            status_item = QTableWidgetItem(status_text)
+            if item.state is BatchItemState.FAILED and isinstance(
+                result, TranscribeSingleFileFailure
+            ):
+                status_item.setText(_FAILURE_STATUS[result.category])
+                status_item.setToolTip(_failure_guidance(result))
+            self.table.setItem(row, 3, status_item)
             self._set_action(row, item.item_id, item.state)
 
     def _set_action(self, row: int, item_id: str, state: BatchItemState) -> None:
@@ -507,14 +594,20 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def _open_settings(self) -> None:
+        self._create_settings_dialog().exec()
+
+    def _create_settings_dialog(self) -> QDialog:
         dialog = QDialog(self)
+        dialog.setObjectName("settingsDialog")
         dialog.setWindowTitle("Configurar OpenAI")
+        dialog.setMinimumWidth(520)
+        dialog.setStyleSheet(self.styleSheet())
         layout = QVBoxLayout(dialog)
         layout.addWidget(self._settings_widget_factory())
         close_button = QPushButton("&Fechar")
         close_button.clicked.connect(dialog.accept)
         layout.addWidget(close_button)
-        dialog.exec()
+        return dialog
 
     @Slot()
     def _open_output(self) -> None:
@@ -541,6 +634,10 @@ class MainWindow(QMainWindow):
             return
         self._processor.clear()
         event.accept()
+
+
+def _failure_guidance(result: TranscribeSingleFileFailure) -> str:
+    return f"{_FAILURE_GUIDANCE[result.category]} Código: {result.diagnostic_code}."
 
 
 def _application_icon_path() -> Path:

@@ -11,10 +11,12 @@ from threading import Event
 from PySide6.QtWidgets import QApplication, QWidget
 
 from caleo_transcriber.application import (
+    ApiKeySettings,
     AttemptFailure,
     BatchProcessor,
     BatchSettings,
     OutputFormat,
+    SecretValue,
     TranscribeLongMediaCommand,
     TranscribeSingleFileFailure,
     TranscribeSingleFileResult,
@@ -22,6 +24,7 @@ from caleo_transcriber.application import (
 )
 from caleo_transcriber.domain import AttemptState
 from caleo_transcriber.presentation import MainWindow, QtBatchEvents
+from caleo_transcriber.presentation.settings import ApiKeySettingsWidget
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "docs" / "evidence" / "ux-increment-2"
@@ -33,6 +36,22 @@ class _Notice:
 
     def mark_shown(self) -> None:
         return None
+
+
+class _CredentialStore:
+    def __init__(self) -> None:
+        self._secret: SecretValue | None = SecretValue("synthetic-preview-key")
+
+    def get(self, service: str, account: str) -> SecretValue | None:
+        return self._secret
+
+    def set(self, service: str, account: str, secret: SecretValue) -> None:
+        self._secret = secret
+
+    def delete(self, service: str, account: str) -> bool:
+        existed = self._secret is not None
+        self._secret = None
+        return existed
 
 
 class _UseCase:
@@ -75,8 +94,14 @@ def _window(use_case: _UseCase) -> MainWindow:
         events,
         "ux-evidence",
     )
-    window = MainWindow(processor, events, OUTPUT / "cache", QWidget, _Notice())
-    window.set_output_directory(OUTPUT)
+    window = MainWindow(
+        processor,
+        events,
+        OUTPUT / "cache",
+        lambda: ApiKeySettingsWidget(ApiKeySettings(_CredentialStore())),
+        _Notice(),
+    )
+    window.set_output_directory(Path("C:/Transcricoes"))
     window.resize(980, 700)
     window.show()
     QApplication.processEvents()
@@ -92,7 +117,7 @@ def _wait(predicate: Callable[[], bool], timeout: float = 5.0) -> None:
         time.sleep(0.01)
 
 
-def _save(window: MainWindow, name: str) -> None:
+def _save(window: QWidget, name: str) -> None:
     QApplication.processEvents()
     if not window.grab().save(str(OUTPUT / name), "PNG"):
         raise RuntimeError("UX_EVIDENCE_SAVE_FAILED")
@@ -130,6 +155,13 @@ def main() -> int:
     resume.show_resume_banner()
     _save(resume, "04-resume.png")
     resume.close()
+
+    settings = _window(_UseCase([]))
+    dialog = settings._create_settings_dialog()
+    dialog.show()
+    _save(dialog, "05-settings-dialog.png")
+    dialog.close()
+    settings.close()
     return 0
 
 
