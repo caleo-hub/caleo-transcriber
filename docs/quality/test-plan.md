@@ -85,6 +85,7 @@ Nenhum teste isolado prova correção. O gauntlet combina verificações rápida
 | LM-CA-011/012 | cancelar/progresso são honestos? | componente com token e eventos | SEC/UX |
 | BATCH-CA-001–007 | fila isola, cancela e repete corretamente? | máquina de estados + falha em cada posição | SEC |
 | BATCH-CA-008–010 | tabela é compreensível, acessível e efêmera? | pytest-qt, screenshot e reinício | UX |
+| BATCH-CA-011–016 | seleção, limpeza, ordem, pausa e cancelamento preservam dados? | domínio + scheduler + pytest-qt + screenshot | UX/SEC |
 
 TASK-011 valida os oráculos sem importar `src`. Depois dos gates, cada teste comportamental é
 conectado à API pública antes da implementação correspondente.

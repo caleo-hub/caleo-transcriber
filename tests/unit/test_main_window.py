@@ -5,8 +5,8 @@ from pathlib import Path
 from threading import Event
 
 import pytest
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QLabel, QMessageBox, QWidget
+from PySide6.QtCore import QItemSelectionModel, Qt
+from PySide6.QtWidgets import QAbstractItemView, QLabel, QMessageBox, QWidget
 from pytestqt.qtbot import QtBot
 
 from caleo_transcriber.application import (
@@ -108,6 +108,14 @@ def _cell_text(window: MainWindow, row: int, column: int) -> str:
     return item.text()
 
 
+def _select_rows(window: MainWindow, *rows: int) -> None:
+    selection = window.table.selectionModel()
+    selection.clearSelection()
+    flags = QItemSelectionModel.SelectionFlag.Select | QItemSelectionModel.SelectionFlag.Rows
+    for row in rows:
+        selection.select(window.table.model().index(row, 0), flags)
+
+
 def test_empty_ui_has_cloud_notice_accessible_queue_and_no_history(qtbot: QtBot) -> None:
     window = _window(qtbot, StubUseCase([]))
     labels = [label.text() for label in window.findChildren(QLabel)]
@@ -132,6 +140,84 @@ def test_multiple_sources_deduplicate_and_format_is_common(qtbot: QtBot) -> None
     assert [_cell_text(window, row, 2) for row in range(2)] == ["SRT", "SRT"]
     assert "duplicado" in window.detail_label.text()
     assert window.start_button.isEnabled()
+
+
+def test_selection_reorders_and_removes_queue_items(qtbot: QtBot) -> None:
+    window = _window(qtbot, StubUseCase([]))
+    window.set_sources([Path("one.mp4"), Path("two.mp4"), Path("three.mp4")])
+    window.set_output_directory(Path("C:/out"))
+
+    assert window.table.selectionMode() == QAbstractItemView.SelectionMode.ExtendedSelection
+    _select_rows(window, 1)
+    assert window.move_up_button.isEnabled()
+    _click(qtbot, window.move_up_button)
+    assert [_cell_text(window, row, 0) for row in range(3)] == [
+        "two.mp4",
+        "one.mp4",
+        "three.mp4",
+    ]
+
+    _select_rows(window, 0, 2)
+    assert window.remove_button.isEnabled()
+    _click(qtbot, window.remove_button)
+    assert window.table.rowCount() == 1
+    assert _cell_text(window, 0, 0) == "one.mp4"
+    assert "somente da fila" in window.detail_label.text()
+
+
+def test_pause_after_current_leaves_next_item_ready(qtbot: QtBot) -> None:
+    entered = Event()
+    release = Event()
+    use_case = StubUseCase([_success(), _success()], entered, release)
+    window = _window(qtbot, use_case)
+    window.set_sources([Path("one.mp4"), Path("two.mp4")])
+    window.set_output_directory(Path("C:/out"))
+
+    _click(qtbot, window.start_button)
+    assert entered.wait(timeout=2)
+    qtbot.waitUntil(window.pause_button.isEnabled)
+    _click(qtbot, window.pause_button)
+    release.set()
+    qtbot.waitUntil(lambda: window._thread is None)
+
+    assert len(use_case.calls) == 1
+    assert _cell_text(window, 0, 3) == "Concluído"
+    assert _cell_text(window, 1, 3) == "Na fila"
+    assert window.start_button.isEnabled()
+
+
+def test_retry_selected_requeues_only_selected_failure(qtbot: QtBot) -> None:
+    use_case = StubUseCase([_failure(), _failure(), _success()])
+    window = _window(qtbot, use_case)
+    window.set_sources([Path("one.mp4"), Path("two.mp4")])
+    window.set_output_directory(Path("C:/out"))
+    _click(qtbot, window.start_button)
+    qtbot.waitUntil(lambda: window._thread is None)
+
+    _select_rows(window, 1)
+    assert window.retry_selected_button.isEnabled()
+    _click(qtbot, window.retry_selected_button)
+    qtbot.waitUntil(lambda: window._thread is None and len(use_case.calls) == 3)
+
+    assert [call.source.name for call in use_case.calls] == ["one.mp4", "two.mp4", "two.mp4"]
+    assert _cell_text(window, 0, 3) == "Falhou — conexão"
+    assert _cell_text(window, 1, 3) == "Concluído"
+
+
+def test_clear_completed_preserves_files_message_and_cancel_actions(qtbot: QtBot) -> None:
+    window = _window(qtbot, StubUseCase([_success()]))
+    window.set_sources([Path("one.mp4")])
+    window.set_output_directory(Path("C:/out"))
+    _click(qtbot, window.start_button)
+    qtbot.waitUntil(lambda: window._thread is None)
+
+    assert window.clear_completed_action.isEnabled()
+    window.clear_completed_action.trigger()
+
+    assert window.table.rowCount() == 0
+    assert "arquivos foram preservados" in window.detail_label.text()
+    assert window.cancel_button.text() == "&Cancelar atual"
+    assert window.cancel_all_action.text() == "Cancelar fila"
 
 
 def test_worker_keeps_ui_responsive_and_locks_configuration(qtbot: QtBot) -> None:

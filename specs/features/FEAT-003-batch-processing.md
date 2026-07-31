@@ -15,11 +15,15 @@ falhar, com cancelamento previsível e repetição apenas das falhas.
 - fila FIFO efêmera, com no máximo um item ativo;
 - destino e formato TXT/SRT comuns à execução;
 - estado e etapa por item, resumo do lote e ações acessíveis por teclado;
+- seleção múltipla para remover, repetir e reorganizar itens;
+- reordenação explícita somente entre itens pendentes;
+- limpeza por escopo: concluídos, falhas/cancelados, pendentes ou toda a fila inativa;
+- pausa segura após concluir o item ativo;
 - cancelar pendentes, o item ativo ou o lote;
 - preservar concluídos e repetir somente itens em `failed`.
 
-Não entra: prioridade/reordenação manual, execução paralela de arquivos, histórico após reinício,
-pastas recursivas ou configurações diferentes por item. Mídia longa usa FEAT-002 internamente.
+Não entra: prioridade automática, execução paralela de arquivos, histórico após reinício, pastas
+recursivas ou configurações diferentes por item. Mídia longa usa FEAT-002 internamente.
 
 ## Modelo e invariantes
 
@@ -39,6 +43,11 @@ Estados por item: `queued`, `preparing`, `transcribing`, `saving`, `completed`, 
 11. Fechar e reabrir o aplicativo mostra fila vazia; retomada técnica só aparece ao selecionar
     novamente uma fonte compatível com FEAT-002.
 12. Nenhum nome completo de caminho, conteúdo ou chave entra em log.
+13. Reordenar altera somente a ordem relativa de itens `queued`; ativo e terminais não mudam de
+    posição por essa ação.
+14. Remover ou limpar uma linha descarta apenas metadados efêmeros da fila e nunca apaga origem,
+    saída TXT/SRT ou credencial.
+15. Pausar após o atual deixa os demais itens em `queued` e permite continuar depois.
 
 ## Fluxo principal
 
@@ -96,6 +105,36 @@ indeterminado quando não há total real.
 ### BATCH-CA-010 — Sem histórico
 
 Ao reiniciar, a fila está vazia e nenhuma lista de trabalhos anteriores é apresentada.
+
+### BATCH-CA-011 — Seleção e remoção
+
+Seleção por linha aceita Ctrl/Shift. `Remover selecionados` remove itens pendentes ou terminais,
+ignora o ativo com orientação visível e não apaga arquivos de entrada ou saída.
+
+### BATCH-CA-012 — Reordenação previsível
+
+`Subir` e `Descer` preservam a ordem interna da seleção e só trocam posições com outros itens
+pendentes. O próximo processamento respeita a nova ordem.
+
+### BATCH-CA-013 — Limpeza por escopo
+
+É possível limpar concluídos, falhas/cancelados, pendentes ou toda a fila inativa. Durante uma
+execução, o item ativo permanece visível e recebe uma explicação; a saída já criada é preservada.
+
+### BATCH-CA-014 — Repetir selecionados
+
+O comando habilita somente quando a seleção contém falha e não há execução ativa. Apenas falhas
+selecionadas voltam a `queued`; concluídos, cancelados e pendentes selecionados não mudam.
+
+### BATCH-CA-015 — Pausar após o atual
+
+Durante processamento, `Pausar após o atual` não cancela o item ativo. Depois que ele termina, a
+thread encerra e os demais itens continuam pendentes até `Iniciar fila`.
+
+### BATCH-CA-016 — Cancelamento explícito
+
+`Cancelar atual` solicita interrupção somente do item ativo. `Cancelar fila`, no menu de ações,
+também cancela todos os pendentes. Nenhum dos comandos remove sucessos ou saídas.
 
 ## Exemplos e contraexemplos
 

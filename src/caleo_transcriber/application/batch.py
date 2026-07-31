@@ -78,6 +78,7 @@ class BatchProcessor:
         self._confirm_ids: set[str] = set()
         self._active_cancel: Event | None = None
         self._active_id: str | None = None
+        self._pause_after_current = False
         self._running = False
         self._lock = RLock()
 
@@ -119,6 +120,7 @@ class BatchProcessor:
             if self._running:
                 raise RuntimeError("lote já está em execução")
             self._running = True
+            self._pause_after_current = False
         try:
             while True:
                 with self._lock:
@@ -179,11 +181,15 @@ class BatchProcessor:
                     self._publish(current)
                     self._active_id = None
                     self._active_cancel = None
+                    if self._pause_after_current:
+                        self._pause_after_current = False
+                        return self._queue.summary()
         finally:
             with self._lock:
                 self._running = False
                 self._active_id = None
                 self._active_cancel = None
+                self._pause_after_current = False
 
     def cancel_item(self, item_id: str) -> bool:
         with self._lock:
@@ -215,6 +221,18 @@ class BatchProcessor:
                     self._publish(self._queue.set_state(active.item_id, BatchItemState.CANCELLING))
                 self._active_cancel.set()
 
+    def cancel_active(self) -> bool:
+        with self._lock:
+            active_id = self._active_id
+        return active_id is not None and self.cancel_item(active_id)
+
+    def pause_after_current(self) -> bool:
+        with self._lock:
+            if not self._running or self._active_id is None:
+                return False
+            self._pause_after_current = True
+            return True
+
     def retry_failed(self) -> tuple[str, ...]:
         with self._lock:
             retried = self._queue.retry_failed()
@@ -223,6 +241,41 @@ class BatchProcessor:
             for item in retried:
                 self._publish(item)
             return ids
+
+    def retry_items(self, item_ids: Iterable[str]) -> tuple[str, ...]:
+        with self._lock:
+            retried = self._queue.retry_items(item_ids)
+            ids = tuple(item.item_id for item in retried)
+            self._retry_ids.update(ids)
+            for item in retried:
+                self._publish(item)
+            return ids
+
+    def move_items(self, item_ids: Iterable[str], direction: int) -> tuple[str, ...]:
+        with self._lock:
+            moved = self._queue.move_queued(item_ids, direction)
+            return tuple(item.item_id for item in moved)
+
+    def remove_items(self, item_ids: Iterable[str]) -> tuple[str, ...]:
+        with self._lock:
+            removed = self._queue.remove(item_ids)
+            self._forget(removed)
+            return tuple(item.item_id for item in removed)
+
+    def clear_completed(self) -> tuple[str, ...]:
+        return self._clear_states({BatchItemState.COMPLETED})
+
+    def clear_failed_cancelled(self) -> tuple[str, ...]:
+        return self._clear_states({BatchItemState.FAILED, BatchItemState.CANCELLED})
+
+    def clear_pending(self) -> tuple[str, ...]:
+        return self._clear_states({BatchItemState.QUEUED})
+
+    def clear_inactive(self) -> tuple[str, ...]:
+        with self._lock:
+            removed = self._queue.clear_inactive()
+            self._forget(removed)
+            return tuple(item.item_id for item in removed)
 
     def retry_ambiguous(self, item_id: str) -> bool:
         with self._lock:
@@ -251,6 +304,19 @@ class BatchProcessor:
             self._results.clear()
             self._retry_ids.clear()
             self._confirm_ids.clear()
+
+    def _clear_states(self, states: set[BatchItemState]) -> tuple[str, ...]:
+        with self._lock:
+            removed = self._queue.clear_states(states)
+            self._forget(removed)
+            return tuple(item.item_id for item in removed)
+
+    def _forget(self, items: Iterable[BatchItem]) -> None:
+        for item in items:
+            self._sources.pop(item.item_id, None)
+            self._results.pop(item.item_id, None)
+            self._retry_ids.discard(item.item_id)
+            self._confirm_ids.discard(item.item_id)
 
     def _publish(self, item: BatchItem) -> None:
         self._events.publish(

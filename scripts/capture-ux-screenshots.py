@@ -8,6 +8,7 @@ from collections.abc import Callable
 from pathlib import Path
 from threading import Event
 
+from PySide6.QtCore import QItemSelectionModel
 from PySide6.QtWidgets import QApplication, QWidget
 
 from caleo_transcriber.application import (
@@ -162,6 +163,17 @@ def main() -> int:
     _save(dialog, "05-settings-dialog.png")
     dialog.close()
     settings.close()
+
+    controls = _window(_UseCase([]))
+    controls.set_sources(
+        [Path("primeiro.mp4"), Path("segundo.wav"), Path("terceiro.mp3"), Path("quarto.mp4")]
+    )
+    selection = controls.table.selectionModel()
+    flags = QItemSelectionModel.SelectionFlag.Select | QItemSelectionModel.SelectionFlag.Rows
+    for row in (1, 2):
+        selection.select(controls.table.model().index(row, 0), flags)
+    _save(controls, "06-queue-controls.png")
+    controls.close()
     return 0
 
 

@@ -10,7 +10,13 @@
     "BATCH-CA-007",
     "BATCH-CA-008",
     "BATCH-CA-009",
-    "BATCH-CA-010"
+    "BATCH-CA-010",
+    "BATCH-CA-011",
+    "BATCH-CA-012",
+    "BATCH-CA-013",
+    "BATCH-CA-014",
+    "BATCH-CA-015",
+    "BATCH-CA-016"
   ],
   "cases": [
     {
@@ -39,6 +45,48 @@
       "acceptance": "BATCH-CA-002",
       "observed": ["completed", "transcribing", "queued", "queued"],
       "expected_active_count": 1
+    },
+    {
+      "id": "remove-selection-preserves-active",
+      "acceptance": "BATCH-CA-011",
+      "initial": ["completed", "transcribing", "queued"],
+      "selected_positions": [0, 1, 2],
+      "expected": ["transcribing"],
+      "filesystem_deletes": 0
+    },
+    {
+      "id": "move-pending-up",
+      "acceptance": "BATCH-CA-012",
+      "initial_ids": ["completed", "first", "second", "third"],
+      "selected_ids": ["second", "third"],
+      "direction": "up",
+      "expected_ids": ["completed", "second", "third", "first"]
+    },
+    {
+      "id": "clear-completed-only",
+      "acceptance": "BATCH-CA-013",
+      "initial": ["completed", "failed", "cancelled", "queued"],
+      "expected": ["failed", "cancelled", "queued"],
+      "filesystem_deletes": 0
+    },
+    {
+      "id": "retry-selected-failure",
+      "acceptance": "BATCH-CA-014",
+      "initial": ["failed", "failed", "completed"],
+      "selected_positions": [1, 2],
+      "expected": ["failed", "queued", "completed"]
+    },
+    {
+      "id": "pause-after-active",
+      "acceptance": "BATCH-CA-015",
+      "initial": ["transcribing", "queued"],
+      "expected_after_active": ["completed", "queued"]
+    },
+    {
+      "id": "cancel-current-only",
+      "acceptance": "BATCH-CA-016",
+      "initial": ["transcribing", "queued"],
+      "expected": ["cancelled", "queued"]
     }
   ]
 }
