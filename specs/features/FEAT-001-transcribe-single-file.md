@@ -1,6 +1,6 @@
 # FEAT-001 — Transcrever um arquivo inteiro em TXT
 
-- **Status:** em clarificação
+- **Status:** aprovada
 - **PRD relacionado:** [`docs/product/prd.md`](../../docs/product/prd.md)
 - **Constituição:** [`specs/constitution.md`](../constitution.md)
 - **Owner:** `caleo-hub`
@@ -277,7 +277,7 @@ Não há migração de dados. A fatia não cria histórico. Configurações de p
 
 1. **Q1 [resolvida]:** fatia reduzida alinhada à arquitetura de referência, com portas e adaptadores e caminho OpenAI ponta a ponta primeiro.
 2. **Q2 [resolvida]:** MP4, MP3 e WAV; entradas de vídeo têm somente o áudio extraído.
-3. **Q3 [pendente]:** proposta: exibir um aviso explicativo na primeira utilização da OpenAI e manter, em toda execução, o indicador visível “OpenAI (cloud) — envia áudio e pode gerar custo”, sem abrir modal repetitivo. Clicar “Iniciar” com esse modo visível confirma o envio.
+3. **Q3 [resolvida]:** exibir um aviso explicativo na primeira utilização da OpenAI e manter, em toda execução, o indicador visível “OpenAI (cloud) — envia áudio e pode gerar custo”, sem abrir modal repetitivo. Clicar “Iniciar” com esse modo visível confirma o envio.
 4. **Q4 [resolvida]:** API OpenAI com `whisper-1` primeiro; Whisper local entra depois como alternativa opcional para evitar custo de API.
 5. **Q5 [resolvida]:** áudio válido porém silencioso gera TXT vazio com sucesso e aviso “nenhuma fala detectada”.
 
@@ -289,4 +289,4 @@ Não há migração de dados. A fatia não cria histórico. Configurações de p
 
 ## Gate da Fase 3
 
-**NÃO ATENDIDO.** Q1, Q2, Q4 e Q5 foram resolvidas em 2026-07-31. Falta somente a decisão de UX/consentimento da Q3 antes de transformar a spec em contrato aprovado.
+**ATENDIDO em 2026-07-31.** Q1–Q5 foram resolvidas pelo owner; intenção, escopo, invariantes, falhas, exemplos e critérios de aceitação estão aprovados. A feature pode avançar para arquitetura e contratos.

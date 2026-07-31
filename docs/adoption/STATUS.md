@@ -2,15 +2,15 @@
 
 ## Fase atual
 
-Fase 3 — especificar comportamento e eliminar ambiguidades.
+Fase 4 — definir arquitetura suficiente e contratos verificáveis.
 
 ## Resultado esperado desta fase
 
-Aprovar o comportamento da primeira fatia vertical com requisitos, invariantes, falhas, exemplos e critérios observáveis, sem decisão crítica escondida.
+Definir componentes, fronteiras, contratos, dependências, ADRs e estratégia de testes da primeira fatia sem antecipar complexidade dos incrementos posteriores.
 
 ## Estado do gate
 
-**NÃO ATENDIDO.** As Fases 0, 1 e 2 foram aprovadas em 2026-07-31. A primeira feature spec está em clarificação.
+**EM ANDAMENTO.** As Fases 0–3 foram aprovadas em 2026-07-31. A arquitetura e os contratos da primeira fatia ainda serão definidos.
 
 ## Artefatos canônicos
 
@@ -63,6 +63,7 @@ Aprovar o comportamento da primeira fatia vertical com requisitos, invariantes, 
 - A primeira fatia proposta reduz o fluxo a um arquivo inteiro de até 30 minutos, saída TXT e provedor previamente configurado.
 - Em 2026-07-31, `caleo-hub` aprovou MP4, MP3 e WAV na primeira fatia, com extração exclusiva do áudio de vídeos, e TXT vazio com aviso para áudio silencioso.
 - A primeira fatia seguirá as fronteiras da arquitetura de referência e entregará primeiro a API OpenAI com `whisper-1`; Whisper local será um adaptador opcional posterior para quem preferir evitar custo de API.
+- Em 2026-07-31, `caleo-hub` aprovou aviso explicativo somente no primeiro uso da OpenAI, indicador cloud permanente e ausência de modal repetitivo; com isso, o gate da Fase 3 foi atendido.
 
 ## Fatos observados
 
@@ -86,7 +87,7 @@ Aprovar o comportamento da primeira fatia vertical com requisitos, invariantes, 
 
 ## Decisões humanas pendentes
 
-1. Decidir a Q3: aviso único mais indicador cloud permanente, ou modal de confirmação em toda execução.
+Nenhuma decisão de produto pendente para a primeira fatia. Eventuais decisões arquiteturais materiais serão apresentadas com alternativas e consequências na Fase 4.
 
 ## Riscos e bloqueios
 
@@ -98,4 +99,4 @@ Aprovar o comportamento da primeira fatia vertical com requisitos, invariantes, 
 
 ## Próxima ação recomendada
 
-O responsável humano decide a Q3 em `specs/features/FEAT-001-transcribe-single-file.md`. Com o gate da Fase 3 aceito, iniciar arquitetura e contratos; não gerar scaffold ou código de produto antes disso.
+Produzir a arquitetura mínima, ADRs e contratos verificáveis da primeira fatia; não gerar scaffold ou código de produto antes do gate da Fase 4.
