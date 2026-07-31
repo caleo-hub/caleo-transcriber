@@ -3,7 +3,7 @@
 ## Identificação
 
 - **Data de abertura:** 2026-07-31
-- **Estado:** decisões humanas registradas; duas confirmações pendentes
+- **Estado:** Fase 0 aprovada; discovery da Fase 1 em andamento
 - **Nome provisório:** Caleo Transcriber
 - **BOOK_ROOT:** <https://github.com/caleo-hub/engenharia-de-software-com-agentes-de-codigo>
 - **RUNBOOK:** <https://github.com/caleo-hub/engenharia-de-software-com-agentes-de-codigo/blob/main/guias-de-adocao/RUNBOOK-A-PRIORI-PROJETO-NOVO.md>
@@ -92,7 +92,7 @@ Estes itens são propostas de corte de escopo, não decisões aprovadas.
 
 | Item | Classificação inicial | Tratamento esperado | Estado |
 |---|---|---|---|
-| Arquivos de entrada | potencialmente pessoais, confidenciais ou protegidos por direitos autorais | processar somente por ação explícita; informar quando houver envio externo | política pendente |
+| Arquivos de entrada | potencialmente pessoais, confidenciais ou protegidos por direitos autorais | processar somente por ação explícita; no modo OpenAI, enviar apenas o áudio selecionado | decidido |
 | Áudio temporário extraído | mesma classificação do arquivo de entrada | usar armazenamento temporário controlado e remoção segura após o trabalho | proposta |
 | Transcrições | podem reproduzir dados sensíveis do conteúdo | salvar apenas no destino escolhido e evitar conteúdo em logs | proposta |
 | Chave da API | segredo de alta sensibilidade | nunca versionar ou registrar; usar armazenamento protegido do Windows | proposta arquitetural |
@@ -116,7 +116,7 @@ Fonte: [README oficial do OpenAI Whisper](https://github.com/openai/whisper/blob
 
 ## Perfil de adoção e risco
 
-**Proposta mantida, pendente de aceite explícito: perfil padrão, com controles reforçados para segredo e dados locais.**
+**Decisão: perfil padrão, com controles reforçados para segredo e dados locais.**
 
 Justificativa: há integração externa, segredo persistente, possíveis dados pessoais/confidenciais, processamento concorrente, distribuição de binário e dependências nativas. O perfil não é crítico por padrão; deverá ser reclassificado se o produto for usado com dados regulados, em contexto corporativo obrigatório ou com alto impacto.
 
@@ -136,12 +136,9 @@ Justificativa: há integração externa, segredo persistente, possíveis dados p
 5. TXT e SRT serão opções de saída selecionáveis.
 6. Windows 10 é o sistema operacional mínimo.
 7. O requisito de hardware local usará dados oficiais quando existirem e benchmarks quando a biblioteca não publicar um mínimo.
-
-## Confirmações necessárias para o gate
-
-1. No modo OpenAI, autorizar o envio **somente do áudio do arquivo ou segmento escolhido**, por ação explícita do usuário. Sem essa autorização, o modo OpenAI precisa sair do MVP.
-2. Aceitar ou corrigir a proposta de perfil de adoção **padrão**.
+8. No modo OpenAI, o usuário autoriza por ação explícita o envio somente do áudio do arquivo ou segmento escolhido.
+9. O perfil de adoção padrão foi aceito.
 
 ## Gate da Fase 0
 
-**NÃO ATENDIDO.** Owners e escopo principal foram definidos. Faltam a política mínima de transferência do modo OpenAI e o aceite do perfil de adoção.
+**ATENDIDO em 2026-07-31.** Owner, problema inicial, perfil de risco, limites de permissão e política mínima de transferência foram aceitos por `caleo-hub`.

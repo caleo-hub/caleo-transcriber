@@ -15,7 +15,7 @@ Esta matriz limita ações por classe. Autorização para uma ação não se tra
 | Criar issues, branches adicionais, PRs ou releases | não autorizado | solicitar direção antes da mutação |
 | Acessar ou receber a chave da OpenAI | proibido | o agente não deve pedir, revelar, copiar ou persistir a chave |
 | Executar chamadas pagas à OpenAI | requer aprovação | informar finalidade, dados enviados e potencial de custo |
-| Enviar mídia ou transcrição a serviço externo | bloqueado até clarificação | no produto, o modo OpenAI exigirá ação explícita e enviará somente o áudio selecionado; usar conteúdo sintético em testes |
+| Enviar mídia ou transcrição a serviço externo | autorizado somente no comportamento aprovado do produto | modo OpenAI por ação explícita, somente para o áudio selecionado; agentes e testes continuam usando conteúdo sintético por padrão |
 | Usar mídia real fornecida pelo usuário | limitado | somente no escopo solicitado; não publicar nem reter sem política |
 | Alterar configurações de produção, deploy ou assinatura | bloqueado | exige plano, evidências e aprovação humana específica |
 | Excluir, sobrescrever ou migrar dados | requer aprovação explícita | alvo resolvido, backup/rollback e impacto informados |
