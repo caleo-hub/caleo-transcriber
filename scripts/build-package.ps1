@@ -145,8 +145,10 @@ $installerPath = Join-Path $candidateRoot $installerName
 if (-not (Test-Path -LiteralPath $installerPath)) {
     throw "PACKAGE_INSTALLER_MISSING"
 }
-$installerSignature = Get-AuthenticodeSignature -LiteralPath $installerPath
-if ($installerSignature.Status -ne [System.Management.Automation.SignatureStatus]::NotSigned) {
+& $python (Join-Path $projectRoot "scripts\inspect-pe-signature.py") `
+    $installerPath `
+    --expect-unsigned
+if ($LASTEXITCODE -ne 0) {
     throw "PACKAGE_UNEXPECTED_SIGNATURE_STATE"
 }
 

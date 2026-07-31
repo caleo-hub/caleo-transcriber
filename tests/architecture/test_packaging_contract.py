@@ -41,6 +41,7 @@ def test_build_scripts_pin_tools_and_never_embed_a_secret_slot() -> None:
     paths = [
         PROJECT_ROOT / "scripts/install-inno-setup.ps1",
         PROJECT_ROOT / "scripts/build-package.ps1",
+        PROJECT_ROOT / "scripts/inspect-pe-signature.py",
         PROJECT_ROOT / "packaging/CaleoTranscriber.spec",
     ]
     text = "\n".join(path.read_text(encoding="utf-8") for path in paths)
@@ -50,3 +51,4 @@ def test_build_scripts_pin_tools_and_never_embed_a_secret_slot() -> None:
     assert "--onedir" not in text
     assert "OPENAI_API_KEY" not in text
     assert not re.search(r"shell\s*=\s*True", text)
+    assert "Get-AuthenticodeSignature -LiteralPath $installerPath" not in text
