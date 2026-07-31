@@ -30,8 +30,10 @@ from caleo_transcriber.application.media import (
     SilenceDetector,
 )
 from caleo_transcriber.application.output import (
+    OutputFormat,
     OutputWriteCancelled,
     OutputWriteError,
+    TranscriptOutputWriter,
     TxtOutputWriter,
 )
 from caleo_transcriber.application.transcribe_single_file import (
@@ -71,6 +73,8 @@ __all__ = [
     "OPENAI_CREDENTIAL_SERVICE",
     "OutputWriteCancelled",
     "OutputWriteError",
+    "OutputFormat",
+    "TranscriptOutputWriter",
     "TxtOutputWriter",
     "AudioExtractor",
     "AudioChunkExtractor",

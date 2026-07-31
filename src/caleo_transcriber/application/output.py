@@ -1,8 +1,11 @@
 """Porta para criação segura de arquivos finais de transcrição."""
 
 from collections.abc import Callable
+from enum import StrEnum
 from pathlib import Path
 from typing import Protocol, runtime_checkable
+
+from caleo_transcriber.domain.long_media import TimedText
 
 
 class OutputWriteError(RuntimeError):
@@ -14,6 +17,11 @@ class OutputWriteError(RuntimeError):
 
 class OutputWriteCancelled(RuntimeError):
     """Escrita interrompida antes da publicação do arquivo final."""
+
+
+class OutputFormat(StrEnum):
+    TXT = "txt"
+    SRT = "srt"
 
 
 @runtime_checkable
@@ -29,3 +37,17 @@ class TxtOutputWriter(Protocol):
     ) -> Path:
         """Retorna o caminho exclusivo criado somente após sucesso."""
         ...
+
+
+@runtime_checkable
+class TranscriptOutputWriter(Protocol):
+    """Publica TXT ou SRT a partir da mesma sequência consolidada."""
+
+    def write_transcript(
+        self,
+        output_directory: Path,
+        source_name: str,
+        segments: tuple[TimedText, ...],
+        output_format: OutputFormat,
+        should_cancel: Callable[[], bool] | None = None,
+    ) -> Path: ...

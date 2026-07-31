@@ -34,6 +34,11 @@ def sanitize_output_stem(source_name: str) -> str:
 class AtomicTxtOutputWriter:
     """Grava em temporário e publica por hard link exclusivo no mesmo volume."""
 
+    def __init__(self, extension: str = "txt") -> None:
+        if extension not in {"txt", "srt"}:
+            raise ValueError("extensão de transcrição inválida")
+        self._extension = extension
+
     def write(
         self,
         output_directory: Path,
@@ -55,7 +60,7 @@ class AtomicTxtOutputWriter:
                 os.fsync(stream.fileno())
             if cancel():
                 raise OutputWriteCancelled
-            return self._publish_exclusively(temporary, directory, stem)
+            return self._publish_exclusively(temporary, directory, stem, self._extension)
         except OutputWriteCancelled:
             raise
         except OSError as error:
@@ -64,10 +69,12 @@ class AtomicTxtOutputWriter:
             temporary.unlink(missing_ok=True)
 
     @staticmethod
-    def _publish_exclusively(temporary: Path, directory: Path, stem: str) -> Path:
+    def _publish_exclusively(temporary: Path, directory: Path, stem: str, extension: str) -> Path:
         suffix = 0
         while True:
-            candidate_name = f"{stem}.txt" if suffix == 0 else f"{stem} ({suffix}).txt"
+            candidate_name = (
+                f"{stem}.{extension}" if suffix == 0 else f"{stem} ({suffix}).{extension}"
+            )
             candidate = directory / candidate_name
             try:
                 os.link(temporary, candidate)
