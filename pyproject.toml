@@ -20,12 +20,14 @@ dependencies = [
 dev = [
   "build==1.5.0",
   "import-linter==2.13",
+  "jsonschema==4.26.0",
   "mypy==2.3.0",
   "pip-audit==2.10.1",
   "pyinstaller==6.21.0",
   "pytest==9.1.1",
   "pytest-qt==4.5.0",
   "ruff==0.16.1",
+  "types-jsonschema==4.26.0.20260518",
 ]
 
 [tool.setuptools.packages.find]
@@ -51,6 +53,13 @@ files = ["src", "tests"]
 addopts = "-ra --strict-config --strict-markers"
 testpaths = ["tests"]
 qt_api = "pyside6"
+markers = [
+  "acceptance: cenários derivados diretamente da feature spec",
+  "contract: compatibilidade de fronteiras",
+  "architecture: limites estruturais e políticas do repositório",
+  "integration: integração controlada sem serviço pago",
+  "e2e: jornada empacotada em Windows",
+]
 
 [tool.importlinter]
 root_packages = ["caleo_transcriber"]

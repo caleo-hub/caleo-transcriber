@@ -1,0 +1,12 @@
+{
+  "status": "success",
+  "text": "Texto transcrito.",
+  "detected_language": "pt",
+  "duration_ms": 4200,
+  "segments": [
+    { "start_ms": 0, "end_ms": 4200, "text": "Texto transcrito." }
+  ],
+  "provider": "openai",
+  "model": "whisper-1",
+  "warnings": []
+}

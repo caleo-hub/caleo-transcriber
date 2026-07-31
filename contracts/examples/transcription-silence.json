@@ -1,0 +1,10 @@
+{
+  "status": "success",
+  "text": "",
+  "detected_language": null,
+  "duration_ms": 60000,
+  "segments": [],
+  "provider": "openai",
+  "model": "whisper-1",
+  "warnings": ["no_speech_detected"]
+}

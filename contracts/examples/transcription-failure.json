@@ -1,0 +1,7 @@
+{
+  "status": "failure",
+  "category": "credential",
+  "retryable": false,
+  "user_message_key": "transcription.error.credential",
+  "diagnostic_code": "OPENAI_401"
+}

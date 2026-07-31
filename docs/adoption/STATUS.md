@@ -2,15 +2,15 @@
 
 ## Fase atual
 
-Fase 6 — construir o sistema de verificação antes da autonomia.
+Fase 7 — planejar e decompor o primeiro incremento.
 
 ## Resultado esperado desta fase
 
-Mapear requisitos e riscos para verificações independentes, completar o test gauntlet e tornar os checks proporcionais bloqueadores antes de implementar a feature.
+Converter spec, arquitetura e gauntlet em tarefas pequenas, ordenadas, reversíveis e verificáveis, sem decisões ocultas durante a implementação.
 
 ## Estado do gate
 
-**EM ANDAMENTO.** As Fases 0–5 foram concluídas em 2026-07-31. Uma sessão nova consegue instalar, formatar, verificar, auditar e localizar fontes/limites sem acessar secrets ou serviços pagos.
+**EM ANDAMENTO.** As Fases 0–6 foram concluídas em 2026-07-31. Todos os critérios da primeira fatia e ameaças materiais possuem verificação ativa ou teste planejado na camada adequada; checks locais e de CI falham de forma bloqueadora.
 
 ## Artefatos canônicos
 
@@ -39,6 +39,13 @@ Mapear requisitos e riscos para verificações independentes, completar o test g
 - `pyproject.toml`
 - `scripts/`
 - `.github/workflows/ci.yml`
+- `.github/workflows/secret-scan.yml`
+- `docs/quality/test-plan.md`
+- `docs/delivery/release-target.md`
+- `contracts/transcription-provider-v1.schema.json`
+- `contracts/examples/`
+- `tests/architecture/`
+- `tests/contract/`
 - `specs/constitution.md`
 - `specs/features/FEAT-001-transcribe-single-file.md`
 
@@ -76,6 +83,12 @@ Mapear requisitos e riscos para verificações independentes, completar o test g
 - `capitulos/05-parte-v-o-repositorio-preparado-para-agentes/028-instrucoes-por-diretorio-e-monorepos.md`
 - `capitulos/07-parte-vii-instrucao-prompt-comando-skill-script-ou-mcp/037-escolha-o-mecanismo-pelo-tipo-de-problema.md`
 - `capitulos/13-parte-xiii-seguranca-permissoes-e-cadeia-de-suprimentos/068-matriz-de-permissoes.md`
+- `capitulos/10-parte-x-estrategia-de-testes-e-o-test-gauntlet/052-testes-respondem-perguntas-diferentes.md`
+- `capitulos/10-parte-x-estrategia-de-testes-e-o-test-gauntlet/053-independencia-da-validacao.md`
+- `capitulos/10-parte-x-estrategia-de-testes-e-o-test-gauntlet/057-um-gauntlet-pratico-por-camadas.md`
+- `capitulos/14-parte-xiv-ci-cd-como-sistema-de-governanca/074-o-pipeline-precisa-dizer-nao.md`
+- `capitulos/14-parte-xiv-ci-cd-como-sistema-de-governanca/076-quality-gates-sem-caca-ao-numero.md`
+- `capitulos/21-apendice-a-templates-reutilizaveis/a-21-plano-de-testes.md`
 
 ## Evidências disponíveis
 
@@ -102,6 +115,10 @@ Mapear requisitos e riscos para verificações independentes, completar o test g
 - `.\audit.cmd` passou sem vulnerabilidades conhecidas; o pacote local `caleo-transcriber` foi corretamente ignorado por não existir no PyPI.
 - O caminho com caracteres acentuados expôs uma incompatibilidade de encoding no `pip-audit`; o script agora força UTF-8 e foi revalidado.
 - A chave OpenAI permanece fora de `.env.example`; a UI futura usará o Windows Credential Manager por `CredentialStore`.
+- A Fase 6 adicionou matriz CA/ameaça → verificação, JSON Schema versionado, três exemplos de contrato, políticas de repositório e propriedades da máquina de estados.
+- `.\verify.cmd` passou com 14 testes, três contratos arquiteturais, lint, tipos, build e dependências íntegras.
+- O secret scan independente com Gitleaks foi adicionado ao GitHub Actions; CODEOWNERS protege specs, contratos, aceitação e segurança para revisão do owner.
+- Em 2026-07-31, o owner definiu GitHub Releases como canal final, com instalador `.exe` Windows x64 autocontido e smoke test do arquivo efetivamente baixado.
 
 ## Fatos observados
 
@@ -125,7 +142,7 @@ Mapear requisitos e riscos para verificações independentes, completar o test g
 
 ## Decisões humanas pendentes
 
-Nenhuma decisão humana bloqueia o harness. A escolha do build de FFmpeg e suas obrigações de licença permanece deliberadamente bloqueada antes de vendorização/release.
+Nenhuma decisão bloqueia a passagem para planejamento. Antes da primeira release ainda serão necessárias as decisões de build/licença do FFmpeg e assinatura Authenticode.
 
 ## Riscos e bloqueios
 
@@ -137,4 +154,4 @@ Nenhuma decisão humana bloqueia o harness. A escolha do build de FFmpeg e suas 
 
 ## Próxima ação recomendada
 
-Executar a Fase 6: criar o plano de testes e ampliar o gauntlet de requisitos/riscos sem usar chave, rede ou mídia pessoal.
+Executar a Fase 7: decompor a primeira fatia em tarefas/PRs e reservar gates humanos para FFmpeg, chamada real OpenAI e publicação de release.

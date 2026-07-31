@@ -61,6 +61,7 @@ A necessidade foi declarada pelo owner, mas ainda não possui baseline quantitat
 - **Privacidade:** modo local sem chamadas de rede após modelo disponível; modo OpenAI visível e explícito.
 - **Confiabilidade:** escrita atômica, isolamento por item e nenhuma sobrescrita silenciosa.
 - **Compatibilidade:** Windows 10 x64 como baseline proposto; executável autocontido para o usuário.
+- **Distribuição:** release no GitHub com instalador `.exe` x64 autocontido; a pessoa não instala Python, Qt ou FFmpeg separadamente.
 - **Desempenho:** vídeos de até 30 minutos formam o baseline obrigatório; medir por modelo, CPU/GPU, duração e tamanho antes de definir metas de tempo.
 - **Manutenibilidade:** fronteiras entre UI, fila, mídia, provedores e saída deverão ser verificáveis na arquitetura.
 
@@ -127,6 +128,7 @@ Não haverá coleta de produto. Evidências virão de:
 
 - Uso pessoal e instalação manual no MVP.
 - Sem atualização automática.
+- Cada versão distribuível será publicada em GitHub Releases com instalador versionado e checksum; pacote portátil poderá ser oferecido como artefato secundário.
 - Release deve ser substituível pela versão anterior sem perder a chave ou saídas.
 - Configurações persistentes precisarão de schema versionado e caminho de downgrade quando existirem.
 

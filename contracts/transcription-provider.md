@@ -28,6 +28,7 @@
 
 ```json
 {
+  "status": "success",
   "text": "Texto transcrito.",
   "detected_language": "pt",
   "duration_ms": 4200,
@@ -35,7 +36,8 @@
     {"start_ms": 0, "end_ms": 4200, "text": "Texto transcrito."}
   ],
   "provider": "openai",
-  "model": "whisper-1"
+  "model": "whisper-1",
+  "warnings": []
 }
 ```
 
@@ -50,6 +52,7 @@
 
 ```json
 {
+  "status": "failure",
   "category": "credential | network | rate_limit | provider | provider_limit | cancelled",
   "retryable": false,
   "user_message_key": "transcription.error.credential",

@@ -1,2 +1,5 @@
 * @caleo-hub
-
+/specs/ @caleo-hub
+/contracts/ @caleo-hub
+/tests/acceptance/ @caleo-hub
+/docs/security/ @caleo-hub

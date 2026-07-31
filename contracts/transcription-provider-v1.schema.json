@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://caleo.local/contracts/transcription-provider-v1.schema.json",
+  "title": "TranscriptionProviderResultV1",
+  "oneOf": [
+    { "$ref": "#/$defs/success" },
+    { "$ref": "#/$defs/failure" }
+  ],
+  "$defs": {
+    "segment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start_ms", "end_ms", "text"],
+      "properties": {
+        "start_ms": { "type": "integer", "minimum": 0 },
+        "end_ms": { "type": "integer", "minimum": 0 },
+        "text": { "type": "string" }
+      }
+    },
+    "success": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "text", "detected_language", "duration_ms", "segments", "provider", "model", "warnings"],
+      "properties": {
+        "status": { "const": "success" },
+        "text": { "type": "string" },
+        "detected_language": { "type": ["string", "null"] },
+        "duration_ms": { "type": "integer", "minimum": 0 },
+        "segments": { "type": "array", "items": { "$ref": "#/$defs/segment" } },
+        "provider": { "const": "openai" },
+        "model": { "const": "whisper-1" },
+        "warnings": {
+          "type": "array",
+          "items": { "enum": ["no_speech_detected"] },
+          "uniqueItems": true
+        }
+      }
+    },
+    "failure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "category", "retryable", "user_message_key", "diagnostic_code"],
+      "properties": {
+        "status": { "const": "failure" },
+        "category": {
+          "enum": ["credential", "network", "rate_limit", "provider", "provider_limit", "cancelled"]
+        },
+        "retryable": { "type": "boolean" },
+        "user_message_key": { "type": "string", "minLength": 1 },
+        "diagnostic_code": { "type": "string", "pattern": "^[A-Z0-9_]+$" }
+      }
+    }
+  }
+}
