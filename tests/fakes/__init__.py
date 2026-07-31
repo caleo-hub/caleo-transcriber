@@ -1,0 +1,1 @@
+"""Fakes compartilhados pelos testes."""
