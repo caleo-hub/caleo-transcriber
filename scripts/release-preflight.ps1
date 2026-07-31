@@ -57,7 +57,19 @@ if ($null -eq $expectedHash) {
 }
 
 $installerPath = Join-Path $candidatePath $installerName
-$actualHash = (Get-FileHash -LiteralPath $installerPath -Algorithm SHA256).Hash.ToLowerInvariant()
+$sha256 = [System.Security.Cryptography.SHA256]::Create()
+try {
+    $installerStream = [System.IO.File]::OpenRead($installerPath)
+    try {
+        $hashBytes = $sha256.ComputeHash($installerStream)
+        $actualHash = [System.BitConverter]::ToString($hashBytes).Replace("-", "").ToLowerInvariant()
+    } finally {
+        $installerStream.Dispose()
+    }
+} finally {
+    $sha256.Dispose()
+}
+
 if ($actualHash -ne $expectedHash) {
     throw "PREFLIGHT_CHECKSUM_MISMATCH: Checksum SHA-256 divergente para $installerName"
 }
