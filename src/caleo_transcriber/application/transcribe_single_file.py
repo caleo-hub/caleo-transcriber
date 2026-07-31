@@ -81,6 +81,15 @@ class TranscribeSingleFileFailure:
 type TranscribeSingleFileResult = TranscribeSingleFileSuccess | TranscribeSingleFileFailure
 
 
+@runtime_checkable
+class TranscribeSingleFileUseCase(Protocol):
+    def execute(
+        self,
+        command: TranscribeSingleFileCommand,
+        should_cancel: Callable[[], bool] | None = None,
+    ) -> TranscribeSingleFileResult: ...
+
+
 class TranscriptionAlreadyRunningError(RuntimeError):
     """Impede duas tentativas simultâneas no incremento de arquivo único."""
 

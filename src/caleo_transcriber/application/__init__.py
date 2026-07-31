@@ -35,6 +35,7 @@ from caleo_transcriber.application.transcribe_single_file import (
     TranscribeSingleFileFailure,
     TranscribeSingleFileResult,
     TranscribeSingleFileSuccess,
+    TranscribeSingleFileUseCase,
     TranscriptionAlreadyRunningError,
 )
 from caleo_transcriber.application.transcription import (
@@ -81,5 +82,6 @@ __all__ = [
     "TranscribeSingleFileFailure",
     "TranscribeSingleFileResult",
     "TranscribeSingleFileSuccess",
+    "TranscribeSingleFileUseCase",
     "TranscriptionAlreadyRunningError",
 ]
