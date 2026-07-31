@@ -42,6 +42,7 @@ class MediaInfo:
 class PreparedAudio:
     path: Path
     duration_seconds: float
+    size_bytes: int
     media_type: str = "audio/mpeg"
 
 
