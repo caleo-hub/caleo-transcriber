@@ -1,10 +1,10 @@
 # Constituição — Caleo Transcriber
 
-- **Versão:** 0.1
-- **Status:** proposta
+- **Versão:** 1.0
+- **Status:** aprovada
 - **Owner:** `caleo-hub`
 - **Proposta em:** 2026-07-31
-- **Aprovação:** pendente
+- **Aprovação:** `caleo-hub`, em 2026-07-31
 
 ## Precedência
 
@@ -61,4 +61,4 @@ Toda exceção ou alteração registra motivo, alternativas, impacto, riscos, ow
 
 ## Gate da Fase 2
 
-**NÃO ATENDIDO.** `caleo-hub` precisa aprovar os onze princípios, as ações com aprovação obrigatória e os required checks.
+**ATENDIDO em 2026-07-31.** `caleo-hub` aprovou os onze princípios, as ações com aprovação obrigatória e os required checks.

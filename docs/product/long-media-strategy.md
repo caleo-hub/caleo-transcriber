@@ -1,6 +1,6 @@
 # Estratégia de referência — áudio e vídeo longos
 
-- **Status:** candidata para ratificação na arquitetura
+- **Status:** referência aprovada; ratificação técnica pendente na arquitetura
 - **Owner:** `caleo-hub`
 - **Data:** 2026-07-31
 - **Escopo:** comportamento interno; nenhuma configuração de chunk é exposta ao usuário
@@ -121,4 +121,4 @@ Paralelismo irrestrito pode aumentar custo, atingir rate limits, esgotar VRAM/RA
 
 ## Gate
 
-Esta referência restringe a futura arquitetura, mas não escolhe biblioteca de chunking, valores numéricos ou scheduler. Ela será aprovada junto da constituição e ratificada por ADR e benchmarks na Fase 4.
+Esta referência foi aprovada junto da constituição. Ela restringe a futura arquitetura, mas não escolhe biblioteca de chunking, valores numéricos ou scheduler; esses pontos serão ratificados por ADR e benchmarks na Fase 4.

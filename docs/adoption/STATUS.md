@@ -2,15 +2,15 @@
 
 ## Fase atual
 
-Fase 2 — escrever a constituição do projeto.
+Fase 3 — especificar comportamento e eliminar ambiguidades.
 
 ## Resultado esperado desta fase
 
-Aprovar poucas regras estáveis que governem fontes de verdade, privacidade, arquitetura, qualidade, evidência, autonomia e reversibilidade.
+Aprovar o comportamento da primeira fatia vertical com requisitos, invariantes, falhas, exemplos e critérios observáveis, sem decisão crítica escondida.
 
 ## Estado do gate
 
-**NÃO ATENDIDO.** As Fases 0 e 1 foram aprovadas em 2026-07-31. A constituição está proposta e aguarda aprovação do owner.
+**NÃO ATENDIDO.** As Fases 0, 1 e 2 foram aprovadas em 2026-07-31. A primeira feature spec está em clarificação.
 
 ## Artefatos canônicos
 
@@ -23,6 +23,7 @@ Aprovar poucas regras estáveis que governem fontes de verdade, privacidade, arq
 - `docs/product/prd.md`
 - `docs/product/long-media-strategy.md`
 - `specs/constitution.md`
+- `specs/features/FEAT-001-transcribe-single-file.md`
 
 ## Fontes lidas nesta fase
 
@@ -38,6 +39,13 @@ Aprovar poucas regras estáveis que governem fontes de verdade, privacidade, arq
 - `capitulos/03-parte-iii-spec-driven-development-sem-teatro-documental/013-constituicao-poucas-regras-que-realmente-governam.md`
 - `capitulos/21-apendice-a-templates-reutilizaveis/a-04-constituicao-do-projeto.md`
 - `capitulos/05-parte-v-o-repositorio-preparado-para-agentes/029-o-que-nunca-deve-estar-nesses-arquivos.md`
+- `capitulos/02-parte-ii-da-ideia-a-especificacao/007-requisitos-que-podem-ser-verificados.md`
+- `capitulos/02-parte-ii-da-ideia-a-especificacao/008-regras-de-negocio-invariantes-e-restricoes.md`
+- `capitulos/02-parte-ii-da-ideia-a-especificacao/009-criterios-de-aceitacao-exemplos-e-contraexemplos.md`
+- `capitulos/02-parte-ii-da-ideia-a-especificacao/010-como-detectar-uma-especificacao-fraca.md`
+- `capitulos/03-parte-iii-spec-driven-development-sem-teatro-documental/014-clarificacao-o-gate-que-mais-economiza-retrabalho.md`
+- `capitulos/21-apendice-a-templates-reutilizaveis/a-03-especificacao-de-feature.md`
+- `capitulos/21-apendice-a-templates-reutilizaveis/a-07-criterios-de-aceitacao.md`
 
 ## Evidências disponíveis
 
@@ -51,6 +59,8 @@ Aprovar poucas regras estáveis que governem fontes de verdade, privacidade, arq
 - Em 2026-07-31, `caleo-hub` autorizou o envio explícito somente do áudio selecionado no modo OpenAI e aceitou o perfil padrão.
 - Em 2026-07-31, `caleo-hub` aprovou todos os defaults, Windows 10 x64, a meta de três minutos e tratamento automático acima de 30 minutos.
 - A estratégia tradicional foi contrastada com fontes oficiais: OpenAI limita arquivo de transcrição a 25 MB e recomenda compressão/divisão sem cortar sentenças; Whisper local usa janelas deslizantes de 30 segundos.
+- Em 2026-07-31, `caleo-hub` aprovou a constituição, os required checks e a estratégia de mídia longa.
+- A primeira fatia proposta reduz o fluxo a um arquivo inteiro de até 30 minutos, saída TXT e provedor previamente configurado.
 
 ## Fatos observados
 
@@ -74,8 +84,8 @@ Aprovar poucas regras estáveis que governem fontes de verdade, privacidade, arq
 
 ## Decisões humanas pendentes
 
-1. Aceitar ou corrigir os princípios da constituição.
-2. Aceitar os required checks e as ações que sempre exigem aprovação.
+1. Aprovar ou corrigir o recorte da primeira fatia.
+2. Resolver as perguntas classificadas no fim da feature spec.
 
 ## Riscos e bloqueios
 
@@ -87,4 +97,4 @@ Aprovar poucas regras estáveis que governem fontes de verdade, privacidade, arq
 
 ## Próxima ação recomendada
 
-O responsável humano revisa `specs/constitution.md`. Com o gate da Fase 2 aceito, iniciar especificação e clarificação; não gerar scaffold ou código de produto antes disso.
+O responsável humano revisa `specs/features/FEAT-001-transcribe-single-file.md`. Com o gate da Fase 3 aceito, iniciar arquitetura e contratos; não gerar scaffold ou código de produto antes disso.
