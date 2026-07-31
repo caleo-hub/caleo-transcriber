@@ -1,6 +1,6 @@
 # Segundo incremento — mídia longa e lote
 
-- **Status:** proposto; implementação bloqueada pelos gates SEC/UX
+- **Status:** aprovado; implementação liberada pelos gates SEC/UX
 - **Features:** FEAT-002 e FEAT-003
 - **Meta:** uma mudança revisável por tarefa, sem chamada paga
 

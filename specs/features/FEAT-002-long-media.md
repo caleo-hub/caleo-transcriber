@@ -1,6 +1,6 @@
 # FEAT-002 — Transcrever mídia longa automaticamente
 
-- **Status:** proposta; gate de segurança pendente
+- **Status:** aprovada
 - **Owner:** `caleo-hub`
 - **Risco:** alto nas fronteiras de custo, retenção temporária e recomposição
 - **Referência:** [`docs/product/long-media-strategy.md`](../../docs/product/long-media-strategy.md)
@@ -139,5 +139,5 @@ manter áudio após sucesso, salvar texto claro em manifesto ou repetir upload a
 
 ## Gate
 
-Implementação bloqueada até aprovação de `GATE-SEC-002`: limites, retenção por sete dias, DPAPI,
-estado ambíguo e concorrência cloud igual a um.
+**ATENDIDO em 2026-07-31.** O owner aprovou `GATE-SEC-002`: limites, retenção por sete dias,
+DPAPI, estado ambíguo e concorrência cloud igual a um.

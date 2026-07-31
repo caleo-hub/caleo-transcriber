@@ -1,6 +1,6 @@
 # GATE-SEC-002 — Segurança de mídia longa e lote
 
-- **Status:** pendente de aprovação do owner
+- **Status:** aprovado
 - **Data da proposta:** 2026-07-31
 - **Bloqueia:** TASK-012 até TASK-017
 
@@ -36,9 +36,9 @@ anterior tiver sido processado. Esses riscos devem ficar claros na ação de ret
 
 ## Aprovação
 
-- [ ] limites e concorrência aprovados;
-- [ ] retenção de sete dias e DPAPI aprovadas;
-- [ ] tratamento de upload ambíguo aprovado;
-- [ ] risco residual aceito.
+- [x] limites e concorrência aprovados;
+- [x] retenção de sete dias e DPAPI aprovadas;
+- [x] tratamento de upload ambíguo aprovado;
+- [x] risco residual aceito.
 
-- **Owner/data:** pendente
+- **Owner/data:** `caleo-hub`, 2026-07-31

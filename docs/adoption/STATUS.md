@@ -13,8 +13,8 @@ alterar o comportamento do aplicativo.
 
 **EM ANDAMENTO.** TASK-001–010 foram implementadas e mescladas até a PR #14. A TASK-010 passou em
 `verify`, gitleaks e workflow de pacote, produzindo candidato efêmero sem publicar Release. A
-TASK-011 propõe FEAT-002/003, ADR-0006/0007, contratos, threat model, tarefas e testes-oráculo. Toda
-implementação nova permanece bloqueada por `GATE-SEC-002` e `GATE-UX-002`.
+TASK-011 propõe FEAT-002/003, ADR-0006/0007, contratos, threat model, tarefas e testes-oráculo. Em
+2026-07-31, o owner aprovou `GATE-SEC-002` e `GATE-UX-002`, liberando TASK-012 em diante.
 
 ## Artefatos canônicos
 
@@ -228,5 +228,5 @@ implementação correspondente avançar.
 
 ## Próxima ação recomendada
 
-Validar a TASK-011 e solicitar aprovação explícita de `GATE-SEC-002` e `GATE-UX-002`. Somente após
-ambos, iniciar TASK-012 pela implementação orientada pelos vetores versionados.
+Mesclar a TASK-011 com checks verdes e iniciar TASK-012 pela implementação orientada pelos vetores
+versionados, mantendo uma tarefa revisável por PR.

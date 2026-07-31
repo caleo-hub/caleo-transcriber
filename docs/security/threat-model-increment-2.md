@@ -1,6 +1,6 @@
 # Threat model — mídia longa e lote
 
-- **Status:** proposto; risco residual pendente no `GATE-SEC-002`
+- **Status:** controles e risco residual aceitos pelo owner em 2026-07-31
 - **Data:** 2026-07-31
 - **Complementa:** `docs/security/threat-model.md`
 

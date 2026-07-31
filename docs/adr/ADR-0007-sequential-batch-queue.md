@@ -1,6 +1,6 @@
 # ADR-0007 — Fila FIFO sequencial e efêmera
 
-- **Status:** proposto; depende de `GATE-UX-002`
+- **Status:** aceito
 - **Data:** 2026-07-31
 - **Decisor:** `caleo-hub`
 

@@ -1,6 +1,6 @@
 # GATE-UX-002 — UX de fila, cancelamento e retomada
 
-- **Status:** pendente de aprovação do owner
+- **Status:** aprovado
 - **Data da proposta:** 2026-07-31
 - **Bloqueia:** TASK-018
 
@@ -35,9 +35,9 @@ possuem texto e anúncios não dependem de cor. Escape não cancela trabalho sem
 
 ## Aprovação
 
-- [ ] tabela e controles globais aprovados;
-- [ ] comportamento de falha/cancelamento/repetição aprovado;
-- [ ] banners de retomada e upload ambíguo aprovados;
-- [ ] acessibilidade e resumo aprovados.
+- [x] tabela e controles globais aprovados;
+- [x] comportamento de falha/cancelamento/repetição aprovado;
+- [x] banners de retomada e upload ambíguo aprovados;
+- [x] acessibilidade e resumo aprovados.
 
-- **Owner/data:** pendente
+- **Owner/data:** `caleo-hub`, 2026-07-31

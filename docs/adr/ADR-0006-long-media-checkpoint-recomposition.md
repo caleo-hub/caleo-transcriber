@@ -1,6 +1,6 @@
 # ADR-0006 — Segmentação, recomposição e checkpoint de mídia longa
 
-- **Status:** proposto; depende de `GATE-SEC-002`
+- **Status:** aceito
 - **Data:** 2026-07-31
 - **Decisor:** `caleo-hub`
 

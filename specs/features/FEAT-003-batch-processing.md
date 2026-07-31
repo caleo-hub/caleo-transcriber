@@ -1,6 +1,6 @@
 # FEAT-003 — Processamento em lote com fila isolada
 
-- **Status:** proposta; gate de UX pendente
+- **Status:** aprovada
 - **Owner:** `caleo-hub`
 - **Risco:** moderado; alto quando combinado com custo cloud
 
@@ -105,5 +105,5 @@ mostrar percentual baseado em timer ou restaurar a fila inteira no próximo iní
 
 ## Gate
 
-Implementação da apresentação bloqueada até aprovação de `GATE-UX-002`: layout da tabela, ações,
-bloqueio de configurações durante execução, resumo global e diálogo de retomada.
+**ATENDIDO em 2026-07-31.** O owner aprovou `GATE-UX-002`: layout da tabela, ações, bloqueio de
+configurações durante execução, resumo global e diálogo de retomada.
