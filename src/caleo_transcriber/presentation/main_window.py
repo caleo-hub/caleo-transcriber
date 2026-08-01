@@ -242,7 +242,8 @@ class MainWindow(QMainWindow):
         self.retry_selected_button.clicked.connect(self._retry_selected)
         self.more_button = QPushButton("&Limpar…")
         self.more_button.setAccessibleName("Mais ações para limpar ou cancelar a fila")
-        clear_menu = QMenu(self.more_button)
+        self.clear_menu = QMenu(self.more_button)
+        self.clear_menu.setObjectName("queueMenu")
         self.clear_completed_action = QAction("Limpar concluídos", self)
         self.clear_completed_action.triggered.connect(self._clear_completed)
         self.clear_failed_action = QAction("Limpar falhas e cancelados", self)
@@ -253,13 +254,13 @@ class MainWindow(QMainWindow):
         self.clear_queue_action.triggered.connect(self._clear_queue)
         self.cancel_all_action = QAction("Cancelar fila", self)
         self.cancel_all_action.triggered.connect(self._cancel_all)
-        clear_menu.addAction(self.clear_completed_action)
-        clear_menu.addAction(self.clear_failed_action)
-        clear_menu.addAction(self.clear_pending_action)
-        clear_menu.addAction(self.clear_queue_action)
-        clear_menu.addSeparator()
-        clear_menu.addAction(self.cancel_all_action)
-        self.more_button.setMenu(clear_menu)
+        self.clear_menu.addAction(self.clear_completed_action)
+        self.clear_menu.addAction(self.clear_failed_action)
+        self.clear_menu.addAction(self.clear_pending_action)
+        self.clear_menu.addAction(self.clear_queue_action)
+        self.clear_menu.addSeparator()
+        self.clear_menu.addAction(self.cancel_all_action)
+        self.more_button.setMenu(self.clear_menu)
         for button in (
             self.remove_button,
             self.move_up_button,
@@ -356,6 +357,17 @@ class MainWindow(QMainWindow):
                 background: white; color: #152238; border: 1px solid #829AB1;
                 selection-background-color: #D6E9FF; selection-color: #102A43;
             }
+            QMenu {
+                background: #FFFFFF; color: #152238;
+                border: 1px solid #829AB1; padding: 4px;
+            }
+            QMenu::item {
+                background: transparent; color: #152238;
+                padding: 8px 28px 8px 12px; border-radius: 4px;
+            }
+            QMenu::item:selected { background: #D6E9FF; color: #102A43; }
+            QMenu::item:disabled { background: transparent; color: #6B7C8F; }
+            QMenu::separator { height: 1px; background: #D9E2EC; margin: 4px 8px; }
             QToolTip {
                 background: #102A43; color: white; border: 1px solid #486581; padding: 4px;
             }

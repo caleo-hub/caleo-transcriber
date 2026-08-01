@@ -2,16 +2,16 @@
 
 ## Fase atual
 
-Incremento de gerenciamento da fila (TASK-023).
+Patch de contraste do menu de limpeza (TASK-024).
 
 ## Resultado esperado desta fase
 
-Publicar `v0.3.0-beta.1` com seleção, remoção, limpeza, reordenação e pausa segura da fila.
+Publicar `v0.3.1-beta.1` com o popup `Limpar…` legível sob tema escuro do Windows.
 
 ## Estado do gate
 
-**CONCLUÍDO.** A TASK-023 foi mesclada na PR #19. A prerelease `v0.3.0-beta.1` foi publicada e
-validada após download, sem alterar privacidade, persistência, concorrência ou política de arquivos.
+**EM ANDAMENTO.** O owner relatou contraste insuficiente no popup `Limpar…` de `v0.3.0-beta.1` e
+autorizou correção e nova release. O patch não altera comportamento ou política de dados.
 
 ## Artefatos canônicos
 
@@ -241,4 +241,4 @@ autorizadas. A chave atual foi recusada e precisa ser substituída pela UI antes
 
 ## Próxima ação recomendada
 
-Testar a beta instalada no uso diário, mantendo `v0.2.1-beta.1` disponível para rollback.
+Concluir TASK-024 e publicar `v0.3.1-beta.1`, mantendo `v0.3.0-beta.1` para rollback.

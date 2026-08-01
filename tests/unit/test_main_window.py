@@ -270,6 +270,12 @@ def test_theme_explicitly_styles_dark_mode_surfaces(qtbot: QtBot) -> None:
     assert "QPushButton, QComboBox, QLineEdit" in style
     assert "QHeaderView::section" in style
     assert "background: #E8EEF6; color: #102A43" in style
+    assert "QMenu {" in style
+    assert "QMenu::item:selected { background: #D6E9FF; color: #102A43; }" in style
+    assert "QMenu::item:disabled { background: transparent; color: #6B7C8F; }" in style
+    assert "QMenu::separator" in style
+    assert window.clear_menu.objectName() == "queueMenu"
+    assert window.more_button.menu() is window.clear_menu
 
     dialog = window._create_settings_dialog()
     qtbot.addWidget(dialog)
