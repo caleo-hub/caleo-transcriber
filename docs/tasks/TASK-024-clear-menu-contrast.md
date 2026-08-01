@@ -38,3 +38,8 @@ build-evidence, checksum e preflight pós-download sem instalação.
 ## Rollback
 
 Preservar e reinstalar `v0.3.0-beta.1`; nenhuma mídia, saída ou credencial é removida.
+
+## Resultado
+
+Concluída na PR #21 e publicada como `v0.3.1-beta.1`. Os oito critérios de aceitação passaram;
+o instalador público foi baixado novamente e aprovado pelo preflight sem instalação local.
