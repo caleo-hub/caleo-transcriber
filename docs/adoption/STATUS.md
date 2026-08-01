@@ -2,16 +2,17 @@
 
 ## Fase atual
 
-Patch de contraste do menu de limpeza (TASK-024).
+Patch de contraste do menu de limpeza concluído (TASK-024).
 
 ## Resultado esperado desta fase
 
-Publicar `v0.3.1-beta.1` com o popup `Limpar…` legível sob tema escuro do Windows.
+`v0.3.1-beta.1` publicada com o popup `Limpar…` legível sob tema escuro do Windows.
 
 ## Estado do gate
 
-**EM ANDAMENTO.** O owner relatou contraste insuficiente no popup `Limpar…` de `v0.3.0-beta.1` e
-autorizou correção e nova release. O patch não altera comportamento ou política de dados.
+**CONCLUÍDO.** A PR #21 corrigiu o contraste, passou pelos checks obrigatórios e foi mesclada no
+commit `140e896`. A prerelease `v0.3.1-beta.1` foi publicada e validada após novo download. O patch
+não altera comportamento ou política de dados.
 
 ## Artefatos canônicos
 
@@ -199,6 +200,10 @@ autorizou correção e nova release. O patch não altera comportamento ou polít
 - A PR #19 mesclou TASK-023 no commit `9227009`; 191 testes, CI, gitleaks e pacote remoto passaram.
   `v0.3.0-beta.1` foi publicada com seis assets e o instalador baixado passou pelo preflight com
   SHA-256 `3175f209626c283ce2d5ef09bfbbc1da79aab0cd6fb34e05b58de2d5cd12acb5`.
+- A PR #21 mesclou TASK-024 no commit `140e896`; 192 testes, CI, gitleaks e pacote remoto passaram.
+  `v0.3.1-beta.1` foi publicada com seis assets. O instalador público de 114.188.486 bytes passou
+  pelo preflight pós-download com SHA-256
+  `feeb3de9dc1b6a17b83f10a6f1c860cf95a40fe17c9c5d88d39220d37b0eb67a`.
 
 ## Fatos observados
 
@@ -241,4 +246,4 @@ autorizadas. A chave atual foi recusada e precisa ser substituída pela UI antes
 
 ## Próxima ação recomendada
 
-Concluir TASK-024 e publicar `v0.3.1-beta.1`, mantendo `v0.3.0-beta.1` para rollback.
+Usar `v0.3.1-beta.1` no teste pessoal e manter `v0.3.0-beta.1` disponível para rollback.
