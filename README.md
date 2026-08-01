@@ -6,9 +6,10 @@ mídia longa automaticamente, sem configuração manual de chunks.
 
 ## Estado
 
-A versão 0.3.0 adiciona seleção múltipla, remoção, limpeza, reordenação, repetição selecionada e
-pausa segura da fila. Whisper local e seleção de trecho permanecem para um incremento posterior. O
-instalador ainda não possui assinatura Authenticode.
+A versão 0.3.1 corrige o contraste do menu de limpeza sob tema escuro do Windows. A fila mantém
+seleção múltipla, remoção, limpeza, reordenação, repetição selecionada e pausa segura. Whisper local
+e seleção de trecho permanecem para um incremento posterior. O instalador ainda não possui
+assinatura Authenticode.
 
 ## Setup no Windows
 
@@ -39,7 +40,7 @@ O preflight de um futuro candidato de release, sem publicá-lo, usa:
 O build local do candidato, também sem publicar ou instalar, usa:
 
 ```powershell
-.\build-package.cmd -Version 0.3.0
+.\build-package.cmd -Version 0.3.1
 ```
 
 Ele exige a versão aprovada do Inno Setup e baixa o build FFmpeg fixado e verificado pelo projeto.

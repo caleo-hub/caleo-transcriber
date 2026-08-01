@@ -173,6 +173,13 @@ def main() -> int:
     for row in (1, 2):
         selection.select(controls.table.model().index(row, 0), flags)
     _save(controls, "06-queue-controls.png")
+    controls.clear_menu.popup(
+        controls.more_button.mapToGlobal(controls.more_button.rect().bottomLeft())
+    )
+    controls.clear_menu.setActiveAction(controls.clear_pending_action)
+    QApplication.processEvents()
+    _save(controls.clear_menu, "07-clear-menu.png")
+    controls.clear_menu.close()
     controls.close()
     return 0
 

@@ -45,13 +45,13 @@ jobs:
         run: .\scripts\install-inno-setup.ps1
       - name: Build and smoke candidate
         shell: pwsh
-        run: .\scripts\build-package.ps1 -Version 0.3.0
+        run: .\scripts\build-package.ps1 -Version 0.3.1
       - name: Upload unpublished candidate
         uses: actions/upload-artifact@v7
         with:
-          name: CaleoTranscriber-0.3.0-unpublished
+          name: CaleoTranscriber-0.3.1-unpublished
           path: |
-            artifacts/candidate/0.3.0/
+            artifacts/candidate/0.3.1/
             build/package/CaleoTranscriber/
           compression-level: 0
           retention-days: 3

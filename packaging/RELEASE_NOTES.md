@@ -6,6 +6,8 @@ da margem de upload, com timestamps, recomposição e retomada segura.
 
 ## Novidades desta beta
 
+- menu `Limpar…` com fundo, texto, seleção, itens desabilitados e separadores legíveis mesmo sob
+  tema escuro do Windows;
 - seleção múltipla com remoção segura somente da fila;
 - botões para subir/descer itens pendentes e repetir apenas falhas selecionadas;
 - limpeza de concluídos, falhas/cancelados, pendentes ou toda a fila inativa;
@@ -36,5 +38,5 @@ da margem de upload, com timestamps, recomposição e retomada segura.
 ## Integridade e rollback
 
 Confira `SHA256SUMS.txt` antes de instalar. O rollback recomendado é desinstalar esta versão e
-reinstalar `v0.2.1-beta.1`; a desinstalação não remove a chave do Credential Manager nem arquivos
+reinstalar `v0.3.0-beta.1`; a desinstalação não remove a chave do Credential Manager nem arquivos
 TXT/SRT criados pela pessoa usuária.
