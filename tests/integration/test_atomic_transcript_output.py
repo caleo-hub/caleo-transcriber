@@ -40,6 +40,14 @@ def test_txt_and_srt_derive_from_same_segments_without_retranscription(tmp_path:
     assert srt.suffix == ".srt"
 
 
+def test_source_folder_name_produces_transcription_suffix(tmp_path: Path) -> None:
+    writer = AtomicTranscriptOutputWriter()
+
+    created = writer.write_transcript(tmp_path, "Demo_transcription.mp4", (), OutputFormat.TXT)
+
+    assert created.name == "Demo_transcription.txt"
+
+
 def test_srt_has_valid_global_increasing_non_overlapping_cues() -> None:
     cues = _CUE.findall(render_srt(_segments()))
 

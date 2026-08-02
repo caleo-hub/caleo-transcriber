@@ -69,6 +69,7 @@ class TranscribeLongMediaCommand:
     language: str | None = None
     retry_failed: bool = False
     confirm_ambiguous: bool = False
+    output_name_suffix: str = ""
 
 
 class TranscribeLongMedia:
@@ -191,7 +192,7 @@ class TranscribeLongMedia:
                 try:
                     output = self._output_writer.write_transcript(
                         command.output_directory,
-                        command.source.name,
+                        _output_source_name(command.source, command.output_name_suffix),
                         consolidated,
                         command.output_format,
                         cancel,
@@ -463,6 +464,13 @@ class TranscribeLongMedia:
         self._events.publish(
             AttemptEvent(attempt_id, state, failure, warnings, completed, total, active)
         )
+
+
+def _output_source_name(source: Path, suffix: str) -> str:
+    """Preserva a extensão da entrada enquanto permite nomes de saída explícitos."""
+    if not suffix:
+        return source.name
+    return f"{source.stem}{suffix}{source.suffix}"
 
 
 class _BorrowedPreparedAudioLease:

@@ -144,6 +144,31 @@ def test_fifo_duplicate_and_failure_isolation_continue_to_next_item() -> None:
     assert summary.failed == 1
 
 
+def test_source_folder_output_uses_each_source_directory_and_suffix() -> None:
+    use_case = FakeLongMediaUseCase([_success("one"), _success("two")])
+    events = RecordingBatchEvents()
+    processor = BatchProcessor(
+        use_case,
+        BatchSettings(
+            Path("C:/fallback"),
+            Path("C:/cache"),
+            OutputFormat.TXT,
+            save_next_to_source=True,
+        ),
+        events,
+        "batch-source-folder",
+    )
+    processor.add_sources([Path("C:/videos/a/one.mp4"), Path("D:/audio/b/two.wav")])
+
+    summary = processor.run()
+
+    assert summary.completed == 2
+    assert [(call.output_directory, call.output_name_suffix) for call in use_case.calls] == [
+        (Path("C:/videos/a"), "_transcription"),
+        (Path("D:/audio/b"), "_transcription"),
+    ]
+
+
 def test_cancel_pending_has_no_use_case_call_and_retry_sends_only_failure() -> None:
     use_case = FakeLongMediaUseCase([_failure(), _success("second")])
     processor, _ = _processor(use_case)

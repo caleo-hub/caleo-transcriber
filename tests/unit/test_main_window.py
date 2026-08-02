@@ -5,7 +5,8 @@ from pathlib import Path
 from threading import Event
 
 import pytest
-from PySide6.QtCore import QItemSelectionModel, Qt
+from PySide6.QtCore import QItemSelectionModel, Qt, QUrl
+from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import QAbstractItemView, QLabel, QMessageBox, QWidget
 from pytestqt.qtbot import QtBot
 
@@ -140,6 +141,52 @@ def test_multiple_sources_deduplicate_and_format_is_common(qtbot: QtBot) -> None
     assert [_cell_text(window, row, 2) for row in range(2)] == ["SRT", "SRT"]
     assert "duplicado" in window.detail_label.text()
     assert window.start_button.isEnabled()
+
+
+def test_source_folder_output_option_needs_no_manual_directory(qtbot: QtBot) -> None:
+    use_case = StubUseCase([_success()])
+    window = _window(qtbot, use_case)
+    window.set_sources([Path("C:/videos/Demo.mp4")])
+
+    assert not window.start_button.isEnabled()
+    window.same_folder_checkbox.setChecked(True)
+
+    assert window.start_button.isEnabled()
+    assert not window.output_button.isEnabled()
+    assert window.output_label.text() == "Pasta de cada arquivo original"
+
+    _click(qtbot, window.start_button)
+    qtbot.waitUntil(lambda: window._thread is None)
+
+    assert use_case.calls[0].output_directory == Path("C:/videos")
+    assert use_case.calls[0].output_name_suffix == "_transcription"
+
+
+def test_source_folder_completed_action_opens_effective_output_folder(
+    qtbot: QtBot, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    opened: list[str] = []
+
+    def open_url(url: QUrl) -> bool:
+        opened.append(url.toLocalFile())
+        return True
+
+    monkeypatch.setattr(
+        QDesktopServices,
+        "openUrl",
+        open_url,
+    )
+    window = _window(qtbot, StubUseCase([_success()]))
+    window.set_sources([Path("C:/videos/Demo.mp4")])
+    window.same_folder_checkbox.setChecked(True)
+    _click(qtbot, window.start_button)
+    qtbot.waitUntil(lambda: window._thread is None)
+
+    action_button = window.table.cellWidget(0, 4)
+    assert isinstance(action_button, QWidget)
+    _click(qtbot, action_button)
+
+    assert opened == ["C:/synthetic-output"]
 
 
 def test_selection_reorders_and_removes_queue_items(qtbot: QtBot) -> None:
