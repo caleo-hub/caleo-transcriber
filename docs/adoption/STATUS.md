@@ -11,9 +11,9 @@ configuração manual de destino em filas com muitos arquivos.
 
 ## Estado do gate
 
-**CONCLUÍDO LOCALMENTE; RELEASE PENDENTE.** A TASK-025 foi implementada, especificada e validada
-com os checks locais. A publicação de uma nova release aguarda autorização explícita do owner. A
-mudança não altera comportamento cloud/local, política de dados ou a saída manual existente.
+**CONCLUÍDO.** A TASK-025 foi implementada, passou pelos checks locais e remotos e foi publicada em
+`v0.3.2-beta.1`. A mudança não altera comportamento cloud/local, política de dados ou a saída
+manual existente.
 
 ## Artefatos canônicos
 
@@ -55,6 +55,7 @@ mudança não altera comportamento cloud/local, política de dados ou a saída m
 - `docs/delivery/rollback-runbook.md`
 - `docs/delivery/release-evidence-template.md`
 - `docs/delivery/task-010-validation.md`
+- `docs/delivery/task-025-validation.md`
 - `release-preflight.cmd`
 - `scripts/release-preflight.ps1`
 - `contracts/transcription-provider-v1.schema.json`
@@ -208,7 +209,11 @@ mudança não altera comportamento cloud/local, política de dados ou a saída m
   `feeb3de9dc1b6a17b83f10a6f1c860cf95a40fe17c9c5d88d39220d37b0eb67a`.
 - A TASK-025 adicionou destino por fonte, sufixo `_transcription`, checkbox acessível e abertura da
   pasta efetiva do item. `verify.cmd` passou com 198 testes e `audit.cmd` não encontrou
-  vulnerabilidades conhecidas; nenhuma release ou chamada OpenAI foi feita nesta mudança.
+  vulnerabilidades conhecidas.
+- A PR #23 mesclou a implementação da TASK-025 no commit `7b76694`; a PR #24 alinhou a versão no
+  commit `f3db407`. A prerelease `v0.3.2-beta.1` foi publicada com seis assets e o instalador
+  baixado passou pelo preflight com SHA-256
+  `6964a6d4847aa5cf05d6423745a666dc225c5b9f0030c2f7bd682db5dcbef9de`.
 
 ## Fatos observados
 
@@ -251,5 +256,4 @@ autorizadas. A chave atual foi recusada e precisa ser substituída pela UI antes
 
 ## Próxima ação recomendada
 
-Revisar a jornada da TASK-025 e, se aprovada, preparar a próxima beta mantendo
-`v0.3.1-beta.1` disponível para rollback.
+Usar `v0.3.2-beta.1` no teste pessoal e manter `v0.3.1-beta.1` disponível para rollback.
