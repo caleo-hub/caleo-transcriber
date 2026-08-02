@@ -43,7 +43,7 @@ A necessidade foi declarada pelo owner, mas ainda não possui baseline quantitat
 | RF-005 | Salvar, substituir, testar e remover a chave da OpenAI em armazenamento protegido | decidido; mecanismo posterior |
 | RF-006 | No modo OpenAI, enviar somente o áudio do arquivo/segmento escolhido | decidido |
 | RF-007 | Instalar/selecionar modelo local com tamanho, progresso e erros visíveis | aceito no PRD |
-| RF-008 | Escolher o diretório de saída | decidido |
+| RF-008 | Escolher um diretório comum ou salvar cada transcrição ao lado da fonte | decidido |
 | RF-009 | Escolher TXT ou SRT por execução | decidido |
 | RF-010 | Exibir etapa, estado e progresso por item e do lote sem inventar precisão indisponível | decidido |
 | RF-011 | Cancelar itens pendentes e fazer cancelamento de melhor esforço do item ativo | aceito no PRD |

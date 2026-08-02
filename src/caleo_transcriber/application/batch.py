@@ -26,6 +26,7 @@ class BatchSettings:
     workspace: Path
     output_format: OutputFormat
     language: str | None = None
+    save_next_to_source: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -134,14 +135,22 @@ class BatchProcessor:
                     self._publish(item)
                     source = self._sources[item.item_id]
                     retry_failed = item.item_id in self._retry_ids
+                    output_directory = (
+                        source.parent
+                        if self._settings.save_next_to_source
+                        else self._settings.output_directory
+                    )
                 result = self._use_case.execute(
                     TranscribeLongMediaCommand(
                         attempt_id=item.item_id,
                         source=source,
-                        output_directory=self._settings.output_directory,
+                        output_directory=output_directory,
                         workspace=self._settings.workspace,
                         output_format=self._settings.output_format,
                         language=self._settings.language,
+                        output_name_suffix=(
+                            "_transcription" if self._settings.save_next_to_source else ""
+                        ),
                         retry_failed=retry_failed,
                         confirm_ambiguous=item.item_id in self._confirm_ids,
                     ),

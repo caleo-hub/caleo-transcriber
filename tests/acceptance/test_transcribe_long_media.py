@@ -109,6 +109,8 @@ class MemoryCheckpointStore:
 class RecordingTranscriptWriter:
     def __init__(self) -> None:
         self.calls: list[tuple[tuple[TimedText, ...], OutputFormat]] = []
+        self.source_names: list[str] = []
+        self.output_directories: list[Path] = []
 
     def write_transcript(
         self,
@@ -118,6 +120,8 @@ class RecordingTranscriptWriter:
         output_format: OutputFormat,
         should_cancel: Callable[[], bool] | None = None,
     ) -> Path:
+        self.source_names.append(source_name)
+        self.output_directories.append(output_directory)
         self.calls.append((segments, output_format))
         return output_directory / f"result.{output_format.value}"
 
@@ -192,6 +196,22 @@ def test_segmented_flow_is_sequential_merges_overlap_and_cleans_checkpoint() -> 
     assert store.checkpoint is None
     assert events.events[-1].completed_chunks == 2
     assert events.events[-1].total_chunks == 2
+
+
+def test_source_folder_name_suffix_is_applied_before_atomic_writer() -> None:
+    use_case, _, _, _, writer, _ = _workflow([_success("fala"), _success("continua")])
+
+    result = use_case.execute(
+        _command(
+            source=Path("C:/private/Demo.mp4"),
+            output_directory=Path("C:/private"),
+            output_name_suffix="_transcription",
+        )
+    )
+
+    assert isinstance(result, TranscribeSingleFileSuccess)
+    assert writer.source_names == ["Demo_transcription.mp4"]
+    assert writer.output_directories == [Path("C:/private")]
 
 
 def test_failure_preserves_confirmed_chunk_and_retry_sends_only_failed() -> None:

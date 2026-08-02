@@ -2,17 +2,18 @@
 
 ## Fase atual
 
-Patch de contraste do menu de limpeza concluído (TASK-024).
+Saída automática ao lado do arquivo original concluída (TASK-025).
 
 ## Resultado esperado desta fase
 
-`v0.3.1-beta.1` publicada com o popup `Limpar…` legível sob tema escuro do Windows.
+Adicionar a opção de salvar cada transcrição na pasta da fonte, com nome `_transcription` e sem
+configuração manual de destino em filas com muitos arquivos.
 
 ## Estado do gate
 
-**CONCLUÍDO.** A PR #21 corrigiu o contraste, passou pelos checks obrigatórios e foi mesclada no
-commit `140e896`. A prerelease `v0.3.1-beta.1` foi publicada e validada após novo download. O patch
-não altera comportamento ou política de dados.
+**CONCLUÍDO LOCALMENTE; RELEASE PENDENTE.** A TASK-025 foi implementada, especificada e validada
+com os checks locais. A publicação de uma nova release aguarda autorização explícita do owner. A
+mudança não altera comportamento cloud/local, política de dados ou a saída manual existente.
 
 ## Artefatos canônicos
 
@@ -66,6 +67,7 @@ não altera comportamento ou política de dados.
 - `specs/features/FEAT-001-transcribe-single-file.md`
 - `specs/features/FEAT-002-long-media.md`
 - `specs/features/FEAT-003-batch-processing.md`
+- `specs/features/FEAT-004-source-folder-output.md`
 - `docs/plans/second-increment.md`
 - `docs/gates/GATE-SEC-002-long-media-batch.md`
 - `docs/gates/GATE-UX-002-batch-queue.md`
@@ -204,6 +206,9 @@ não altera comportamento ou política de dados.
   `v0.3.1-beta.1` foi publicada com seis assets. O instalador público de 114.188.486 bytes passou
   pelo preflight pós-download com SHA-256
   `feeb3de9dc1b6a17b83f10a6f1c860cf95a40fe17c9c5d88d39220d37b0eb67a`.
+- A TASK-025 adicionou destino por fonte, sufixo `_transcription`, checkbox acessível e abertura da
+  pasta efetiva do item. `verify.cmd` passou com 198 testes e `audit.cmd` não encontrou
+  vulnerabilidades conhecidas; nenhuma release ou chamada OpenAI foi feita nesta mudança.
 
 ## Fatos observados
 
@@ -246,4 +251,5 @@ autorizadas. A chave atual foi recusada e precisa ser substituída pela UI antes
 
 ## Próxima ação recomendada
 
-Usar `v0.3.1-beta.1` no teste pessoal e manter `v0.3.0-beta.1` disponível para rollback.
+Revisar a jornada da TASK-025 e, se aprovada, preparar a próxima beta mantendo
+`v0.3.1-beta.1` disponível para rollback.

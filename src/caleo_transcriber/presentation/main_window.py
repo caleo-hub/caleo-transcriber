@@ -10,6 +10,7 @@ from PySide6.QtCore import QObject, Qt, QThread, QUrl, Signal, Slot
 from PySide6.QtGui import QAction, QCloseEvent, QDesktopServices, QDragEnterEvent, QDropEvent, QIcon
 from PySide6.QtWidgets import (
     QAbstractItemView,
+    QCheckBox,
     QComboBox,
     QDialog,
     QFileDialog,
@@ -37,6 +38,7 @@ from caleo_transcriber.application import (
     BatchSettings,
     OutputFormat,
     TranscribeSingleFileFailure,
+    TranscribeSingleFileSuccess,
 )
 from caleo_transcriber.domain import ACTIVE_BATCH_STATES, AttemptState, BatchItemState
 from caleo_transcriber.presentation.notices import CloudNoticePolicy
@@ -128,6 +130,7 @@ class MainWindow(QMainWindow):
         self._notice_policy = notice_policy
         self._attempt_events = attempt_events
         self._output_directory: Path | None = None
+        self._save_next_to_source = False
         self._thread: QThread | None = None
         self._worker: BatchWorker | None = None
         self._rows: dict[str, int] = {}
@@ -204,6 +207,11 @@ class MainWindow(QMainWindow):
         self.output_label = QLabel("Pasta de saída não escolhida")
         self.output_label.setObjectName("muted")
         self.output_label.setAccessibleName("Pasta de saída selecionada")
+        self.same_folder_checkbox = QCheckBox("Salvar ao lado do arquivo original")
+        self.same_folder_checkbox.setAccessibleName(
+            "Salvar automaticamente na pasta do arquivo original"
+        )
+        self.same_folder_checkbox.toggled.connect(self._set_save_next_to_source)
         self.format_combo = QComboBox()
         self.format_combo.addItem("TXT", OutputFormat.TXT)
         self.format_combo.addItem("SRT", OutputFormat.SRT)
@@ -211,6 +219,7 @@ class MainWindow(QMainWindow):
         self.format_combo.currentIndexChanged.connect(self._refresh_format_column)
         toolbar.addWidget(self.add_button)
         toolbar.addWidget(self.output_button)
+        toolbar.addWidget(self.same_folder_checkbox)
         toolbar.addWidget(self.output_label, 1)
         toolbar.addWidget(QLabel("Formato:"))
         toolbar.addWidget(self.format_combo)
@@ -389,9 +398,25 @@ class MainWindow(QMainWindow):
         self._refresh()
 
     def set_output_directory(self, directory: Path) -> None:
+        if self._save_next_to_source:
+            self.same_folder_checkbox.setChecked(False)
         self._output_directory = directory
         self.output_label.setText(str(directory))
         self.output_label.setToolTip(str(directory))
+        self._refresh()
+
+    @Slot(bool)
+    def _set_save_next_to_source(self, enabled: bool) -> None:
+        self._save_next_to_source = enabled
+        self.output_button.setEnabled(not enabled and self._thread is None)
+        if enabled:
+            self.output_label.setText("Pasta de cada arquivo original")
+            self.output_label.setToolTip(
+                "Cada transcrição será salva ao lado do áudio ou vídeo de origem."
+            )
+        elif self._output_directory is None:
+            self.output_label.setText("Pasta de saída não escolhida")
+            self.output_label.setToolTip("")
         self._refresh()
 
     @Slot()
@@ -410,7 +435,9 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def _start(self) -> None:
-        if self._thread is not None or self._output_directory is None:
+        if self._thread is not None or (
+            self._output_directory is None and not self._save_next_to_source
+        ):
             return
         if self._notice_policy.should_show():
             QMessageBox.information(
@@ -421,9 +448,10 @@ class MainWindow(QMainWindow):
             self._notice_policy.mark_shown()
         self._processor.configure(
             BatchSettings(
-                self._output_directory,
+                self._output_directory or self._workspace,
                 self._workspace,
                 self._format(),
+                save_next_to_source=self._save_next_to_source,
             )
         )
         thread = QThread(self)
@@ -712,7 +740,8 @@ class MainWindow(QMainWindow):
             if isinstance(item_id, str):
                 self._cancel_item(item_id)
         elif action == "open":
-            self._open_output()
+            item_id = button.property("item_id")
+            self._open_output(item_id if isinstance(item_id, str) else None)
 
     def _cancel_item(self, item_id: str) -> None:
         self._processor.cancel_item(item_id)
@@ -734,7 +763,11 @@ class MainWindow(QMainWindow):
         processing = self._processor.running
         summary = self._processor.summary()
         queued = any(item.state is BatchItemState.QUEUED for item in self._processor.items)
-        self.start_button.setEnabled(not active and queued and self._output_directory is not None)
+        self.start_button.setEnabled(
+            not active
+            and queued
+            and (self._output_directory is not None or self._save_next_to_source)
+        )
         self.pause_button.setEnabled(processing)
         self.cancel_button.setEnabled(processing)
         self.retry_button.setEnabled(not active and summary.failed > 0)
@@ -751,11 +784,12 @@ class MainWindow(QMainWindow):
         self.cancel_all_action.setEnabled(processing or queued)
         for widget in (
             self.add_button,
-            self.output_button,
+            self.same_folder_checkbox,
             self.format_combo,
             self.settings_button,
         ):
             widget.setEnabled(not active)
+        self.output_button.setEnabled(not active and not self._save_next_to_source)
         self._refresh_queue_controls()
         self._refresh_summary()
 
@@ -807,9 +841,14 @@ class MainWindow(QMainWindow):
         return dialog
 
     @Slot()
-    def _open_output(self) -> None:
-        if self._output_directory is not None:
-            QDesktopServices.openUrl(QUrl.fromLocalFile(str(self._output_directory)))
+    def _open_output(self, item_id: str | None = None) -> None:
+        directory = self._output_directory
+        if item_id is not None:
+            result = self._processor.result_for(item_id)
+            if isinstance(result, TranscribeSingleFileSuccess):
+                directory = result.output_path.parent
+        if directory is not None:
+            QDesktopServices.openUrl(QUrl.fromLocalFile(str(directory)))
 
     def dragEnterEvent(self, event: QDragEnterEvent) -> None:
         if event.mimeData().hasUrls() and any(
