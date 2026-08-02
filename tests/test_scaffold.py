@@ -5,7 +5,7 @@ from caleo_transcriber.domain.attempt import ALLOWED_TRANSITIONS, AttemptState, 
 
 
 def test_package_is_importable() -> None:
-    assert __version__ == "0.3.1"
+    assert __version__ == "0.3.2"
 
 
 def test_attempt_state_uses_stable_wire_values() -> None:
