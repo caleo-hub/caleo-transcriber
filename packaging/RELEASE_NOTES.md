@@ -21,6 +21,8 @@ da margem de upload, com timestamps, recomposição e retomada segura.
 - TXT e SRT consolidados, atômicos e sem sobrescrever saídas existentes;
 - novo ícone próprio na janela, executável, atalhos e instalador;
 - chave configurada uma vez no Windows Credential Manager.
+- opção para salvar automaticamente cada resultado ao lado da fonte, com nomes como
+  `Demo_transcription.txt` ou `Demo_transcription.srt`, inclusive em filas com pastas diferentes;
 
 ## Privacidade e custo
 
