@@ -33,7 +33,7 @@ jobs:
         shell: pwsh
         run: .\setup.cmd
       - name: Cache approved FFmpeg build
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: vendor/ffmpeg/bin
           key: ffmpeg-089e4169e93b2b3f3acbfced3c0704d24276a225641bdda04d796d28b07a2a38
